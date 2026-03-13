@@ -36,7 +36,7 @@
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-html { -webkit-tap-highlight-color: transparent; }
+html { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 
 body {
   font-family: 'Sora', sans-serif;
@@ -477,6 +477,13 @@ textarea.input { resize: vertical; min-height: 80px; }
 .sub-add-input::placeholder { color: var(--text3); }
 .sub-add-btn { font-size: 11px; color: var(--text3); cursor: pointer; padding: 3px 8px; border-radius: 6px; transition: var(--transition); flex-shrink: 0; }
 .sub-add-btn:hover { color: var(--gold); background: var(--gold-glow); }
+.sub-edit-input {
+  flex: 1; background: transparent; border: none; border-bottom: 1px solid transparent;
+  color: var(--text); font-family: 'Sora', sans-serif; font-size: 13px;
+  outline: none; padding: 2px 4px; width: 100%; transition: var(--transition);
+}
+.sub-edit-input.done { text-decoration: line-through; color: var(--text3); }
+.sub-edit-input:focus { border-bottom-color: var(--gold); }
 
 .todo-section-label {
   font-size: 11px; font-weight: 600; color: var(--text3);
@@ -1128,6 +1135,22 @@ textarea.input { resize: vertical; min-height: 80px; }
   </div>
 </div>
 
+<!-- TODO DETAIL MODAL -->
+<div class="modal-bg" id="m-todo-detail">
+  <div class="modal">
+    <div class="modal-title" id="td-title" style="margin-bottom:8px"></div>
+    <div id="td-meta" style="display:flex;gap:8px;margin-bottom:20px"></div>
+    <div id="td-subitems"></div>
+    <div style="display:flex;gap:10px;margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
+      <input class="input" id="td-new-item" placeholder="Add an item…" onkeydown="if(event.key==='Enter')addSubitemFromModal()" style="flex:1">
+      <button class="btn btn-gold btn-sm" onclick="addSubitemFromModal()" style="white-space:nowrap">+ Add</button>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('m-todo-detail')">Done</button>
+    </div>
+  </div>
+</div>
+
 <div id="app-loading" style="position:fixed;inset:0;background:var(--bg);display:flex;
   align-items:center;justify-content:center;z-index:9999;color:var(--gold);
   font-family:'Sora',sans-serif;font-size:15px;letter-spacing:0.06em;">
@@ -1151,6 +1174,7 @@ const db = firebase.database();
 const ROOT = db.ref('cuppel');
 
 function newId() { return db.ref().push().key; }
+let _detailTodoId = null;
 
 // ====== STATE ======
 // S is a cache; Firebase is the source of truth
@@ -1217,6 +1241,10 @@ ROOT.on('value', snap => {
     const id = active.id.replace('page-','');
     const renders = {todo:renderTodos,calendar:renderCal,finances:renderFin,projects:renderProj,wiki:renderWiki,inspire:renderInspire};
     if (renders[id]) renders[id]();
+  }
+  // Re-render detail modal if open
+  if (_detailTodoId && document.getElementById('m-todo-detail').classList.contains('open')) {
+    renderTodoDetail();
   }
 });
 
@@ -1312,30 +1340,10 @@ function todoHTML(t){
   const whoClass = t.who==='adib'?'todo-who-a':t.who==='ummey'?'todo-who-u':'todo-who-b';
   const whoLabel = t.who==='adib'?'Adib':t.who==='ummey'?'Ummey':'Both';
   const items = t.items || [];
-  const isExpanded = _expanded.has(t.id);
   const doneCount = items.filter(i=>i.done).length;
-  const countLabel = items.length ? `<span class="todo-expand-count">${doneCount}/${items.length}</span>` : '';
-  const expandBtn = `<span class="todo-expand" onclick="toggleSublist('${t.id}')">${isExpanded?'▼':'▶'} ${countLabel}</span>`;
-
-  let sublistHTML = '';
-  if (isExpanded) {
-    const itemsHTML = items.map(si=>`
-      <div class="todo-subitem" id="si-${t.id}-${si.id}">
-        <div class="sub-check ${si.done?'checked':''}" onclick="toggleSubitem('${t.id}','${si.id}')">
-          ${si.done?'<span class="sub-check-inner">✓</span>':''}
-        </div>
-        <span class="sub-text ${si.done?'done':''}">${si.text}</span>
-        <span class="sub-del" onclick="delSubitem('${t.id}','${si.id}')">✕</span>
-      </div>`).join('');
-    sublistHTML = `<div class="todo-sublist">
-      ${itemsHTML}
-      <div class="sub-add-row">
-        <div class="sub-add-placeholder"></div>
-        <input class="sub-add-input" id="sub-input-${t.id}" placeholder="Add an item…" onkeydown="if(event.key==='Enter')addSubitem('${t.id}')">
-        <span class="sub-add-btn" onclick="addSubitem('${t.id}')">+ Add</span>
-      </div>
-    </div>`;
-  }
+  const expandBtn = items.length
+    ? `<span class="todo-expand" onclick="openTodoDetail('${t.id}')">▶ <span class="todo-expand-count">${doneCount}/${items.length}</span></span>`
+    : `<span class="todo-expand" onclick="openTodoDetail('${t.id}')">+ list</span>`;
 
   return `<div class="todo-item ${t.done?'done':''}" id="ti-${t.id}">
     <div class="todo-main-row">
@@ -1349,7 +1357,6 @@ function todoHTML(t){
       <span class="todo-edit" onclick="editTodo('${t.id}')">✏️</span>
       <span class="todo-del" onclick="delTodo('${t.id}')">🗑</span>
     </div>
-    ${sublistHTML}
   </div>`;
 }
 
@@ -1387,21 +1394,6 @@ function saveEditTodo(){
 }
 
 // ====== SUBITEMS ======
-const _expanded = new Set();
-function toggleSublist(id){
-  if(_expanded.has(id)) _expanded.delete(id); else _expanded.add(id);
-  renderTodos();
-}
-function addSubitem(todoId){
-  const input=document.getElementById('sub-input-'+todoId);
-  if(!input)return;
-  const text=input.value.trim();
-  if(!text)return;
-  const id=newId();
-  ROOT.child('todos').child(todoId).child('items').child(id).set({id,text,done:false});
-  input.value='';
-  setTimeout(()=>{const inp=document.getElementById('sub-input-'+todoId);if(inp)inp.focus();},0);
-}
 function toggleSubitem(todoId,subId){
   const t=S.todos.find(t=>t.id===todoId);
   if(!t||!t.items)return;
@@ -1410,6 +1402,46 @@ function toggleSubitem(todoId,subId){
 }
 function delSubitem(todoId,subId){
   ROOT.child('todos').child(todoId).child('items').child(subId).remove();
+}
+function saveSubitem(todoId,subId,text){
+  text=text.trim();
+  if(!text)return;
+  ROOT.child('todos').child(todoId).child('items').child(subId).update({text});
+}
+
+// ====== TODO DETAIL MODAL ======
+function openTodoDetail(id){
+  _detailTodoId=id;
+  renderTodoDetail();
+  openModal('m-todo-detail');
+}
+function renderTodoDetail(){
+  const t=S.todos.find(t=>t.id===_detailTodoId);
+  if(!t)return;
+  document.getElementById('td-title').textContent=t.text;
+  const whoClass=t.who==='adib'?'tag-gold':t.who==='ummey'?'tag-rose':'tag-sage';
+  const whoLabel=t.who==='adib'?'Adib':t.who==='ummey'?'Ummey':'Both';
+  document.getElementById('td-meta').innerHTML=`<span class="tag ${whoClass}">${whoLabel}</span><span class="tag tag-dim">${t.cat}</span>`;
+  const items=t.items||[];
+  document.getElementById('td-subitems').innerHTML=items.length?items.map(si=>`
+    <div class="todo-subitem" style="padding:10px 0;border-bottom:1px solid var(--border)">
+      <div class="sub-check ${si.done?'checked':''}" onclick="toggleSubitem('${t.id}','${si.id}')">
+        ${si.done?'<span class="sub-check-inner">✓</span>':''}
+      </div>
+      <input class="sub-edit-input ${si.done?'done':''}" value="${si.text.replace(/"/g,'&quot;')}"
+        onblur="saveSubitem('${t.id}','${si.id}',this.value)"
+        onkeydown="if(event.key==='Enter'){saveSubitem('${t.id}','${si.id}',this.value);this.blur()}">
+      <span class="sub-del" style="opacity:1" onclick="delSubitem('${t.id}','${si.id}')">✕</span>
+    </div>`).join('')
+  :`<p style="color:var(--text3);font-size:13px;padding:8px 0">No items yet. Add one below.</p>`;
+}
+function addSubitemFromModal(){
+  const input=document.getElementById('td-new-item');
+  const text=input.value.trim();
+  if(!text||!_detailTodoId)return;
+  const id=newId();
+  ROOT.child('todos').child(_detailTodoId).child('items').child(id).set({id,text,done:false});
+  input.value='';
 }
 
 // ====== CALENDAR ======
