@@ -1,0 +1,1493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Cuppel</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0D0F14;
+  --bg2: #13161E;
+  --bg3: #1A1E28;
+  --surface: rgba(255,255,255,0.055);
+  --surface2: rgba(255,255,255,0.085);
+  --border: rgba(255,255,255,0.09);
+  --border2: rgba(255,255,255,0.14);
+  --gold: #E8B86D;
+  --gold2: #F5D08A;
+  --gold-glow: rgba(232,184,109,0.18);
+  --rose: #E88A8A;
+  --rose-light: #F5B8B8;
+  --sage: #7DB89B;
+  --sage-light: #A8D4C2;
+  --text: #F0EDE8;
+  --text2: #9A9590;
+  --text3: #5C5955;
+  --radius: 20px;
+  --radius-sm: 12px;
+  --radius-xs: 8px;
+  --nav-h: 64px;
+  --bottom-h: 76px;
+  --transition: all 0.28s cubic-bezier(0.4,0,0.2,1);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: 'Sora', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  min-height: 100dvh;
+  font-size: 14px;
+  overflow-x: hidden;
+}
+
+/* Ambient background orbs */
+body::before {
+  content: '';
+  position: fixed;
+  top: -200px; left: -200px;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(232,184,109,0.07) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+body::after {
+  content: '';
+  position: fixed;
+  bottom: -150px; right: -150px;
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(232,138,138,0.06) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ======== TOP NAV ======== */
+.top-nav {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: var(--nav-h);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 20px;
+  background: rgba(13,15,20,0.85);
+  backdrop-filter: blur(24px) saturate(1.4);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+  border-bottom: 1px solid var(--border);
+  z-index: 200;
+}
+
+.logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: -0.02em;
+  cursor: pointer;
+  display: flex; align-items: center; gap: 8px;
+  transition: var(--transition);
+}
+.logo:hover { opacity: 0.85; }
+.logo-icon {
+  width: 32px; height: 32px;
+  background: linear-gradient(135deg, var(--gold), var(--rose));
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+}
+
+.couple-pill {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 999px;
+  padding: 5px 14px 5px 6px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.couple-pill:hover { background: rgba(255,255,255,0.12); }
+.couple-avatars { display: flex; }
+.c-avatar {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 600;
+  border: 2px solid var(--bg);
+  letter-spacing: 0;
+}
+.c-avatar-a { background: linear-gradient(135deg, #E8B86D, #D4854A); color: #1a0f00; }
+.c-avatar-u { background: linear-gradient(135deg, #E88A8A, #C45A8A); color: white; margin-left: -8px; }
+.couple-name { font-size: 12px; font-weight: 500; color: var(--text2); }
+
+/* ======== LAYOUT ======== */
+.app-layout {
+  display: flex;
+  padding-top: var(--nav-h);
+  min-height: 100dvh;
+}
+
+/* ======== SIDEBAR ======== */
+.sidebar {
+  width: 230px;
+  flex-shrink: 0;
+  position: fixed;
+  top: var(--nav-h);
+  left: 0;
+  bottom: 0;
+  overflow-y: auto;
+  padding: 24px 14px;
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 100;
+}
+
+.sidebar-label {
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--text3); padding: 16px 12px 6px;
+}
+
+.sb-item {
+  display: flex; align-items: center; gap: 11px;
+  padding: 10px 12px; border-radius: var(--radius-sm);
+  cursor: pointer; transition: var(--transition);
+  color: var(--text2); font-size: 13px; font-weight: 500;
+  position: relative;
+}
+.sb-item:hover { background: var(--surface); color: var(--text); }
+.sb-item.active { background: var(--gold-glow); color: var(--gold); }
+.sb-item.active::before {
+  content: '';
+  position: absolute; left: 0; top: 20%; bottom: 20%;
+  width: 3px; border-radius: 0 3px 3px 0;
+  background: var(--gold);
+}
+.sb-icon { font-size: 17px; line-height: 1; opacity: 0.9; }
+.sb-badge {
+  margin-left: auto;
+  background: var(--rose);
+  color: white;
+  font-size: 10px; font-weight: 700;
+  padding: 2px 7px; border-radius: 999px;
+  min-width: 20px; text-align: center;
+}
+
+/* ======== MAIN ======== */
+.main {
+  flex: 1;
+  margin-left: 230px;
+  padding: 32px 32px 40px;
+  min-height: calc(100dvh - var(--nav-h));
+  position: relative;
+  z-index: 1;
+}
+
+/* ======== PAGES ======== */
+.page {
+  display: none;
+  animation: fadeUp 0.32s cubic-bezier(0.4,0,0.2,1);
+}
+.page.active { display: block; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ======== PAGE HEADER ======== */
+.ph {
+  margin-bottom: 28px;
+}
+.ph-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 30px; font-weight: 700;
+  color: var(--text);
+  display: flex; align-items: center; gap: 12px;
+  line-height: 1.15;
+}
+.ph-title .ph-icon { font-size: 26px; }
+.ph-sub { margin-top: 6px; color: var(--text2); font-size: 13px; }
+
+/* ======== GLASS CARDS ======== */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: var(--transition);
+}
+.card:hover { border-color: var(--border2); background: var(--surface2); }
+
+.card-title {
+  font-size: 12px; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text3); margin-bottom: 16px;
+  display: flex; align-items: center; gap: 8px;
+}
+
+/* ======== GRID ======== */
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
+
+/* ======== BUTTONS ======== */
+.btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 10px 20px; border-radius: 999px;
+  font-family: 'Sora', sans-serif;
+  font-size: 13px; font-weight: 600;
+  border: none; cursor: pointer;
+  transition: var(--transition);
+  letter-spacing: 0.01em;
+}
+.btn-gold {
+  background: linear-gradient(135deg, var(--gold), #D4904A);
+  color: #1a0f00;
+  box-shadow: 0 4px 20px rgba(232,184,109,0.3);
+}
+.btn-gold:hover { transform: translateY(-1px); box-shadow: 0 6px 28px rgba(232,184,109,0.4); }
+.btn-ghost {
+  background: var(--surface2); color: var(--text2);
+  border: 1px solid var(--border2);
+}
+.btn-ghost:hover { color: var(--text); background: rgba(255,255,255,0.12); }
+.btn-sm { padding: 7px 16px; font-size: 12px; }
+.btn-danger { background: rgba(232,138,138,0.15); color: var(--rose); border: 1px solid rgba(232,138,138,0.2); }
+.btn-danger:hover { background: rgba(232,138,138,0.25); }
+
+.icon-btn {
+  width: 34px; height: 34px; border-radius: 10px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--surface2); border: 1px solid var(--border);
+  cursor: pointer; font-size: 15px; transition: var(--transition);
+  color: var(--text2);
+}
+.icon-btn:hover { background: var(--gold-glow); border-color: var(--gold); color: var(--gold); }
+
+/* ======== INPUTS ======== */
+.input {
+  width: 100%; padding: 11px 15px;
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  font-family: 'Sora', sans-serif;
+  font-size: 13px; color: var(--text);
+  outline: none; transition: var(--transition);
+}
+.input:focus { border-color: var(--gold); background: rgba(232,184,109,0.05); }
+.input::placeholder { color: var(--text3); }
+select.input { cursor: pointer; }
+textarea.input { resize: vertical; min-height: 80px; }
+
+.fg { margin-bottom: 14px; }
+.fl { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text3); margin-bottom: 6px; display: block; }
+
+/* ======== TAGS ======== */
+.tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 10px; border-radius: 999px;
+  font-size: 11px; font-weight: 600; letter-spacing: 0.02em;
+}
+.tag-gold { background: rgba(232,184,109,0.15); color: var(--gold2); border: 1px solid rgba(232,184,109,0.2); }
+.tag-rose { background: rgba(232,138,138,0.15); color: var(--rose-light); border: 1px solid rgba(232,138,138,0.2); }
+.tag-sage { background: rgba(125,184,155,0.15); color: var(--sage-light); border: 1px solid rgba(125,184,155,0.2); }
+.tag-dim { background: var(--surface); color: var(--text3); border: 1px solid var(--border); }
+
+/* ======== DIVIDER ======== */
+.divider { border: none; border-top: 1px solid var(--border); margin: 22px 0; }
+
+/* ======== TABS ======== */
+.tabs {
+  display: flex; gap: 2px;
+  background: var(--bg3); padding: 4px;
+  border-radius: 999px; border: 1px solid var(--border);
+  width: fit-content;
+}
+.tab-btn {
+  padding: 6px 16px; border-radius: 999px;
+  font-size: 12px; font-weight: 600;
+  cursor: pointer; color: var(--text3);
+  transition: var(--transition);
+}
+.tab-btn.active { background: var(--surface2); color: var(--gold); }
+.tab-btn:hover:not(.active) { color: var(--text2); }
+
+/* ======== HOME ======== */
+.home-hero {
+  position: relative; overflow: hidden;
+  border-radius: var(--radius);
+  padding: 36px 32px;
+  margin-bottom: 22px;
+  background: linear-gradient(135deg, #1C1408 0%, #241810 40%, #1A1220 100%);
+  border: 1px solid rgba(232,184,109,0.2);
+}
+.home-hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23E8B86D' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+.home-hero-glow {
+  position: absolute; right: -60px; top: -60px;
+  width: 320px; height: 320px;
+  background: radial-gradient(circle, rgba(232,184,109,0.12) 0%, transparent 65%);
+  pointer-events: none;
+}
+.home-hero-content { position: relative; z-index: 1; }
+.home-greeting {
+  font-family: 'Playfair Display', serif;
+  font-size: 34px; font-weight: 700;
+  line-height: 1.2;
+  background: linear-gradient(135deg, var(--gold2), var(--text));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 8px;
+}
+.home-date { font-size: 13px; color: var(--text2); margin-bottom: 22px; }
+
+.streak-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.streak-chip {
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 7px 14px; border-radius: 999px;
+  font-size: 12px; font-weight: 500; color: var(--text2);
+  backdrop-filter: blur(8px);
+}
+.streak-chip span { font-size: 15px; }
+
+/* ======== NUDGE ======== */
+.nudge {
+  display: flex; align-items: center; gap: 14px;
+  background: linear-gradient(135deg, rgba(232,184,109,0.08), rgba(232,138,138,0.06));
+  border: 1px solid rgba(232,184,109,0.18);
+  border-radius: var(--radius-sm); padding: 14px 16px;
+  margin-bottom: 22px; animation: shimmer 4s ease-in-out infinite;
+}
+@keyframes shimmer {
+  0%,100% { border-color: rgba(232,184,109,0.18); }
+  50% { border-color: rgba(232,184,109,0.32); }
+}
+.nudge-icon { font-size: 22px; flex-shrink: 0; }
+.nudge-body { flex: 1; }
+.nudge-title { font-size: 13px; font-weight: 600; color: var(--gold2); margin-bottom: 2px; }
+.nudge-desc { font-size: 12px; color: var(--text2); }
+.nudge-close { font-size: 18px; color: var(--text3); cursor: pointer; padding: 4px; transition: var(--transition); }
+.nudge-close:hover { color: var(--text); }
+
+/* ======== HOME QUICK CARDS ======== */
+.home-quick { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.hq-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px; cursor: pointer;
+  transition: var(--transition);
+  position: relative; overflow: hidden;
+}
+.hq-card:hover { background: var(--surface2); border-color: var(--border2); transform: translateY(-2px); }
+.hq-label { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); margin-bottom: 10px; }
+.hq-value {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px; font-weight: 700;
+  color: var(--gold);
+  line-height: 1.1; margin-bottom: 4px;
+}
+.hq-sub { font-size: 12px; color: var(--text2); }
+.hq-badge {
+  position: absolute; top: 16px; right: 16px;
+  background: var(--gold-glow); border: 1px solid rgba(232,184,109,0.2);
+  padding: 4px 10px; border-radius: 999px;
+  font-size: 11px; font-weight: 600; color: var(--gold2);
+}
+
+/* ======== TODO ======== */
+.todo-item {
+  display: flex; align-items: center; gap: 13px;
+  padding: 14px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  transition: var(--transition);
+  margin-bottom: 8px;
+  position: relative;
+}
+.todo-item:hover { background: var(--surface2); border-color: var(--border2); }
+.todo-item.done { opacity: 0.4; }
+.todo-item.done .todo-text { text-decoration: line-through; color: var(--text3); }
+
+.todo-check-outer {
+  width: 22px; height: 22px; border-radius: 50%;
+  border: 2px solid var(--border2);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; flex-shrink: 0;
+  transition: var(--transition);
+}
+.todo-check-outer.checked {
+  background: linear-gradient(135deg, var(--sage), #4A9B7A);
+  border-color: var(--sage);
+}
+.todo-check-inner { color: white; font-size: 11px; }
+.todo-text { flex: 1; font-size: 13px; font-weight: 400; }
+.todo-who {
+  font-size: 11px; font-weight: 600;
+  padding: 3px 10px; border-radius: 999px;
+}
+.todo-who-a { background: rgba(232,184,109,0.12); color: var(--gold2); border: 1px solid rgba(232,184,109,0.18); }
+.todo-who-u { background: rgba(232,138,138,0.12); color: var(--rose-light); border: 1px solid rgba(232,138,138,0.18); }
+.todo-who-b { background: rgba(125,184,155,0.12); color: var(--sage-light); border: 1px solid rgba(125,184,155,0.18); }
+.todo-edit { font-size: 14px; cursor: pointer; color: var(--text3); opacity: 0; transition: var(--transition); margin-right: 2px; }
+.todo-item:hover .todo-edit { opacity: 1; }
+.todo-edit:hover { color: var(--gold); }
+.todo-del { font-size: 14px; cursor: pointer; color: var(--text3); opacity: 0; transition: var(--transition); }
+.todo-item:hover .todo-del { opacity: 1; }
+.todo-del:hover { color: var(--rose); }
+
+.todo-section-label {
+  font-size: 11px; font-weight: 600; color: var(--text3);
+  letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 8px 0 6px;
+}
+
+/* ======== CALENDAR ======== */
+.cal-wrapper { display: grid; grid-template-columns: 1fr 320px; gap: 20px; }
+.cal-month { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 600; color: var(--text); }
+.cal-grid-wrap { padding: 20px; }
+.cal-days-header {
+  display: grid; grid-template-columns: repeat(7,1fr);
+  margin-bottom: 6px;
+}
+.cal-dh { text-align: center; font-size: 11px; font-weight: 600; color: var(--text3); padding: 6px; }
+.cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 3px; }
+.cal-cell {
+  aspect-ratio: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  border-radius: 10px; cursor: pointer;
+  font-size: 13px; font-weight: 400;
+  transition: var(--transition); position: relative;
+  color: var(--text2);
+}
+.cal-cell:hover { background: var(--surface2); color: var(--text); }
+.cal-cell.today {
+  background: linear-gradient(135deg, var(--gold), #D4904A);
+  color: #1a0f00; font-weight: 700;
+}
+.cal-cell.other { color: var(--text3); }
+.cal-cell.has-ev::after {
+  content: ''; width: 4px; height: 4px;
+  background: var(--rose); border-radius: 50%;
+  position: absolute; bottom: 4px;
+}
+.cal-cell.today.has-ev::after { background: rgba(0,0,0,0.4); }
+
+.ev-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 13px 16px; border-radius: var(--radius-sm);
+  background: var(--surface); border: 1px solid var(--border);
+  margin-bottom: 8px; transition: var(--transition); cursor: pointer;
+}
+.ev-item:hover { background: var(--surface2); border-color: var(--border2); }
+.ev-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.ev-info { flex: 1; }
+.ev-name { font-size: 13px; font-weight: 500; }
+.ev-date { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.ev-type-badge {
+  font-size: 10px; font-weight: 600; padding: 3px 9px;
+  border-radius: 999px; text-transform: capitalize;
+}
+
+/* ======== FINANCES ======== */
+.fin-hero {
+  background: linear-gradient(135deg, rgba(232,184,109,0.1), rgba(212,133,74,0.05));
+  border: 1px solid rgba(232,184,109,0.2);
+  border-radius: var(--radius); padding: 26px 28px;
+  margin-bottom: 22px; display: flex; gap: 32px;
+}
+.fin-stat { flex: 1; }
+.fin-stat-val {
+  font-family: 'Playfair Display', serif;
+  font-size: 36px; font-weight: 700; color: var(--gold);
+  line-height: 1; margin-bottom: 4px;
+}
+.fin-stat-lbl { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); }
+.fin-divider { width: 1px; background: var(--border); align-self: stretch; }
+
+.fin-row {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 0; border-bottom: 1px solid var(--border);
+}
+.fin-row:last-child { border-bottom: none; }
+.fin-icon-wrap {
+  width: 42px; height: 42px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0;
+  background: var(--surface2); border: 1px solid var(--border);
+}
+.fin-info { flex: 1; }
+.fin-name { font-size: 14px; font-weight: 500; }
+.fin-freq { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.fin-amt {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px; font-weight: 600; color: var(--text);
+}
+
+/* ======== PROJECTS ======== */
+.proj-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 22px;
+  margin-bottom: 14px; cursor: pointer;
+  transition: var(--transition); position: relative; overflow: hidden;
+}
+.proj-card:hover { background: var(--surface2); border-color: var(--border2); transform: translateY(-2px); }
+.proj-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--gold), var(--rose));
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+.proj-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 10px; }
+.proj-name { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 600; }
+.proj-status-dot {
+  width: 8px; height: 8px; border-radius: 50%; margin-top: 7px; flex-shrink: 0;
+}
+.proj-status-dot.active { background: var(--sage); box-shadow: 0 0 8px var(--sage); }
+.proj-status-dot.planning { background: var(--gold); box-shadow: 0 0 8px var(--gold); }
+.proj-desc { font-size: 13px; color: var(--text2); margin-bottom: 16px; }
+.proj-progress { margin-bottom: 14px; }
+.proj-progress-bar { height: 4px; background: var(--bg3); border-radius: 2px; overflow: hidden; }
+.proj-progress-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--gold), var(--sage)); transition: width 0.6s cubic-bezier(0.4,0,0.2,1); }
+.proj-progress-label { display: flex; justify-content: space-between; font-size: 11px; color: var(--text3); margin-bottom: 6px; }
+.proj-meta { display: flex; gap: 16px; }
+.proj-meta-item { font-size: 12px; color: var(--text3); display: flex; align-items: center; gap: 5px; }
+
+/* ======== WIKI ======== */
+.wiki-sec { margin-bottom: 24px; }
+.wiki-sec-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px; font-weight: 600; color: var(--text);
+  margin-bottom: 12px; display: flex; align-items: center; gap: 9px;
+}
+.wiki-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); gap: 10px; }
+.wiki-tile {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 14px 16px;
+  cursor: pointer; transition: var(--transition);
+}
+.wiki-tile:hover { background: var(--surface2); border-color: var(--border2); }
+.wiki-tile-label { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); margin-bottom: 5px; }
+.wiki-tile-val { font-size: 13px; font-weight: 500; color: var(--text); }
+.wiki-tile-val.blurred { filter: blur(6px); user-select: none; }
+.wiki-lock {
+  display: flex; align-items: center; gap: 12px;
+  background: rgba(232,184,109,0.06); border: 1px solid rgba(232,184,109,0.14);
+  border-radius: var(--radius-sm); padding: 12px 16px; margin-bottom: 18px;
+  font-size: 12px; color: var(--text2);
+}
+
+/* ======== INSPIRE ======== */
+.jar-box {
+  background: linear-gradient(135deg, rgba(232,138,138,0.08), rgba(232,184,109,0.06));
+  border: 1px solid rgba(232,138,138,0.2);
+  border-radius: var(--radius); padding: 24px; margin-bottom: 24px;
+}
+.jar-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px; font-weight: 700; margin-bottom: 14px;
+  display: flex; align-items: center; gap: 10px;
+}
+.jar-title-sub { font-family: 'Sora', sans-serif; font-size: 13px; font-weight: 400; color: var(--text2); }
+.jar-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.jar-chip {
+  background: var(--surface2); border: 1px solid var(--border2);
+  padding: 7px 16px; border-radius: 999px;
+  font-size: 12px; font-weight: 500; color: var(--text2);
+  cursor: pointer; transition: var(--transition);
+}
+.jar-chip:hover { background: rgba(232,138,138,0.15); border-color: rgba(232,138,138,0.3); color: var(--rose-light); }
+
+.inspire-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
+.inspire-tile {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden;
+  cursor: pointer; transition: var(--transition);
+}
+.inspire-tile:hover { transform: translateY(-3px); border-color: var(--border2); box-shadow: 0 12px 40px rgba(0,0,0,0.3); }
+.inspire-img {
+  height: 100px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 46px;
+  background: linear-gradient(135deg, var(--bg3), var(--bg2));
+}
+.inspire-body { padding: 14px 16px; }
+.inspire-name { font-weight: 600; font-size: 13px; margin-bottom: 4px; }
+.inspire-desc { font-size: 12px; color: var(--text2); line-height: 1.5; }
+
+.checkin-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px; margin-bottom: 12px;
+}
+.checkin-q { font-size: 15px; font-weight: 500; margin-bottom: 14px; line-height: 1.5; }
+.scale-row { display: flex; gap: 6px; flex-wrap: wrap; }
+.scale-n {
+  width: 38px; height: 38px; border-radius: 10px;
+  border: 1px solid var(--border2); background: var(--bg3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  transition: var(--transition); color: var(--text2);
+}
+.scale-n:hover { border-color: var(--gold); color: var(--gold); }
+.scale-n.sel { background: var(--gold-glow); border-color: var(--gold); color: var(--gold2); }
+
+/* ======== MODAL ======== */
+.modal-bg {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 500; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.modal-bg.open { display: flex; }
+.modal {
+  background: var(--bg2); border: 1px solid var(--border2);
+  border-radius: var(--radius); padding: 28px;
+  width: 100%; max-width: 460px;
+  max-height: 90dvh; overflow-y: auto;
+  animation: modalIn 0.25s cubic-bezier(0.4,0,0.2,1);
+  box-shadow: 0 32px 80px rgba(0,0,0,0.6);
+}
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.94) translateY(16px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+.modal-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px; font-weight: 700; margin-bottom: 22px; color: var(--text);
+}
+.modal-footer {
+  display: flex; justify-content: flex-end; gap: 10px;
+  margin-top: 22px; padding-top: 18px;
+  border-top: 1px solid var(--border);
+}
+
+/* ======== BOTTOM NAV (mobile) ======== */
+.bottom-nav {
+  display: none;
+  position: fixed; bottom: 0; left: 0; right: 0;
+  height: var(--bottom-h);
+  background: rgba(13,15,20,0.92);
+  backdrop-filter: blur(24px) saturate(1.4);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+  border-top: 1px solid var(--border);
+  z-index: 200;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.bn-items { display: flex; height: 100%; }
+.bn-item {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 4px; cursor: pointer; transition: var(--transition);
+  padding-top: 4px;
+}
+.bn-icon { font-size: 22px; line-height: 1; transition: var(--transition); }
+.bn-label { font-size: 10px; font-weight: 600; color: var(--text3); transition: var(--transition); }
+.bn-item.active .bn-label { color: var(--gold); }
+.bn-item.active .bn-icon { transform: scale(1.12); }
+.bn-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--rose); margin-top: -2px; }
+
+/* ======== RESPONSIVE ======== */
+@media (max-width: 900px) {
+  .sidebar { display: none; }
+  .main { margin-left: 0; padding: 20px 16px calc(var(--bottom-h) + 16px); }
+  .bottom-nav { display: block; }
+  .cal-wrapper { grid-template-columns: 1fr; }
+  .grid2 { grid-template-columns: 1fr; }
+  .home-quick { grid-template-columns: 1fr 1fr; }
+  .fin-hero { flex-direction: column; gap: 16px; }
+  .fin-divider { display: none; }
+  .inspire-grid { grid-template-columns: 1fr 1fr; }
+  .home-greeting { font-size: 26px; }
+}
+@media (max-width: 500px) {
+  .home-quick { grid-template-columns: 1fr 1fr; }
+  .inspire-grid { grid-template-columns: 1fr; }
+  .grid3 { grid-template-columns: 1fr; }
+}
+
+/* ======== EMPTY STATE ======== */
+.empty {
+  text-align: center; padding: 52px 20px;
+  color: var(--text3);
+}
+.empty-icon { font-size: 44px; margin-bottom: 12px; opacity: 0.5; }
+.empty-text { font-size: 14px; }
+
+/* ======== SCROLLBAR ======== */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 9px; }
+</style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav class="top-nav">
+  <div class="logo" onclick="nav('home')">
+    <div class="logo-icon">🎮</div>
+    Cuppel
+  </div>
+  <div class="couple-pill">
+    <div class="couple-avatars">
+      <div class="c-avatar c-avatar-a">A</div>
+      <div class="c-avatar c-avatar-u">U</div>
+    </div>
+    <span class="couple-name">Adib & Ummey</span>
+  </div>
+</nav>
+
+<!-- LAYOUT -->
+<div class="app-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-label">Overview</div>
+    <div class="sb-item active" id="sb-home" onclick="nav('home')">
+      <span class="sb-icon">🏠</span> Home
+    </div>
+    <div class="sidebar-label">Together</div>
+    <div class="sb-item" id="sb-todo" onclick="nav('todo')">
+      <span class="sb-icon">✅</span> To Do
+      <span class="sb-badge" id="sb-badge-todo">3</span>
+    </div>
+    <div class="sb-item" id="sb-calendar" onclick="nav('calendar')">
+      <span class="sb-icon">📅</span> Calendar
+    </div>
+    <div class="sb-item" id="sb-finances" onclick="nav('finances')">
+      <span class="sb-icon">💰</span> Finances
+    </div>
+    <div class="sb-item" id="sb-projects" onclick="nav('projects')">
+      <span class="sb-icon">🗂</span> Projects
+    </div>
+    <div class="sidebar-label">Our Space</div>
+    <div class="sb-item" id="sb-wiki" onclick="nav('wiki')">
+      <span class="sb-icon">🗝</span> UsWiki
+    </div>
+    <div class="sb-item" id="sb-inspire" onclick="nav('inspire')">
+      <span class="sb-icon">✨</span> Inspire
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- ===== HOME ===== -->
+    <section class="page active" id="page-home">
+      <div class="home-hero">
+        <div class="home-hero-glow"></div>
+        <div class="home-hero-content">
+          <div class="home-greeting" id="home-greeting">Good evening, Adib ✦</div>
+          <div class="home-date" id="home-date-str"></div>
+          <div class="streak-row">
+            <div class="streak-chip"><span>🔥</span> 12-day streak</div>
+            <div class="streak-chip"><span>💍</span> Anniversary in 43 days</div>
+            <div class="streak-chip"><span>✅</span> 5 tasks done this week</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="nudge" id="nudge-bar">
+        <div class="nudge-icon">💌</div>
+        <div class="nudge-body">
+          <div class="nudge-title">It's been a while since your last date night</div>
+          <div class="nudge-desc">Pick an idea from The Jar and make it happen this weekend.</div>
+        </div>
+        <div class="nudge-close" onclick="document.getElementById('nudge-bar').style.display='none'">×</div>
+      </div>
+
+      <div class="home-quick" style="margin-bottom:14px">
+        <div class="hq-card" onclick="nav('todo')">
+          <div class="hq-label">Open Tasks</div>
+          <div class="hq-value" id="hq-tasks">—</div>
+          <div class="hq-sub">things to do</div>
+          <div class="hq-badge" id="hq-badge-who"></div>
+        </div>
+        <div class="hq-card" onclick="nav('finances')">
+          <div class="hq-label">Monthly Spend</div>
+          <div class="hq-value" id="hq-spend">—</div>
+          <div class="hq-sub">across all expenses</div>
+        </div>
+      </div>
+
+      <div class="home-quick">
+        <div class="hq-card" onclick="nav('calendar')">
+          <div class="hq-label">Next Up</div>
+          <div id="hq-next-event" style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px">Loading…</div>
+          <div id="hq-next-date" class="hq-sub"></div>
+        </div>
+        <div class="hq-card" onclick="nav('inspire')">
+          <div class="hq-label">Date Idea 🎲</div>
+          <div id="hq-date-idea" style="font-size:14px;font-weight:600;color:var(--gold2);margin-bottom:8px">—</div>
+          <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();pickIdea()" style="font-size:11px;padding:5px 13px">Shuffle</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== TODO ===== -->
+    <section class="page" id="page-todo">
+      <div class="ph">
+        <div class="ph-title"><span class="ph-icon">✅</span> To Do</div>
+        <div class="ph-sub">Your shared list — changes sync in real time</div>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:18px">
+        <div class="tabs" id="todo-tabs">
+          <div class="tab-btn active" onclick="todoFilter('all',this)">All</div>
+          <div class="tab-btn" onclick="todoFilter('adib',this)">Adib</div>
+          <div class="tab-btn" onclick="todoFilter('ummey',this)">Ummey</div>
+          <div class="tab-btn" onclick="todoFilter('chores',this)">Chores</div>
+          <div class="tab-btn" onclick="todoFilter('shopping',this)">Shopping</div>
+        </div>
+        <button class="btn btn-gold btn-sm" onclick="openModal('m-todo')">+ Add Task</button>
+      </div>
+
+      <div id="todo-render"></div>
+    </section>
+
+    <!-- ===== CALENDAR ===== -->
+    <section class="page" id="page-calendar">
+      <div class="ph">
+        <div class="ph-title"><span class="ph-icon">📅</span> Calendar</div>
+        <div class="ph-sub">Shared events, birthdays & reminders</div>
+      </div>
+      <div class="cal-wrapper">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+            <div class="cal-month" id="cal-title">March 2026</div>
+            <button class="btn btn-gold btn-sm" onclick="openModal('m-event')">+ Add</button>
+          </div>
+          <div class="cal-days-header" id="cal-dh"></div>
+          <div class="cal-grid" id="cal-grid"></div>
+        </div>
+        <div>
+          <div class="card-title" style="margin-bottom:14px">Upcoming</div>
+          <div id="ev-list"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== FINANCES ===== -->
+    <section class="page" id="page-finances">
+      <div class="ph">
+        <div class="ph-title"><span class="ph-icon">💰</span> Finances</div>
+        <div class="ph-sub">Subscriptions, bills & shared expenses</div>
+      </div>
+      <div class="fin-hero" id="fin-summary"></div>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <div class="card-title" style="margin-bottom:0">Recurring</div>
+          <button class="btn btn-gold btn-sm" onclick="openModal('m-fin')">+ Add</button>
+        </div>
+        <div id="fin-list"></div>
+      </div>
+    </section>
+
+    <!-- ===== PROJECTS ===== -->
+    <section class="page" id="page-projects">
+      <div class="ph">
+        <div class="ph-title"><span class="ph-icon">🗂</span> Projects</div>
+        <div class="ph-sub">Big things you're building together</div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin-bottom:18px">
+        <button class="btn btn-gold btn-sm" onclick="openModal('m-proj')">+ New Project</button>
+      </div>
+      <div id="proj-list"></div>
+    </section>
+
+    <!-- ===== WIKI ===== -->
+    <section class="page" id="page-wiki">
+      <div class="ph">
+        <div class="ph-title"><span class="ph-icon">🗝</span> UsWiki</div>
+        <div class="ph-sub">Your shared vault of important information</div>
+      </div>
+      <div class="wiki-lock">
+        <span style="font-size:18px">🔒</span>
+        Sensitive fields are blurred. Tap any tile to reveal.
+      </div>
+      <div id="wiki-render"></div>
+    </section>
+
+    <!-- ===== INSPIRE ===== -->
+    <section class="page" id="page-inspire">
+      <div class="ph">
+        <div class="ph-title"><span class="ph-icon">✨</span> Inspire</div>
+        <div class="ph-sub">Date ideas, check-ins & relationship sparks</div>
+      </div>
+
+      <div class="jar-box">
+        <div class="jar-title">
+          🫙 The Jar
+          <span class="jar-title-sub">— your date idea bank</span>
+        </div>
+        <div class="jar-chips" id="jar-render"></div>
+        <div style="display:flex;gap:10px">
+          <input class="input" id="jar-input" placeholder="Add a date idea…" style="flex:1" onkeydown="if(event.key==='Enter')addJar()">
+          <button class="btn btn-gold btn-sm" onclick="addJar()">Add</button>
+        </div>
+      </div>
+
+      <div class="card-title" style="margin-bottom:14px">🌡 Relationship Check-In</div>
+      <div id="checkin-render"></div>
+
+      <hr class="divider">
+
+      <div class="card-title" style="margin-bottom:14px">💡 Date Night Ideas</div>
+      <div class="inspire-grid" id="inspire-render"></div>
+    </section>
+
+  </main>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <div class="bn-items">
+    <div class="bn-item active" id="bn-home" onclick="nav('home')">
+      <div class="bn-icon">🏠</div>
+      <div class="bn-label">Home</div>
+    </div>
+    <div class="bn-item" id="bn-todo" onclick="nav('todo')">
+      <div class="bn-icon">✅</div>
+      <div class="bn-label">To Do</div>
+      <div class="bn-dot" id="bn-dot-todo"></div>
+    </div>
+    <div class="bn-item" id="bn-calendar" onclick="nav('calendar')">
+      <div class="bn-icon">📅</div>
+      <div class="bn-label">Calendar</div>
+    </div>
+    <div class="bn-item" id="bn-wiki" onclick="nav('wiki')">
+      <div class="bn-icon">🗝</div>
+      <div class="bn-label">Wiki</div>
+    </div>
+    <div class="bn-item" id="bn-inspire" onclick="nav('inspire')">
+      <div class="bn-icon">✨</div>
+      <div class="bn-label">Inspire</div>
+    </div>
+  </div>
+</nav>
+
+<!-- ===== MODALS ===== -->
+
+<!-- TODO MODAL -->
+<div class="modal-bg" id="m-todo">
+  <div class="modal">
+    <div class="modal-title">Add Task</div>
+    <div class="fg"><label class="fl">What needs doing?</label>
+      <input class="input" id="nt-text" placeholder="Describe the task…"></div>
+    <div class="fg"><label class="fl">Assign to</label>
+      <select class="input" id="nt-who">
+        <option value="adib">Adib</option>
+        <option value="ummey">Ummey</option>
+        <option value="both">Both of us</option>
+      </select></div>
+    <div class="fg"><label class="fl">Category</label>
+      <select class="input" id="nt-cat">
+        <option value="chores">Chores</option>
+        <option value="shopping">Shopping</option>
+        <option value="admin">Admin</option>
+        <option value="other">Other</option>
+      </select></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('m-todo')">Cancel</button>
+      <button class="btn btn-gold" onclick="addTodo()">Add Task</button>
+    </div>
+  </div>
+</div>
+
+<!-- TODO EDIT MODAL -->
+<div class="modal-bg" id="m-todo-edit">
+  <div class="modal">
+    <div class="modal-title">Edit Task</div>
+    <div class="fg"><label class="fl">What needs doing?</label>
+      <input class="input" id="et-text" placeholder="Describe the task…"></div>
+    <div class="fg"><label class="fl">Assign to</label>
+      <select class="input" id="et-who">
+        <option value="adib">Adib</option>
+        <option value="ummey">Ummey</option>
+        <option value="both">Both of us</option>
+      </select></div>
+    <div class="fg"><label class="fl">Category</label>
+      <select class="input" id="et-cat">
+        <option value="chores">Chores</option>
+        <option value="shopping">Shopping</option>
+        <option value="admin">Admin</option>
+        <option value="other">Other</option>
+      </select></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('m-todo-edit')">Cancel</button>
+      <button class="btn btn-gold" onclick="saveEditTodo()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- EVENT MODAL -->
+<div class="modal-bg" id="m-event">
+  <div class="modal">
+    <div class="modal-title">Add Event</div>
+    <div class="fg"><label class="fl">Event Name</label>
+      <input class="input" id="ne-name" placeholder="What's the occasion?"></div>
+    <div class="fg"><label class="fl">Date</label>
+      <input class="input" type="date" id="ne-date"></div>
+    <div class="fg"><label class="fl">Type</label>
+      <select class="input" id="ne-type">
+        <option value="date">Date Night 🌙</option>
+        <option value="birthday">Birthday 🎂</option>
+        <option value="anniversary">Anniversary 💍</option>
+        <option value="appointment">Appointment 🏥</option>
+        <option value="social">Social 🥂</option>
+      </select></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('m-event')">Cancel</button>
+      <button class="btn btn-gold" onclick="addEvent()">Add Event</button>
+    </div>
+  </div>
+</div>
+
+<!-- FINANCE MODAL -->
+<div class="modal-bg" id="m-fin">
+  <div class="modal">
+    <div class="modal-title">Add Expense</div>
+    <div class="fg"><label class="fl">Name</label>
+      <input class="input" id="nf-name" placeholder="Netflix, Rent, Gym…"></div>
+    <div class="fg"><label class="fl">Amount ($)</label>
+      <input class="input" type="number" id="nf-amt" placeholder="0"></div>
+    <div class="fg"><label class="fl">Frequency</label>
+      <select class="input" id="nf-freq">
+        <option>Monthly</option><option>Annual</option><option>Weekly</option>
+      </select></div>
+    <div class="fg"><label class="fl">Emoji Icon</label>
+      <input class="input" id="nf-icon" value="💳" maxlength="2"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('m-fin')">Cancel</button>
+      <button class="btn btn-gold" onclick="addFinance()">Add</button>
+    </div>
+  </div>
+</div>
+
+<!-- PROJECT MODAL -->
+<div class="modal-bg" id="m-proj">
+  <div class="modal">
+    <div class="modal-title">New Project</div>
+    <div class="fg"><label class="fl">Project Name</label>
+      <input class="input" id="np-name" placeholder="e.g. Italy Trip 2026"></div>
+    <div class="fg"><label class="fl">Description</label>
+      <textarea class="input" id="np-desc" placeholder="What's this about?"></textarea></div>
+    <div class="fg"><label class="fl">Status</label>
+      <select class="input" id="np-status">
+        <option value="planning">Planning</option>
+        <option value="active">Active</option>
+      </select></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('m-proj')">Cancel</button>
+      <button class="btn btn-gold" onclick="addProject()">Create</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ====== STATE ======
+const S = {
+  todos: [
+    {id:1,text:'Pick up dry cleaning',who:'adib',cat:'chores',done:false},
+    {id:2,text:'Restock pantry — pasta, olive oil, coffee',who:'ummey',cat:'shopping',done:false},
+    {id:3,text:'Call insurance about the claim',who:'adib',cat:'admin',done:false},
+    {id:4,text:'Book anniversary dinner reservation',who:'both',cat:'other',done:false},
+    {id:5,text:'Vacuum living room',who:'ummey',cat:'chores',done:true},
+    {id:6,text:'Replace porch light bulb',who:'adib',cat:'chores',done:true},
+  ],
+  events: [
+    {id:1,name:"Mom's Birthday 🎂",date:'2026-03-15',type:'birthday'},
+    {id:2,name:'Date Night — Italian place',date:'2026-03-20',type:'date'},
+    {id:3,name:'Doctor Appointment',date:'2026-03-22',type:'appointment'},
+    {id:4,name:'3rd Anniversary 💍',date:'2026-04-10',type:'anniversary'},
+    {id:5,name:'Friends Dinner',date:'2026-04-05',type:'social'},
+  ],
+  finances: [
+    {id:1,name:'Rent',amount:2200,freq:'Monthly',icon:'🏠'},
+    {id:2,name:'Netflix',amount:22,freq:'Monthly',icon:'📺'},
+    {id:3,name:'Spotify Family',amount:18,freq:'Monthly',icon:'🎵'},
+    {id:4,name:'Gym',amount:80,freq:'Monthly',icon:'💪'},
+    {id:5,name:'Car Insurance',amount:920,freq:'Annual',icon:'🚗'},
+  ],
+  projects: [
+    {id:1,name:'Italy Trip 2026',desc:'Rome, Florence & the Amalfi Coast — our first big adventure',status:'active',progress:35,tasks:12,done:4},
+    {id:2,name:'Living Room Refresh',desc:'New couch, rug, gallery wall, and way too many plants',status:'planning',progress:10,tasks:8,done:1},
+  ],
+  jarIdeas: [
+    'Picnic in the park 🌿','Cooking class together 🍝','Sunrise hike 🥾',
+    'Museum day 🎨','Drive-in movie 🎬','Farmer\'s market 🥕',
+    'Board game café 🎲','Stargazing spot 🌌','Day trip somewhere new 🚗',
+  ],
+  filter: 'all',
+};
+
+const evColors = {date:'#E88A8A',birthday:'#E8B86D',anniversary:'#C49AE8',appointment:'#7DB89B',social:'#6AB4D4'};
+
+// ====== NAV ======
+function nav(id) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
+  const sb = document.getElementById('sb-'+id);
+  if(sb) sb.classList.add('active');
+  document.querySelectorAll('.bn-item').forEach(i=>i.classList.remove('active'));
+  const bn = document.getElementById('bn-'+id);
+  if(bn) bn.classList.add('active');
+  const renders = {todo:renderTodos,calendar:renderCal,finances:renderFin,projects:renderProj,wiki:renderWiki,inspire:renderInspire};
+  if(renders[id]) renders[id]();
+}
+
+// ====== MODAL ======
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-bg').forEach(m=>m.addEventListener('click',e=>{ if(e.target===m)m.classList.remove('open'); }));
+
+// ====== HOME ======
+function renderHome(){
+  const now = new Date();
+  const h = now.getHours();
+  document.getElementById('home-greeting').textContent = (h<12?'Good morning':h<17?'Good afternoon':'Good evening')+', Adib ✦';
+  document.getElementById('home-date-str').textContent = now.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+
+  const pending = S.todos.filter(t=>!t.done);
+  document.getElementById('hq-tasks').textContent = pending.length;
+  document.getElementById('hq-badge-who').textContent = pending.filter(t=>t.who==='adib').length+' yours';
+
+  const monthly = finMonthly();
+  document.getElementById('hq-spend').textContent = '$'+monthly.toLocaleString();
+
+  const sorted = [...S.events].sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const next = sorted.find(e=>new Date(e.date+'T00:00:00')>=new Date());
+  if(next){
+    document.getElementById('hq-next-event').textContent = next.name;
+    document.getElementById('hq-next-date').textContent = new Date(next.date+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  }
+
+  const badge = document.getElementById('sb-badge-todo');
+  if(badge) badge.textContent = pending.length;
+  const dot = document.getElementById('bn-dot-todo');
+  if(dot) dot.style.display = pending.length?'block':'none';
+
+  pickIdea();
+}
+
+function pickIdea(){
+  const el = document.getElementById('hq-date-idea');
+  if(el) el.textContent = S.jarIdeas[Math.floor(Math.random()*S.jarIdeas.length)];
+}
+
+function finMonthly(){
+  return S.finances.reduce((s,f)=>s+(f.freq==='Monthly'?f.amount:f.freq==='Annual'?Math.round(f.amount/12):Math.round(f.amount*4.33)),0);
+}
+
+// ====== TODOS ======
+let activeFilter='all';
+function todoFilter(f,el){
+  activeFilter=f;
+  document.querySelectorAll('.tab-btn').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderTodos();
+}
+
+function renderTodos(){
+  let items = S.todos;
+  if(activeFilter==='adib') items=items.filter(t=>t.who==='adib');
+  else if(activeFilter==='ummey') items=items.filter(t=>t.who==='ummey');
+  else if(activeFilter==='chores') items=items.filter(t=>t.cat==='chores');
+  else if(activeFilter==='shopping') items=items.filter(t=>t.cat==='shopping');
+
+  const pending=items.filter(t=>!t.done), done=items.filter(t=>t.done);
+  let html='';
+  if(pending.length){
+    html+=pending.map(todoHTML).join('');
+  }
+  if(done.length){
+    html+=`<div class="todo-section-label" style="margin-top:${pending.length?'16px':'0'}">Completed (${done.length})</div>`;
+    html+=done.map(todoHTML).join('');
+  }
+  if(!items.length) html=`<div class="empty"><div class="empty-icon">🎉</div><div class="empty-text">Nothing here — you're all caught up!</div></div>`;
+  document.getElementById('todo-render').innerHTML=html;
+}
+
+function todoHTML(t){
+  const whoClass = t.who==='adib'?'todo-who-a':t.who==='ummey'?'todo-who-u':'todo-who-b';
+  const whoLabel = t.who==='adib'?'Adib':t.who==='ummey'?'Ummey':'Both';
+  return `<div class="todo-item ${t.done?'done':''}" id="ti-${t.id}">
+    <div class="todo-check-outer ${t.done?'checked':''}" onclick="toggleTodo(${t.id})">
+      ${t.done?'<span class="todo-check-inner">✓</span>':''}
+    </div>
+    <span class="todo-text">${t.text}</span>
+    <span class="todo-who ${whoClass}">${whoLabel}</span>
+    <span class="tag tag-dim" style="font-size:10px">${t.cat}</span>
+    <span class="todo-edit" onclick="editTodo(${t.id})">✏️</span>
+    <span class="todo-del" onclick="delTodo(${t.id})">🗑</span>
+  </div>`;
+}
+
+function toggleTodo(id){
+  const t=S.todos.find(t=>t.id===id);
+  if(t){t.done=!t.done; renderTodos(); renderHome();}
+}
+function delTodo(id){
+  S.todos=S.todos.filter(t=>t.id!==id);
+  renderTodos(); renderHome();
+}
+function addTodo(){
+  const text=document.getElementById('nt-text').value.trim();
+  if(!text)return;
+  S.todos.unshift({id:Date.now(),text,who:document.getElementById('nt-who').value,cat:document.getElementById('nt-cat').value,done:false});
+  closeModal('m-todo');
+  document.getElementById('nt-text').value='';
+  renderTodos(); renderHome();
+}
+
+let _editingTodoId=null;
+function editTodo(id){
+  const t=S.todos.find(t=>t.id===id);
+  if(!t)return;
+  _editingTodoId=id;
+  document.getElementById('et-text').value=t.text;
+  document.getElementById('et-who').value=t.who;
+  document.getElementById('et-cat').value=t.cat;
+  openModal('m-todo-edit');
+}
+function saveEditTodo(){
+  const text=document.getElementById('et-text').value.trim();
+  if(!text)return;
+  const t=S.todos.find(t=>t.id===_editingTodoId);
+  if(t){t.text=text;t.who=document.getElementById('et-who').value;t.cat=document.getElementById('et-cat').value;}
+  closeModal('m-todo-edit');
+  renderTodos(); renderHome();
+}
+
+// ====== CALENDAR ======
+function renderCal(){
+  const now=new Date(), y=now.getFullYear(), m=now.getMonth();
+  document.getElementById('cal-title').textContent=now.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  const days=['Su','Mo','Tu','We','Th','Fr','Sa'];
+  document.getElementById('cal-dh').innerHTML=days.map(d=>`<div class="cal-dh">${d}</div>`).join('');
+  const first=new Date(y,m,1).getDay(), daysInM=new Date(y,m+1,0).getDate(), prevDays=new Date(y,m,0).getDate();
+  const evDates=S.events.map(e=>e.date);
+  let html='';
+  for(let i=first-1;i>=0;i--) html+=`<div class="cal-cell other">${prevDays-i}</div>`;
+  for(let d=1;d<=daysInM;d++){
+    const ds=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isT=d===now.getDate();
+    const hasEv=evDates.includes(ds);
+    html+=`<div class="cal-cell ${isT?'today':''} ${hasEv?'has-ev':''}">${d}</div>`;
+  }
+  document.getElementById('cal-grid').innerHTML=html;
+
+  const sorted=[...S.events].sort((a,b)=>new Date(a.date)-new Date(b.date));
+  document.getElementById('ev-list').innerHTML=sorted.map(e=>{
+    const d=new Date(e.date+'T00:00:00');
+    const col=evColors[e.type]||'#999';
+    return `<div class="ev-item">
+      <div class="ev-dot" style="background:${col};box-shadow:0 0 6px ${col}66"></div>
+      <div class="ev-info">
+        <div class="ev-name">${e.name}</div>
+        <div class="ev-date">${d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</div>
+      </div>
+      <span class="ev-type-badge" style="background:${col}22;color:${col};border:1px solid ${col}44">${e.type}</span>
+    </div>`;
+  }).join('');
+}
+
+function addEvent(){
+  const name=document.getElementById('ne-name').value.trim();
+  const date=document.getElementById('ne-date').value;
+  if(!name||!date)return;
+  S.events.push({id:Date.now(),name,date,type:document.getElementById('ne-type').value});
+  closeModal('m-event');
+  document.getElementById('ne-name').value='';
+  renderCal(); renderHome();
+}
+
+// ====== FINANCES ======
+function renderFin(){
+  const monthly=finMonthly();
+  document.getElementById('fin-summary').innerHTML=`
+    <div class="fin-stat">
+      <div class="fin-stat-val">$${monthly.toLocaleString()}</div>
+      <div class="fin-stat-lbl">Monthly Total</div>
+    </div>
+    <div class="fin-divider"></div>
+    <div class="fin-stat">
+      <div class="fin-stat-val">$${(monthly*12).toLocaleString()}</div>
+      <div class="fin-stat-lbl">Annual Total</div>
+    </div>
+    <div class="fin-divider"></div>
+    <div class="fin-stat">
+      <div class="fin-stat-val">${S.finances.length}</div>
+      <div class="fin-stat-lbl">Active Items</div>
+    </div>`;
+
+  document.getElementById('fin-list').innerHTML=S.finances.map(f=>`
+    <div class="fin-row">
+      <div class="fin-icon-wrap">${f.icon}</div>
+      <div class="fin-info">
+        <div class="fin-name">${f.name}</div>
+        <div class="fin-freq">${f.freq}</div>
+      </div>
+      <div class="fin-amt">$${f.amount.toLocaleString()}</div>
+      <div class="icon-btn" onclick="delFin(${f.id})" style="margin-left:10px">🗑</div>
+    </div>`).join('');
+}
+
+function delFin(id){ S.finances=S.finances.filter(f=>f.id!==id); renderFin(); renderHome(); }
+function addFinance(){
+  const name=document.getElementById('nf-name').value.trim();
+  const amount=parseFloat(document.getElementById('nf-amt').value);
+  if(!name||!amount)return;
+  S.finances.push({id:Date.now(),name,amount,freq:document.getElementById('nf-freq').value,icon:document.getElementById('nf-icon').value||'💳'});
+  closeModal('m-fin');
+  document.getElementById('nf-name').value='';
+  document.getElementById('nf-amt').value='';
+  renderFin(); renderHome();
+}
+
+// ====== PROJECTS ======
+function renderProj(){
+  document.getElementById('proj-list').innerHTML=S.projects.length?S.projects.map(p=>`
+    <div class="proj-card">
+      <div class="proj-top">
+        <div class="proj-name">${p.name}</div>
+        <div class="proj-status-dot ${p.status}"></div>
+      </div>
+      <div class="proj-desc">${p.desc}</div>
+      <div class="proj-progress">
+        <div class="proj-progress-label">
+          <span>Progress</span><span>${p.progress}%</span>
+        </div>
+        <div class="proj-progress-bar"><div class="proj-progress-fill" style="width:${p.progress}%"></div></div>
+      </div>
+      <div class="proj-meta">
+        <span class="proj-meta-item">📋 ${p.tasks} tasks</span>
+        <span class="proj-meta-item">✅ ${p.done} done</span>
+        <span class="tag ${p.status==='active'?'tag-sage':'tag-gold'}" style="margin-left:auto">${p.status}</span>
+      </div>
+    </div>`).join(''):
+    `<div class="empty"><div class="empty-icon">🗂</div><div class="empty-text">No projects yet. Start building something together.</div></div>`;
+}
+
+function addProject(){
+  const name=document.getElementById('np-name').value.trim();
+  if(!name)return;
+  S.projects.push({id:Date.now(),name,desc:document.getElementById('np-desc').value||'No description yet.',status:document.getElementById('np-status').value,progress:0,tasks:0,done:0});
+  closeModal('m-proj');
+  document.getElementById('np-name').value='';
+  document.getElementById('np-desc').value='';
+  renderProj();
+}
+
+// ====== WIKI ======
+const wikiData=[
+  {section:'🛂 Documents',items:[
+    {label:"Adib's Passport #",value:'A12345678',s:true},
+    {label:"Ummey's Passport #",value:'B87654321',s:true},
+    {label:"Adib's Driver's License",value:'CA-XY12345',s:true},
+    {label:"Ummey's Driver's License",value:'CA-AB98765',s:true},
+  ]},
+  {section:'🏥 Insurance',items:[
+    {label:'Provider',value:'Blue Shield PPO',s:false},
+    {label:'Plan ID',value:'BS-9988-XYZ',s:true},
+    {label:'Primary Care',value:'Dr. Patel — (415) 555-0192',s:false},
+  ]},
+  {section:'🏠 Home',items:[
+    {label:'Address',value:'123 Oak Street, SF CA 94117',s:false},
+    {label:'Landlord',value:'Maria Chen — (415) 555-0088',s:false},
+    {label:'WiFi Password',value:'OakStreet2024!',s:true},
+  ]},
+  {section:'🚨 Emergency Contacts',items:[
+    {label:"Adib's Mom",value:'Amina — (703) 555-2201',s:false},
+    {label:"Ummey's Dad",value:'James — (571) 555-4415',s:false},
+  ]},
+];
+
+function renderWiki(){
+  document.getElementById('wiki-render').innerHTML=wikiData.map(sec=>`
+    <div class="wiki-sec">
+      <div class="wiki-sec-title">${sec.section}</div>
+      <div class="wiki-grid">
+        ${sec.items.map(item=>`
+          <div class="wiki-tile" onclick="toggleWiki(this)">
+            <div class="wiki-tile-label">${item.label}</div>
+            <div class="wiki-tile-val ${item.s?'blurred':''}" data-s="${item.s}">${item.value}</div>
+          </div>`).join('')}
+      </div>
+    </div>`).join('');
+}
+
+function toggleWiki(el){
+  const v=el.querySelector('.wiki-tile-val');
+  if(v&&v.dataset.s==='true') v.classList.toggle('blurred');
+}
+
+// ====== INSPIRE ======
+const inspireData=[
+  {e:'🌮',n:'Taco Crawl',d:'Hit 3 spots in one night, rate each one'},
+  {e:'🌄',n:'Sunrise Hike',d:'Pick a trail and watch the sun come up'},
+  {e:'🎨',n:'Paint Night In',d:'Supplies from the art store, chaos ensues'},
+  {e:'🎳',n:'Bowling Night',d:'Loser buys dessert — no negotiating'},
+  {e:'🧁',n:'Bake-Off',d:'Each pick a recipe, blind taste-test at the end'},
+  {e:'🚲',n:'Bike Explore',d:'Rent bikes and discover a new neighborhood'},
+];
+const checkinQs=[
+  {q:'How connected have you felt to each other this week?',scale:true},
+  {q:'How well did you handle stress as a team?',scale:true},
+  {q:'What\'s one thing your partner did this week that you loved?',scale:false},
+];
+
+function renderInspire(){
+  document.getElementById('jar-render').innerHTML=S.jarIdeas.map(idea=>`
+    <div class="jar-chip">${idea}</div>`).join('');
+
+  document.getElementById('checkin-render').innerHTML=checkinQs.map((q,i)=>`
+    <div class="checkin-card">
+      <div class="checkin-q">${q.q}</div>
+      ${q.scale?`<div class="scale-row">${[1,2,3,4,5,6,7,8,9,10].map(n=>`<div class="scale-n" onclick="selScale(this,${i})">${n}</div>`).join('')}</div>`
+      :`<input class="input" placeholder="Your answer…" style="margin-top:4px">`}
+    </div>`).join('');
+
+  document.getElementById('inspire-render').innerHTML=inspireData.map(c=>`
+    <div class="inspire-tile">
+      <div class="inspire-img">${c.e}</div>
+      <div class="inspire-body">
+        <div class="inspire-name">${c.n}</div>
+        <div class="inspire-desc">${c.d}</div>
+      </div>
+    </div>`).join('');
+}
+
+function selScale(el,qi){
+  const row=el.closest('.scale-row');
+  row.querySelectorAll('.scale-n').forEach(n=>n.classList.remove('sel'));
+  el.classList.add('sel');
+}
+
+function addJar(){
+  const val=document.getElementById('jar-input').value.trim();
+  if(!val)return;
+  S.jarIdeas.unshift(val);
+  document.getElementById('jar-input').value='';
+  renderInspire();
+}
+
+// ====== INIT ======
+renderHome();
+</script>
+</body>
+</html>
