@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Cuppel</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <style>
 :root {
   --bg: #0D0F14;
@@ -1124,42 +1126,98 @@ textarea.input { resize: vertical; min-height: 80px; }
   </div>
 </div>
 
+<div id="app-loading" style="position:fixed;inset:0;background:var(--bg);display:flex;
+  align-items:center;justify-content:center;z-index:9999;color:var(--gold);
+  font-family:'Sora',sans-serif;font-size:15px;letter-spacing:0.06em;">
+  Loading your space…
+</div>
+
 <script>
+// ====== FIREBASE SETUP ======
+// Paste your Firebase config here once
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAad9PcDceUeNoptfO59hMdDNid31244Hw",
+  authDomain: "cuppel-2beff.firebaseapp.com",
+  projectId: "cuppel-2beff",
+  storageBucket: "cuppel-2beff.firebasestorage.app",
+  messagingSenderId: "1093172338795",
+  appId: "1:1093172338795:web:8212279db9fba9f742912e",
+  databaseURL: "https://cuppel-2beff-default-rtdb.firebaseio.com",
+};
+firebase.initializeApp(FIREBASE_CONFIG);
+firebase.database().setPersistenceEnabled(true);
+const db = firebase.database();
+const ROOT = db.ref('cuppel');
+
+function newId() { return db.ref().push().key; }
+
 // ====== STATE ======
-const S = {
+// S is a cache; Firebase is the source of truth
+let S = { todos:[], events:[], finances:[], projects:[], jarIdeas:[], filter:'all' };
+
+// Seed data for first-ever launch (when DB is null)
+const SEED = {
   todos: [
-    {id:1,text:'Pick up dry cleaning',who:'adib',cat:'chores',done:false},
-    {id:2,text:'Restock pantry — pasta, olive oil, coffee',who:'ummey',cat:'shopping',done:false},
-    {id:3,text:'Call insurance about the claim',who:'adib',cat:'admin',done:false},
-    {id:4,text:'Book anniversary dinner reservation',who:'both',cat:'other',done:false},
-    {id:5,text:'Vacuum living room',who:'ummey',cat:'chores',done:true},
-    {id:6,text:'Replace porch light bulb',who:'adib',cat:'chores',done:true},
+    {id:'-seed1', text:'Pick up dry cleaning', who:'adib', cat:'chores', done:false},
+    {id:'-seed2', text:'Restock pantry — pasta, olive oil, coffee', who:'ummey', cat:'shopping', done:false},
+    {id:'-seed3', text:'Book anniversary dinner', who:'both', cat:'admin', done:false},
   ],
   events: [
-    {id:1,name:"Mom's Birthday 🎂",date:'2026-03-15',type:'birthday'},
-    {id:2,name:'Date Night — Italian place',date:'2026-03-20',type:'date'},
-    {id:3,name:'Doctor Appointment',date:'2026-03-22',type:'appointment'},
-    {id:4,name:'3rd Anniversary 💍',date:'2026-04-10',type:'anniversary'},
-    {id:5,name:'Friends Dinner',date:'2026-04-05',type:'social'},
+    {id:'-ev1', name:"Ummey's Birthday", date:'2026-05-14', type:'birthday'},
+    {id:'-ev2', name:'Anniversary', date:'2026-07-22', type:'anniversary'},
+    {id:'-ev3', name:'Dentist — Adib', date:'2026-03-28', type:'appointment'},
   ],
   finances: [
-    {id:1,name:'Rent',amount:2200,freq:'Monthly',icon:'🏠'},
-    {id:2,name:'Netflix',amount:22,freq:'Monthly',icon:'📺'},
-    {id:3,name:'Spotify Family',amount:18,freq:'Monthly',icon:'🎵'},
-    {id:4,name:'Gym',amount:80,freq:'Monthly',icon:'💪'},
-    {id:5,name:'Car Insurance',amount:920,freq:'Annual',icon:'🚗'},
+    {id:'-fin1', name:'Rent', amount:2400, freq:'Monthly', icon:'🏠'},
+    {id:'-fin2', name:'Spotify Duo', amount:17, freq:'Monthly', icon:'🎵'},
+    {id:'-fin3', name:'Netflix', amount:22, freq:'Monthly', icon:'📺'},
   ],
   projects: [
-    {id:1,name:'Italy Trip 2026',desc:'Rome, Florence & the Amalfi Coast — our first big adventure',status:'active',progress:35,tasks:12,done:4},
-    {id:2,name:'Living Room Refresh',desc:'New couch, rug, gallery wall, and way too many plants',status:'planning',progress:10,tasks:8,done:1},
+    {id:'-proj1', name:'Italy Trip 2026', desc:'Rome, Florence & the Amalfi Coast', status:'active', progress:35, tasks:12, done:4},
+    {id:'-proj2', name:'Living Room Refresh', desc:'New couch, rug, gallery wall', status:'planning', progress:10, tasks:8, done:1},
   ],
-  jarIdeas: [
-    'Picnic in the park 🌿','Cooking class together 🍝','Sunrise hike 🥾',
-    'Museum day 🎨','Drive-in movie 🎬','Farmer\'s market 🥕',
-    'Board game café 🎲','Stargazing spot 🌌','Day trip somewhere new 🚗',
-  ],
-  filter: 'all',
+  jarIdeas: ['Sunset picnic at the park','Cook a new cuisine together','Stargazing night drive','Board game marathon','Day trip to a new town'],
 };
+
+let _appLoaded = false;
+function hideLoading() {
+  if (_appLoaded) return;
+  _appLoaded = true;
+  const el = document.getElementById('app-loading');
+  if (el) { el.style.opacity='0'; el.style.transition='opacity 0.3s'; setTimeout(()=>el.remove(),300); }
+}
+
+// ONE root listener — fires on load + every remote change
+ROOT.on('value', snap => {
+  const data = snap.val();
+  if (data === null) {
+    // First-ever launch: seed the database
+    const toObj = arr => Object.fromEntries(arr.map(x => [x.id, x]));
+    ROOT.set({
+      todos:     toObj(SEED.todos),
+      events:    toObj(SEED.events),
+      finances:  toObj(SEED.finances),
+      projects:  toObj(SEED.projects),
+      jarIdeas:  Object.fromEntries(SEED.jarIdeas.map((t,i) => [`j${i}`, {id:`j${i}`,text:t}])),
+    });
+    return; // set() above re-fires this listener with seeded data
+  }
+  // Rebuild S arrays from Firebase objects, normalizing nested items
+  S.todos    = data.todos    ? Object.values(data.todos).map(t=>({...t,items:t.items?Object.values(t.items):[]})) : [];
+  S.events   = data.events   ? Object.values(data.events)   : [];
+  S.finances = data.finances ? Object.values(data.finances) : [];
+  S.projects = data.projects ? Object.values(data.projects) : [];
+  S.jarIdeas = data.jarIdeas ? Object.values(data.jarIdeas).map(j=>j.text) : [];
+  hideLoading();
+  renderHome();
+  // Re-render the currently open page
+  const active = document.querySelector('.page.active');
+  if (active) {
+    const id = active.id.replace('page-','');
+    const renders = {todo:renderTodos,calendar:renderCal,finances:renderFin,projects:renderProj,wiki:renderWiki,inspire:renderInspire};
+    if (renders[id]) renders[id]();
+  }
+});
 
 const evColors = {date:'#E88A8A',birthday:'#E8B86D',anniversary:'#C49AE8',appointment:'#7DB89B',social:'#6AB4D4'};
 
@@ -1256,39 +1314,39 @@ function todoHTML(t){
   const isExpanded = _expanded.has(t.id);
   const doneCount = items.filter(i=>i.done).length;
   const countLabel = items.length ? `<span class="todo-expand-count">${doneCount}/${items.length}</span>` : '';
-  const expandBtn = `<span class="todo-expand" onclick="toggleSublist(${t.id})">${isExpanded?'▼':'▶'} ${countLabel}</span>`;
+  const expandBtn = `<span class="todo-expand" onclick="toggleSublist('${t.id}')">${isExpanded?'▼':'▶'} ${countLabel}</span>`;
 
   let sublistHTML = '';
   if (isExpanded) {
     const itemsHTML = items.map(si=>`
       <div class="todo-subitem" id="si-${t.id}-${si.id}">
-        <div class="sub-check ${si.done?'checked':''}" onclick="toggleSubitem(${t.id},${si.id})">
+        <div class="sub-check ${si.done?'checked':''}" onclick="toggleSubitem('${t.id}','${si.id}')">
           ${si.done?'<span class="sub-check-inner">✓</span>':''}
         </div>
         <span class="sub-text ${si.done?'done':''}">${si.text}</span>
-        <span class="sub-del" onclick="delSubitem(${t.id},${si.id})">✕</span>
+        <span class="sub-del" onclick="delSubitem('${t.id}','${si.id}')">✕</span>
       </div>`).join('');
     sublistHTML = `<div class="todo-sublist">
       ${itemsHTML}
       <div class="sub-add-row">
         <div class="sub-add-placeholder"></div>
-        <input class="sub-add-input" id="sub-input-${t.id}" placeholder="Add an item…" onkeydown="if(event.key==='Enter')addSubitem(${t.id})">
-        <span class="sub-add-btn" onclick="addSubitem(${t.id})">+ Add</span>
+        <input class="sub-add-input" id="sub-input-${t.id}" placeholder="Add an item…" onkeydown="if(event.key==='Enter')addSubitem('${t.id}')">
+        <span class="sub-add-btn" onclick="addSubitem('${t.id}')">+ Add</span>
       </div>
     </div>`;
   }
 
   return `<div class="todo-item ${t.done?'done':''}" id="ti-${t.id}">
     <div class="todo-main-row">
-      <div class="todo-check-outer ${t.done?'checked':''}" onclick="toggleTodo(${t.id})">
+      <div class="todo-check-outer ${t.done?'checked':''}" onclick="toggleTodo('${t.id}')">
         ${t.done?'<span class="todo-check-inner">✓</span>':''}
       </div>
       <span class="todo-text">${t.text}</span>
       ${expandBtn}
       <span class="todo-who ${whoClass}">${whoLabel}</span>
       <span class="tag tag-dim" style="font-size:10px">${t.cat}</span>
-      <span class="todo-edit" onclick="editTodo(${t.id})">✏️</span>
-      <span class="todo-del" onclick="delTodo(${t.id})">🗑</span>
+      <span class="todo-edit" onclick="editTodo('${t.id}')">✏️</span>
+      <span class="todo-del" onclick="delTodo('${t.id}')">🗑</span>
     </div>
     ${sublistHTML}
   </div>`;
@@ -1296,19 +1354,18 @@ function todoHTML(t){
 
 function toggleTodo(id){
   const t=S.todos.find(t=>t.id===id);
-  if(t){t.done=!t.done; renderTodos(); renderHome();}
+  if(t) ROOT.child('todos').child(id).update({done: !t.done});
 }
 function delTodo(id){
-  S.todos=S.todos.filter(t=>t.id!==id);
-  renderTodos(); renderHome();
+  ROOT.child('todos').child(id).remove();
 }
 function addTodo(){
   const text=document.getElementById('nt-text').value.trim();
   if(!text)return;
-  S.todos.unshift({id:Date.now(),text,who:document.getElementById('nt-who').value,cat:document.getElementById('nt-cat').value,done:false});
+  const id=newId();
+  ROOT.child('todos').child(id).set({id,text,who:document.getElementById('nt-who').value,cat:document.getElementById('nt-cat').value,done:false});
   closeModal('m-todo');
   document.getElementById('nt-text').value='';
-  renderTodos(); renderHome();
 }
 
 let _editingTodoId=null;
@@ -1324,10 +1381,8 @@ function editTodo(id){
 function saveEditTodo(){
   const text=document.getElementById('et-text').value.trim();
   if(!text)return;
-  const t=S.todos.find(t=>t.id===_editingTodoId);
-  if(t){t.text=text;t.who=document.getElementById('et-who').value;t.cat=document.getElementById('et-cat').value;}
+  ROOT.child('todos').child(_editingTodoId).update({text,who:document.getElementById('et-who').value,cat:document.getElementById('et-cat').value});
   closeModal('m-todo-edit');
-  renderTodos(); renderHome();
 }
 
 // ====== SUBITEMS ======
@@ -1341,25 +1396,19 @@ function addSubitem(todoId){
   if(!input)return;
   const text=input.value.trim();
   if(!text)return;
-  const t=S.todos.find(t=>t.id===todoId);
-  if(!t)return;
-  if(!t.items)t.items=[];
-  t.items.push({id:Date.now(),text,done:false});
-  renderTodos();
+  const id=newId();
+  ROOT.child('todos').child(todoId).child('items').child(id).set({id,text,done:false});
+  input.value='';
   setTimeout(()=>{const inp=document.getElementById('sub-input-'+todoId);if(inp)inp.focus();},0);
 }
 function toggleSubitem(todoId,subId){
   const t=S.todos.find(t=>t.id===todoId);
   if(!t||!t.items)return;
   const si=t.items.find(i=>i.id===subId);
-  if(si)si.done=!si.done;
-  renderTodos();
+  if(si) ROOT.child('todos').child(todoId).child('items').child(subId).update({done: !si.done});
 }
 function delSubitem(todoId,subId){
-  const t=S.todos.find(t=>t.id===todoId);
-  if(!t||!t.items)return;
-  t.items=t.items.filter(i=>i.id!==subId);
-  renderTodos();
+  ROOT.child('todos').child(todoId).child('items').child(subId).remove();
 }
 
 // ====== CALENDAR ======
@@ -1399,10 +1448,10 @@ function addEvent(){
   const name=document.getElementById('ne-name').value.trim();
   const date=document.getElementById('ne-date').value;
   if(!name||!date)return;
-  S.events.push({id:Date.now(),name,date,type:document.getElementById('ne-type').value});
+  const id=newId();
+  ROOT.child('events').child(id).set({id,name,date,type:document.getElementById('ne-type').value});
   closeModal('m-event');
   document.getElementById('ne-name').value='';
-  renderCal(); renderHome();
 }
 
 // ====== FINANCES ======
@@ -1432,20 +1481,20 @@ function renderFin(){
         <div class="fin-freq">${f.freq}</div>
       </div>
       <div class="fin-amt">$${f.amount.toLocaleString()}</div>
-      <div class="icon-btn" onclick="delFin(${f.id})" style="margin-left:10px">🗑</div>
+      <div class="icon-btn" onclick="delFin('${f.id}')" style="margin-left:10px">🗑</div>
     </div>`).join('');
 }
 
-function delFin(id){ S.finances=S.finances.filter(f=>f.id!==id); renderFin(); renderHome(); }
+function delFin(id){ ROOT.child('finances').child(id).remove(); }
 function addFinance(){
   const name=document.getElementById('nf-name').value.trim();
   const amount=parseFloat(document.getElementById('nf-amt').value);
   if(!name||!amount)return;
-  S.finances.push({id:Date.now(),name,amount,freq:document.getElementById('nf-freq').value,icon:document.getElementById('nf-icon').value||'💳'});
+  const id=newId();
+  ROOT.child('finances').child(id).set({id,name,amount,freq:document.getElementById('nf-freq').value,icon:document.getElementById('nf-icon').value||'💳'});
   closeModal('m-fin');
   document.getElementById('nf-name').value='';
   document.getElementById('nf-amt').value='';
-  renderFin(); renderHome();
 }
 
 // ====== PROJECTS ======
@@ -1475,11 +1524,11 @@ function renderProj(){
 function addProject(){
   const name=document.getElementById('np-name').value.trim();
   if(!name)return;
-  S.projects.push({id:Date.now(),name,desc:document.getElementById('np-desc').value||'No description yet.',status:document.getElementById('np-status').value,progress:0,tasks:0,done:0});
+  const id=newId();
+  ROOT.child('projects').child(id).set({id,name,desc:document.getElementById('np-desc').value||'No description yet.',status:document.getElementById('np-status').value,progress:0,tasks:0,done:0});
   closeModal('m-proj');
   document.getElementById('np-name').value='';
   document.getElementById('np-desc').value='';
-  renderProj();
 }
 
 // ====== WIKI ======
@@ -1570,13 +1619,13 @@ function selScale(el,qi){
 function addJar(){
   const val=document.getElementById('jar-input').value.trim();
   if(!val)return;
-  S.jarIdeas.unshift(val);
+  const id=newId();
+  ROOT.child('jarIdeas').child(id).set({id,text:val});
   document.getElementById('jar-input').value='';
-  renderInspire();
 }
 
 // ====== INIT ======
-renderHome();
+// Initial render is handled by the ROOT.on('value') listener above
 </script>
 </body>
 </html>
