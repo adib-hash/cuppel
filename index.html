@@ -1145,7 +1145,6 @@ const FIREBASE_CONFIG = {
   databaseURL: "https://cuppel-2beff-default-rtdb.firebaseio.com",
 };
 firebase.initializeApp(FIREBASE_CONFIG);
-firebase.database().setPersistenceEnabled(true);
 const db = firebase.database();
 const ROOT = db.ref('cuppel');
 
