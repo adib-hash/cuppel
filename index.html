@@ -409,18 +409,18 @@ textarea.input { resize: vertical; min-height: 80px; }
 
 /* ======== TODO ======== */
 .todo-item {
-  display: flex; align-items: center; gap: 13px;
-  padding: 14px 16px;
+  display: flex; flex-direction: column;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
   background: var(--surface);
   transition: var(--transition);
   margin-bottom: 8px;
-  position: relative;
+  overflow: hidden;
 }
 .todo-item:hover { background: var(--surface2); border-color: var(--border2); }
 .todo-item.done { opacity: 0.4; }
 .todo-item.done .todo-text { text-decoration: line-through; color: var(--text3); }
+.todo-main-row { display: flex; align-items: center; gap: 13px; padding: 14px 16px; }
 
 .todo-check-outer {
   width: 22px; height: 22px; border-radius: 50%;
@@ -448,6 +448,33 @@ textarea.input { resize: vertical; min-height: 80px; }
 .todo-del { font-size: 14px; cursor: pointer; color: var(--text3); opacity: 0; transition: var(--transition); }
 .todo-item:hover .todo-del { opacity: 1; }
 .todo-del:hover { color: var(--rose); }
+
+.todo-expand { font-size: 11px; cursor: pointer; color: var(--text3); transition: var(--transition); display: flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 6px; white-space: nowrap; flex-shrink: 0; }
+.todo-expand:hover { color: var(--gold); background: var(--gold-glow); }
+.todo-expand-count { font-size: 10px; font-weight: 700; color: var(--sage-light); }
+
+.todo-sublist { border-top: 1px solid var(--border); padding: 10px 16px 14px; }
+.todo-subitem { display: flex; align-items: center; gap: 10px; padding: 5px 0; }
+.sub-check {
+  width: 16px; height: 16px; border-radius: 4px;
+  border: 2px solid var(--border2);
+  cursor: pointer; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: var(--transition);
+}
+.sub-check.checked { background: var(--sage); border-color: var(--sage); }
+.sub-check-inner { color: white; font-size: 9px; }
+.sub-text { flex: 1; font-size: 12px; color: var(--text2); }
+.sub-text.done { text-decoration: line-through; color: var(--text3); }
+.sub-del { font-size: 12px; cursor: pointer; color: var(--text3); opacity: 0; transition: var(--transition); line-height: 1; }
+.todo-subitem:hover .sub-del { opacity: 1; }
+.sub-del:hover { color: var(--rose); }
+.sub-add-row { display: flex; align-items: center; gap: 10px; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
+.sub-add-placeholder { width: 16px; height: 16px; flex-shrink: 0; }
+.sub-add-input { flex: 1; background: transparent; border: none; color: var(--text); font-family: 'Sora', sans-serif; font-size: 12px; outline: none; }
+.sub-add-input::placeholder { color: var(--text3); }
+.sub-add-btn { font-size: 11px; color: var(--text3); cursor: pointer; padding: 3px 8px; border-radius: 6px; transition: var(--transition); flex-shrink: 0; }
+.sub-add-btn:hover { color: var(--gold); background: var(--gold-glow); }
 
 .todo-section-label {
   font-size: 11px; font-weight: 600; color: var(--text3);
@@ -1225,15 +1252,45 @@ function renderTodos(){
 function todoHTML(t){
   const whoClass = t.who==='adib'?'todo-who-a':t.who==='ummey'?'todo-who-u':'todo-who-b';
   const whoLabel = t.who==='adib'?'Adib':t.who==='ummey'?'Ummey':'Both';
+  const items = t.items || [];
+  const isExpanded = _expanded.has(t.id);
+  const doneCount = items.filter(i=>i.done).length;
+  const countLabel = items.length ? `<span class="todo-expand-count">${doneCount}/${items.length}</span>` : '';
+  const expandBtn = `<span class="todo-expand" onclick="toggleSublist(${t.id})">${isExpanded?'▼':'▶'} ${countLabel}</span>`;
+
+  let sublistHTML = '';
+  if (isExpanded) {
+    const itemsHTML = items.map(si=>`
+      <div class="todo-subitem" id="si-${t.id}-${si.id}">
+        <div class="sub-check ${si.done?'checked':''}" onclick="toggleSubitem(${t.id},${si.id})">
+          ${si.done?'<span class="sub-check-inner">✓</span>':''}
+        </div>
+        <span class="sub-text ${si.done?'done':''}">${si.text}</span>
+        <span class="sub-del" onclick="delSubitem(${t.id},${si.id})">✕</span>
+      </div>`).join('');
+    sublistHTML = `<div class="todo-sublist">
+      ${itemsHTML}
+      <div class="sub-add-row">
+        <div class="sub-add-placeholder"></div>
+        <input class="sub-add-input" id="sub-input-${t.id}" placeholder="Add an item…" onkeydown="if(event.key==='Enter')addSubitem(${t.id})">
+        <span class="sub-add-btn" onclick="addSubitem(${t.id})">+ Add</span>
+      </div>
+    </div>`;
+  }
+
   return `<div class="todo-item ${t.done?'done':''}" id="ti-${t.id}">
-    <div class="todo-check-outer ${t.done?'checked':''}" onclick="toggleTodo(${t.id})">
-      ${t.done?'<span class="todo-check-inner">✓</span>':''}
+    <div class="todo-main-row">
+      <div class="todo-check-outer ${t.done?'checked':''}" onclick="toggleTodo(${t.id})">
+        ${t.done?'<span class="todo-check-inner">✓</span>':''}
+      </div>
+      <span class="todo-text">${t.text}</span>
+      ${expandBtn}
+      <span class="todo-who ${whoClass}">${whoLabel}</span>
+      <span class="tag tag-dim" style="font-size:10px">${t.cat}</span>
+      <span class="todo-edit" onclick="editTodo(${t.id})">✏️</span>
+      <span class="todo-del" onclick="delTodo(${t.id})">🗑</span>
     </div>
-    <span class="todo-text">${t.text}</span>
-    <span class="todo-who ${whoClass}">${whoLabel}</span>
-    <span class="tag tag-dim" style="font-size:10px">${t.cat}</span>
-    <span class="todo-edit" onclick="editTodo(${t.id})">✏️</span>
-    <span class="todo-del" onclick="delTodo(${t.id})">🗑</span>
+    ${sublistHTML}
   </div>`;
 }
 
@@ -1271,6 +1328,38 @@ function saveEditTodo(){
   if(t){t.text=text;t.who=document.getElementById('et-who').value;t.cat=document.getElementById('et-cat').value;}
   closeModal('m-todo-edit');
   renderTodos(); renderHome();
+}
+
+// ====== SUBITEMS ======
+const _expanded = new Set();
+function toggleSublist(id){
+  if(_expanded.has(id)) _expanded.delete(id); else _expanded.add(id);
+  renderTodos();
+}
+function addSubitem(todoId){
+  const input=document.getElementById('sub-input-'+todoId);
+  if(!input)return;
+  const text=input.value.trim();
+  if(!text)return;
+  const t=S.todos.find(t=>t.id===todoId);
+  if(!t)return;
+  if(!t.items)t.items=[];
+  t.items.push({id:Date.now(),text,done:false});
+  renderTodos();
+  setTimeout(()=>{const inp=document.getElementById('sub-input-'+todoId);if(inp)inp.focus();},0);
+}
+function toggleSubitem(todoId,subId){
+  const t=S.todos.find(t=>t.id===todoId);
+  if(!t||!t.items)return;
+  const si=t.items.find(i=>i.id===subId);
+  if(si)si.done=!si.done;
+  renderTodos();
+}
+function delSubitem(todoId,subId){
+  const t=S.todos.find(t=>t.id===todoId);
+  if(!t||!t.items)return;
+  t.items=t.items.filter(i=>i.id!==subId);
+  renderTodos();
 }
 
 // ====== CALENDAR ======
