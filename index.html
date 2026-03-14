@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
 <title>Cuppel</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -97,7 +97,6 @@ body::after {
   background: linear-gradient(135deg, var(--gold), var(--rose));
   border-radius: 9px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 16px;
 }
 
 .couple-pill {
@@ -169,7 +168,8 @@ body::after {
   width: 3px; border-radius: 0 3px 3px 0;
   background: var(--gold);
 }
-.sb-icon { font-size: 17px; line-height: 1; opacity: 0.9; }
+.sb-icon { width: 18px; height: 18px; flex-shrink: 0; opacity: 0.9; display: flex; align-items: center; }
+.sb-icon svg { width: 18px; height: 18px; }
 .sb-badge {
   margin-left: auto;
   background: var(--rose);
@@ -212,7 +212,8 @@ body::after {
   display: flex; align-items: center; gap: 12px;
   line-height: 1.15;
 }
-.ph-title .ph-icon { font-size: 26px; }
+.ph-icon { width: 28px; height: 28px; display: flex; align-items: center; flex-shrink: 0; }
+.ph-icon svg { width: 28px; height: 28px; }
 .ph-sub { margin-top: 6px; color: var(--text2); font-size: 13px; }
 
 /* ======== GLASS CARDS ======== */
@@ -233,6 +234,7 @@ body::after {
   color: var(--text3); margin-bottom: 16px;
   display: flex; align-items: center; gap: 8px;
 }
+.card-title svg { width: 14px; height: 14px; flex-shrink: 0; }
 
 /* ======== GRID ======== */
 .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
@@ -267,10 +269,11 @@ body::after {
   width: 34px; height: 34px; border-radius: 10px;
   display: inline-flex; align-items: center; justify-content: center;
   background: var(--surface2); border: 1px solid var(--border);
-  cursor: pointer; font-size: 15px; transition: var(--transition);
+  cursor: pointer; transition: var(--transition);
   color: var(--text2);
 }
-.icon-btn:hover { background: var(--gold-glow); border-color: var(--gold); color: var(--gold); }
+.icon-btn svg { width: 15px; height: 15px; }
+.icon-btn:hover { background: rgba(232,138,138,0.15); border-color: rgba(232,138,138,0.25); color: var(--rose); }
 
 /* ======== INPUTS ======== */
 .input {
@@ -279,7 +282,7 @@ body::after {
   border: 1px solid var(--border2);
   border-radius: var(--radius-sm);
   font-family: 'Sora', sans-serif;
-  font-size: 13px; color: var(--text);
+  font-size: 16px; color: var(--text);
   outline: none; transition: var(--transition);
 }
 .input:focus { border-color: var(--gold); background: rgba(232,184,109,0.05); }
@@ -362,7 +365,9 @@ textarea.input { resize: vertical; min-height: 80px; }
   font-size: 12px; font-weight: 500; color: var(--text2);
   backdrop-filter: blur(8px);
 }
-.streak-chip span { font-size: 15px; }
+.streak-pip {
+  width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+}
 
 /* ======== NUDGE ======== */
 .nudge {
@@ -376,11 +381,12 @@ textarea.input { resize: vertical; min-height: 80px; }
   0%,100% { border-color: rgba(232,184,109,0.18); }
   50% { border-color: rgba(232,184,109,0.32); }
 }
-.nudge-icon { font-size: 22px; flex-shrink: 0; }
+.nudge-icon { width: 22px; height: 22px; flex-shrink: 0; color: var(--gold2); }
+.nudge-icon svg { width: 22px; height: 22px; }
 .nudge-body { flex: 1; }
 .nudge-title { font-size: 13px; font-weight: 600; color: var(--gold2); margin-bottom: 2px; }
 .nudge-desc { font-size: 12px; color: var(--text2); }
-.nudge-close { font-size: 18px; color: var(--text3); cursor: pointer; padding: 4px; transition: var(--transition); }
+.nudge-close { font-size: 18px; color: var(--text3); cursor: pointer; padding: 4px; transition: var(--transition); line-height: 1; }
 .nudge-close:hover { color: var(--text); }
 
 /* ======== HOME QUICK CARDS ======== */
@@ -435,8 +441,8 @@ textarea.input { resize: vertical; min-height: 80px; }
   background: linear-gradient(135deg, var(--sage), #4A9B7A);
   border-color: var(--sage);
 }
-.todo-check-inner { color: white; font-size: 11px; }
-.todo-text { flex: 1; font-size: 13px; font-weight: 400; }
+.todo-check-inner { color: white; font-size: 11px; font-weight: 700; }
+.todo-text { flex: 1; font-size: 14px; font-weight: 400; }
 .todo-who {
   font-size: 11px; font-weight: 600;
   padding: 3px 10px; border-radius: 999px;
@@ -444,10 +450,12 @@ textarea.input { resize: vertical; min-height: 80px; }
 .todo-who-a { background: rgba(232,184,109,0.12); color: var(--gold2); border: 1px solid rgba(232,184,109,0.18); }
 .todo-who-u { background: rgba(232,138,138,0.12); color: var(--rose-light); border: 1px solid rgba(232,138,138,0.18); }
 .todo-who-b { background: rgba(125,184,155,0.12); color: var(--sage-light); border: 1px solid rgba(125,184,155,0.18); }
-.todo-edit { font-size: 14px; cursor: pointer; color: var(--text3); opacity: 0; transition: var(--transition); margin-right: 2px; }
+.todo-edit { display: flex; align-items: center; cursor: pointer; color: var(--text3); opacity: 0; transition: var(--transition); margin-right: 2px; }
+.todo-edit svg { width: 14px; height: 14px; }
 .todo-item:hover .todo-edit { opacity: 1; }
 .todo-edit:hover { color: var(--gold); }
-.todo-del { font-size: 14px; cursor: pointer; color: var(--text3); opacity: 0; transition: var(--transition); }
+.todo-del { display: flex; align-items: center; cursor: pointer; color: var(--text3); opacity: 0; transition: var(--transition); }
+.todo-del svg { width: 14px; height: 14px; }
 .todo-item:hover .todo-del { opacity: 1; }
 .todo-del:hover { color: var(--rose); }
 
@@ -465,21 +473,22 @@ textarea.input { resize: vertical; min-height: 80px; }
   transition: var(--transition);
 }
 .sub-check.checked { background: var(--sage); border-color: var(--sage); }
-.sub-check-inner { color: white; font-size: 9px; }
-.sub-text { flex: 1; font-size: 12px; color: var(--text2); }
+.sub-check-inner { color: white; font-size: 9px; font-weight: 700; }
+.sub-text { flex: 1; font-size: 13px; color: var(--text2); }
 .sub-text.done { text-decoration: line-through; color: var(--text3); }
-.sub-del { font-size: 12px; cursor: pointer; color: var(--text3); opacity: 0; transition: var(--transition); line-height: 1; }
+.sub-del { display: flex; align-items: center; cursor: pointer; color: var(--text3); opacity: 0; transition: var(--transition); }
+.sub-del svg { width: 12px; height: 12px; }
 .todo-subitem:hover .sub-del { opacity: 1; }
 .sub-del:hover { color: var(--rose); }
 .sub-add-row { display: flex; align-items: center; gap: 10px; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
 .sub-add-placeholder { width: 16px; height: 16px; flex-shrink: 0; }
-.sub-add-input { flex: 1; background: transparent; border: none; color: var(--text); font-family: 'Sora', sans-serif; font-size: 12px; outline: none; }
+.sub-add-input { flex: 1; background: transparent; border: none; color: var(--text); font-family: 'Sora', sans-serif; font-size: 16px; outline: none; }
 .sub-add-input::placeholder { color: var(--text3); }
 .sub-add-btn { font-size: 11px; color: var(--text3); cursor: pointer; padding: 3px 8px; border-radius: 6px; transition: var(--transition); flex-shrink: 0; }
 .sub-add-btn:hover { color: var(--gold); background: var(--gold-glow); }
 .sub-edit-input {
   flex: 1; background: transparent; border: none; border-bottom: 1px solid transparent;
-  color: var(--text); font-family: 'Sora', sans-serif; font-size: 13px;
+  color: var(--text); font-family: 'Sora', sans-serif; font-size: 16px;
   outline: none; padding: 2px 4px; width: 100%; transition: var(--transition);
 }
 .sub-edit-input.done { text-decoration: line-through; color: var(--text3); }
@@ -562,8 +571,12 @@ textarea.input { resize: vertical; min-height: 80px; }
 .fin-icon-wrap {
   width: 42px; height: 42px; border-radius: 12px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 20px; flex-shrink: 0;
+  font-family: 'Playfair Display', serif;
+  font-size: 16px; font-weight: 700;
+  flex-shrink: 0;
   background: var(--surface2); border: 1px solid var(--border);
+  color: var(--text2);
+  letter-spacing: -0.02em;
 }
 .fin-info { flex: 1; }
 .fin-name { font-size: 14px; font-weight: 500; }
@@ -608,6 +621,7 @@ textarea.input { resize: vertical; min-height: 80px; }
   font-size: 18px; font-weight: 600; color: var(--text);
   margin-bottom: 12px; display: flex; align-items: center; gap: 9px;
 }
+.wiki-sec-title svg { width: 18px; height: 18px; flex-shrink: 0; opacity: 0.7; }
 .wiki-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); gap: 10px; }
 .wiki-tile {
   background: var(--surface); border: 1px solid var(--border);
@@ -624,6 +638,7 @@ textarea.input { resize: vertical; min-height: 80px; }
   border-radius: var(--radius-sm); padding: 12px 16px; margin-bottom: 18px;
   font-size: 12px; color: var(--text2);
 }
+.wiki-lock svg { width: 16px; height: 16px; flex-shrink: 0; color: var(--gold); }
 
 /* ======== INSPIRE ======== */
 .jar-box {
@@ -636,6 +651,7 @@ textarea.input { resize: vertical; min-height: 80px; }
   font-size: 22px; font-weight: 700; margin-bottom: 14px;
   display: flex; align-items: center; gap: 10px;
 }
+.jar-title svg { width: 22px; height: 22px; color: var(--rose); flex-shrink: 0; }
 .jar-title-sub { font-family: 'Sora', sans-serif; font-size: 13px; font-weight: 400; color: var(--text2); }
 .jar-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
 .jar-chip {
@@ -656,8 +672,12 @@ textarea.input { resize: vertical; min-height: 80px; }
 .inspire-img {
   height: 100px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 46px;
-  background: linear-gradient(135deg, var(--bg3), var(--bg2));
+}
+.inspire-initial {
+  font-family: 'Playfair Display', serif;
+  font-size: 36px; font-weight: 700;
+  color: rgba(255,255,255,0.5);
+  line-height: 1;
 }
 .inspire-body { padding: 14px 16px; }
 .inspire-name { font-weight: 600; font-size: 13px; margin-bottom: 4px; }
@@ -727,19 +747,20 @@ textarea.input { resize: vertical; min-height: 80px; }
 .bn-item {
   flex: 1; display: flex; flex-direction: column;
   align-items: center; justify-content: center;
-  gap: 4px; cursor: pointer; transition: var(--transition);
-  padding-top: 4px;
+  gap: 5px; cursor: pointer; transition: var(--transition);
+  padding-top: 4px; color: var(--text3);
 }
-.bn-icon { font-size: 22px; line-height: 1; transition: var(--transition); }
+.bn-icon { width: 24px; height: 24px; transition: var(--transition); display: flex; align-items: center; justify-content: center; }
+.bn-icon svg { width: 22px; height: 22px; }
 .bn-label { font-size: 10px; font-weight: 600; color: var(--text3); transition: var(--transition); }
 .bn-item.active .bn-label { color: var(--gold); }
-.bn-item.active .bn-icon { transform: scale(1.12); }
+.bn-item.active .bn-icon { color: var(--gold); transform: scale(1.12); }
 .bn-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--rose); margin-top: -2px; }
 
 /* ======== RESPONSIVE ======== */
 @media (max-width: 900px) {
   .sidebar { display: none; }
-  .main { margin-left: 0; padding: 20px 16px calc(var(--bottom-h) + 16px); }
+  .main { margin-left: 0; padding: 20px 16px calc(var(--bottom-h) + 24px); }
   .bottom-nav { display: block; }
   .cal-wrapper { grid-template-columns: 1fr; }
   .grid2 { grid-template-columns: 1fr; }
@@ -748,7 +769,10 @@ textarea.input { resize: vertical; min-height: 80px; }
   .fin-divider { display: none; }
   .inspire-grid { grid-template-columns: 1fr 1fr; }
   .home-greeting { font-size: 26px; }
-  /* Prevent iOS auto-zoom on input focus (triggered when font-size < 16px) */
+  .ph-title { font-size: 26px; }
+  .ph-sub { font-size: 14px; }
+  .todo-text { font-size: 15px; }
+  .checkin-q { font-size: 16px; }
   .input, .sub-add-input, .sub-edit-input { font-size: 16px; }
 }
 @media (max-width: 500px) {
@@ -762,7 +786,8 @@ textarea.input { resize: vertical; min-height: 80px; }
   text-align: center; padding: 52px 20px;
   color: var(--text3);
 }
-.empty-icon { font-size: 44px; margin-bottom: 12px; opacity: 0.5; }
+.empty-icon { margin-bottom: 16px; opacity: 0.4; display: flex; justify-content: center; }
+.empty-icon svg { width: 44px; height: 44px; }
 .empty-text { font-size: 14px; }
 
 /* ======== SCROLLBAR ======== */
@@ -776,7 +801,12 @@ textarea.input { resize: vertical; min-height: 80px; }
 <!-- TOP NAV -->
 <nav class="top-nav">
   <div class="logo" onclick="nav('home')">
-    <div class="logo-icon">🎮</div>
+    <div class="logo-icon">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="9" cy="12" r="6" stroke="rgba(255,255,255,0.85)" stroke-width="1.5"/>
+        <circle cx="15" cy="12" r="6" stroke="rgba(255,255,255,0.65)" stroke-width="1.5"/>
+      </svg>
+    </div>
     Cuppel
   </div>
   <div class="couple-pill">
@@ -795,28 +825,28 @@ textarea.input { resize: vertical; min-height: 80px; }
   <aside class="sidebar">
     <div class="sidebar-label">Overview</div>
     <div class="sb-item active" id="sb-home" onclick="nav('home')">
-      <span class="sb-icon">🏠</span> Home
+      <span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span> Home
     </div>
     <div class="sidebar-label">Together</div>
     <div class="sb-item" id="sb-todo" onclick="nav('todo')">
-      <span class="sb-icon">✅</span> To Do
+      <span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></span> To Do
       <span class="sb-badge" id="sb-badge-todo">3</span>
     </div>
     <div class="sb-item" id="sb-calendar" onclick="nav('calendar')">
-      <span class="sb-icon">📅</span> Calendar
+      <span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span> Calendar
     </div>
     <div class="sb-item" id="sb-finances" onclick="nav('finances')">
-      <span class="sb-icon">💰</span> Finances
+      <span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></span> Finances
     </div>
     <div class="sb-item" id="sb-projects" onclick="nav('projects')">
-      <span class="sb-icon">🗂</span> Projects
+      <span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></span> Projects
     </div>
     <div class="sidebar-label">Our Space</div>
     <div class="sb-item" id="sb-wiki" onclick="nav('wiki')">
-      <span class="sb-icon">🗝</span> UsWiki
+      <span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></span> UsWiki
     </div>
     <div class="sb-item" id="sb-inspire" onclick="nav('inspire')">
-      <span class="sb-icon">✨</span> Inspire
+      <span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z"/></svg></span> Inspire
     </div>
   </aside>
 
@@ -831,15 +861,17 @@ textarea.input { resize: vertical; min-height: 80px; }
           <div class="home-greeting" id="home-greeting">Good evening, Adib ✦</div>
           <div class="home-date" id="home-date-str"></div>
           <div class="streak-row">
-            <div class="streak-chip"><span>🔥</span> 12-day streak</div>
-            <div class="streak-chip"><span>💍</span> Anniversary in 43 days</div>
-            <div class="streak-chip"><span>✅</span> 5 tasks done this week</div>
+            <div class="streak-chip"><span class="streak-pip" style="background:var(--gold)"></span> 12-day streak</div>
+            <div class="streak-chip"><span class="streak-pip" style="background:var(--rose)"></span> Anniversary in 43 days</div>
+            <div class="streak-chip"><span class="streak-pip" style="background:var(--sage)"></span> 5 tasks done this week</div>
           </div>
         </div>
       </div>
 
       <div class="nudge" id="nudge-bar">
-        <div class="nudge-icon">💌</div>
+        <div class="nudge-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22 6 12 13 2 6"/></svg>
+        </div>
         <div class="nudge-body">
           <div class="nudge-title">It's been a while since your last date night</div>
           <div class="nudge-desc">Pick an idea from The Jar and make it happen this weekend.</div>
@@ -868,7 +900,7 @@ textarea.input { resize: vertical; min-height: 80px; }
           <div id="hq-next-date" class="hq-sub"></div>
         </div>
         <div class="hq-card" onclick="nav('inspire')">
-          <div class="hq-label">Date Idea 🎲</div>
+          <div class="hq-label">Date Idea</div>
           <div id="hq-date-idea" style="font-size:14px;font-weight:600;color:var(--gold2);margin-bottom:8px">—</div>
           <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();pickIdea()" style="font-size:11px;padding:5px 13px">Shuffle</button>
         </div>
@@ -878,7 +910,9 @@ textarea.input { resize: vertical; min-height: 80px; }
     <!-- ===== TODO ===== -->
     <section class="page" id="page-todo">
       <div class="ph">
-        <div class="ph-title"><span class="ph-icon">✅</span> To Do</div>
+        <div class="ph-title">
+          <span class="ph-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></span> To Do
+        </div>
         <div class="ph-sub">Your shared list — changes sync in real time</div>
       </div>
 
@@ -899,7 +933,9 @@ textarea.input { resize: vertical; min-height: 80px; }
     <!-- ===== CALENDAR ===== -->
     <section class="page" id="page-calendar">
       <div class="ph">
-        <div class="ph-title"><span class="ph-icon">📅</span> Calendar</div>
+        <div class="ph-title">
+          <span class="ph-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span> Calendar
+        </div>
         <div class="ph-sub">Shared events, birthdays & reminders</div>
       </div>
       <div class="cal-wrapper">
@@ -921,7 +957,9 @@ textarea.input { resize: vertical; min-height: 80px; }
     <!-- ===== FINANCES ===== -->
     <section class="page" id="page-finances">
       <div class="ph">
-        <div class="ph-title"><span class="ph-icon">💰</span> Finances</div>
+        <div class="ph-title">
+          <span class="ph-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></span> Finances
+        </div>
         <div class="ph-sub">Subscriptions, bills & shared expenses</div>
       </div>
       <div class="fin-hero" id="fin-summary"></div>
@@ -937,7 +975,9 @@ textarea.input { resize: vertical; min-height: 80px; }
     <!-- ===== PROJECTS ===== -->
     <section class="page" id="page-projects">
       <div class="ph">
-        <div class="ph-title"><span class="ph-icon">🗂</span> Projects</div>
+        <div class="ph-title">
+          <span class="ph-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></span> Projects
+        </div>
         <div class="ph-sub">Big things you're building together</div>
       </div>
       <div style="display:flex;justify-content:flex-end;margin-bottom:18px">
@@ -949,11 +989,13 @@ textarea.input { resize: vertical; min-height: 80px; }
     <!-- ===== WIKI ===== -->
     <section class="page" id="page-wiki">
       <div class="ph">
-        <div class="ph-title"><span class="ph-icon">🗝</span> UsWiki</div>
+        <div class="ph-title">
+          <span class="ph-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></span> UsWiki
+        </div>
         <div class="ph-sub">Your shared vault of important information</div>
       </div>
       <div class="wiki-lock">
-        <span style="font-size:18px">🔒</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
         Sensitive fields are blurred. Tap any tile to reveal.
       </div>
       <div id="wiki-render"></div>
@@ -962,13 +1004,16 @@ textarea.input { resize: vertical; min-height: 80px; }
     <!-- ===== INSPIRE ===== -->
     <section class="page" id="page-inspire">
       <div class="ph">
-        <div class="ph-title"><span class="ph-icon">✨</span> Inspire</div>
+        <div class="ph-title">
+          <span class="ph-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z"/></svg></span> Inspire
+        </div>
         <div class="ph-sub">Date ideas, check-ins & relationship sparks</div>
       </div>
 
       <div class="jar-box">
         <div class="jar-title">
-          🫙 The Jar
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z"/></svg>
+          The Jar
           <span class="jar-title-sub">— your date idea bank</span>
         </div>
         <div class="jar-chips" id="jar-render"></div>
@@ -978,12 +1023,18 @@ textarea.input { resize: vertical; min-height: 80px; }
         </div>
       </div>
 
-      <div class="card-title" style="margin-bottom:14px">🌡 Relationship Check-In</div>
+      <div class="card-title" style="margin-bottom:14px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Relationship Check-In
+      </div>
       <div id="checkin-render"></div>
 
       <hr class="divider">
 
-      <div class="card-title" style="margin-bottom:14px">💡 Date Night Ideas</div>
+      <div class="card-title" style="margin-bottom:14px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><line x1="9" y1="18" x2="15" y2="18"/><line x1="10" y1="22" x2="14" y2="22"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0018 8 6 6 0 006 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 018.91 14"/></svg>
+        Date Night Ideas
+      </div>
       <div class="inspire-grid" id="inspire-render"></div>
     </section>
 
@@ -994,24 +1045,24 @@ textarea.input { resize: vertical; min-height: 80px; }
 <nav class="bottom-nav">
   <div class="bn-items">
     <div class="bn-item active" id="bn-home" onclick="nav('home')">
-      <div class="bn-icon">🏠</div>
+      <div class="bn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
       <div class="bn-label">Home</div>
     </div>
     <div class="bn-item" id="bn-todo" onclick="nav('todo')">
-      <div class="bn-icon">✅</div>
+      <div class="bn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></div>
       <div class="bn-label">To Do</div>
       <div class="bn-dot" id="bn-dot-todo"></div>
     </div>
     <div class="bn-item" id="bn-calendar" onclick="nav('calendar')">
-      <div class="bn-icon">📅</div>
+      <div class="bn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
       <div class="bn-label">Calendar</div>
     </div>
     <div class="bn-item" id="bn-wiki" onclick="nav('wiki')">
-      <div class="bn-icon">🗝</div>
+      <div class="bn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>
       <div class="bn-label">Wiki</div>
     </div>
     <div class="bn-item" id="bn-inspire" onclick="nav('inspire')">
-      <div class="bn-icon">✨</div>
+      <div class="bn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z"/></svg></div>
       <div class="bn-label">Inspire</div>
     </div>
   </div>
@@ -1081,11 +1132,11 @@ textarea.input { resize: vertical; min-height: 80px; }
       <input class="input" type="date" id="ne-date"></div>
     <div class="fg"><label class="fl">Type</label>
       <select class="input" id="ne-type">
-        <option value="date">Date Night 🌙</option>
-        <option value="birthday">Birthday 🎂</option>
-        <option value="anniversary">Anniversary 💍</option>
-        <option value="appointment">Appointment 🏥</option>
-        <option value="social">Social 🥂</option>
+        <option value="date">Date Night</option>
+        <option value="birthday">Birthday</option>
+        <option value="anniversary">Anniversary</option>
+        <option value="appointment">Appointment</option>
+        <option value="social">Social</option>
       </select></div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('m-event')">Cancel</button>
@@ -1106,8 +1157,6 @@ textarea.input { resize: vertical; min-height: 80px; }
       <select class="input" id="nf-freq">
         <option>Monthly</option><option>Annual</option><option>Weekly</option>
       </select></div>
-    <div class="fg"><label class="fl">Emoji Icon</label>
-      <input class="input" id="nf-icon" value="💳" maxlength="2"></div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('m-fin')">Cancel</button>
       <button class="btn btn-gold" onclick="addFinance()">Add</button>
@@ -1158,8 +1207,22 @@ textarea.input { resize: vertical; min-height: 80px; }
 </div>
 
 <script>
+// ====== SVG ICONS ======
+const IC = {
+  edit: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`,
+  trash: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>`,
+  close: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
+  empty: `<svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>`,
+  emptyBox: `<svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>`,
+  doc: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>`,
+  shield: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
+  home: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`,
+  alert: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
+  clipboard: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>`,
+  check: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
+};
+
 // ====== FIREBASE SETUP ======
-// Paste your Firebase config here once
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyAad9PcDceUeNoptfO59hMdDNid31244Hw",
   authDomain: "cuppel-2beff.firebaseapp.com",
@@ -1177,10 +1240,8 @@ function newId() { return db.ref().push().key; }
 let _detailTodoId = null;
 
 // ====== STATE ======
-// S is a cache; Firebase is the source of truth
 let S = { todos:[], events:[], finances:[], projects:[], jarIdeas:[], filter:'all' };
 
-// Seed data for first-ever launch (when DB is null)
 const SEED = {
   todos: [
     {id:'-seed1', text:'Pick up dry cleaning', who:'adib', cat:'chores', done:false},
@@ -1193,9 +1254,9 @@ const SEED = {
     {id:'-ev3', name:'Dentist — Adib', date:'2026-03-28', type:'appointment'},
   ],
   finances: [
-    {id:'-fin1', name:'Rent', amount:2400, freq:'Monthly', icon:'🏠'},
-    {id:'-fin2', name:'Spotify Duo', amount:17, freq:'Monthly', icon:'🎵'},
-    {id:'-fin3', name:'Netflix', amount:22, freq:'Monthly', icon:'📺'},
+    {id:'-fin1', name:'Rent', amount:2400, freq:'Monthly'},
+    {id:'-fin2', name:'Spotify Duo', amount:17, freq:'Monthly'},
+    {id:'-fin3', name:'Netflix', amount:22, freq:'Monthly'},
   ],
   projects: [
     {id:'-proj1', name:'Italy Trip 2026', desc:'Rome, Florence & the Amalfi Coast', status:'active', progress:35, tasks:12, done:4},
@@ -1212,11 +1273,9 @@ function hideLoading() {
   if (el) { el.style.opacity='0'; el.style.transition='opacity 0.3s'; setTimeout(()=>el.remove(),300); }
 }
 
-// ONE root listener — fires on load + every remote change
 ROOT.on('value', snap => {
   const data = snap.val();
   if (data === null) {
-    // First-ever launch: seed the database
     const toObj = arr => Object.fromEntries(arr.map(x => [x.id, x]));
     ROOT.set({
       todos:     toObj(SEED.todos),
@@ -1225,9 +1284,8 @@ ROOT.on('value', snap => {
       projects:  toObj(SEED.projects),
       jarIdeas:  Object.fromEntries(SEED.jarIdeas.map((t,i) => [`j${i}`, {id:`j${i}`,text:t}])),
     });
-    return; // set() above re-fires this listener with seeded data
+    return;
   }
-  // Rebuild S arrays from Firebase objects, normalizing nested items
   S.todos    = data.todos    ? Object.values(data.todos).map(t=>({...t,items:t.items?Object.values(t.items):[]})) : [];
   S.events   = data.events   ? Object.values(data.events)   : [];
   S.finances = data.finances ? Object.values(data.finances) : [];
@@ -1235,14 +1293,12 @@ ROOT.on('value', snap => {
   S.jarIdeas = data.jarIdeas ? Object.values(data.jarIdeas).map(j=>j.text) : [];
   hideLoading();
   renderHome();
-  // Re-render the currently open page
   const active = document.querySelector('.page.active');
   if (active) {
     const id = active.id.replace('page-','');
     const renders = {todo:renderTodos,calendar:renderCal,finances:renderFin,projects:renderProj,wiki:renderWiki,inspire:renderInspire};
     if (renders[id]) renders[id]();
   }
-  // Re-render detail modal if open
   if (_detailTodoId && document.getElementById('m-todo-detail').classList.contains('open')) {
     renderTodoDetail();
   }
@@ -1265,9 +1321,17 @@ function nav(id) {
 }
 
 // ====== MODAL ======
-function openModal(id){ document.getElementById(id).classList.add('open'); }
-function closeModal(id){ document.getElementById(id).classList.remove('open'); }
-document.querySelectorAll('.modal-bg').forEach(m=>m.addEventListener('click',e=>{ if(e.target===m)m.classList.remove('open'); }));
+function openModal(id){
+  document.getElementById(id).classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal(id){
+  document.getElementById(id).classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.querySelectorAll('.modal-bg').forEach(m=>m.addEventListener('click',e=>{
+  if(e.target===m){ m.classList.remove('open'); document.body.style.overflow = ''; }
+}));
 
 // ====== HOME ======
 function renderHome(){
@@ -1325,14 +1389,12 @@ function renderTodos(){
 
   const pending=items.filter(t=>!t.done), done=items.filter(t=>t.done);
   let html='';
-  if(pending.length){
-    html+=pending.map(todoHTML).join('');
-  }
+  if(pending.length) html+=pending.map(todoHTML).join('');
   if(done.length){
     html+=`<div class="todo-section-label" style="margin-top:${pending.length?'16px':'0'}">Completed (${done.length})</div>`;
     html+=done.map(todoHTML).join('');
   }
-  if(!items.length) html=`<div class="empty"><div class="empty-icon">🎉</div><div class="empty-text">Nothing here — you're all caught up!</div></div>`;
+  if(!items.length) html=`<div class="empty"><div class="empty-icon">${IC.empty}</div><div class="empty-text">Nothing here — you're all caught up!</div></div>`;
   document.getElementById('todo-render').innerHTML=html;
 }
 
@@ -1354,8 +1416,8 @@ function todoHTML(t){
       ${expandBtn}
       <span class="todo-who ${whoClass}">${whoLabel}</span>
       <span class="tag tag-dim" style="font-size:10px">${t.cat}</span>
-      <span class="todo-edit" onclick="editTodo('${t.id}')">✏️</span>
-      <span class="todo-del" onclick="delTodo('${t.id}')">🗑</span>
+      <span class="todo-edit" onclick="editTodo('${t.id}')">${IC.edit}</span>
+      <span class="todo-del" onclick="delTodo('${t.id}')">${IC.trash}</span>
     </div>
   </div>`;
 }
@@ -1364,9 +1426,7 @@ function toggleTodo(id){
   const t=S.todos.find(t=>t.id===id);
   if(t) ROOT.child('todos').child(id).update({done: !t.done});
 }
-function delTodo(id){
-  ROOT.child('todos').child(id).remove();
-}
+function delTodo(id){ ROOT.child('todos').child(id).remove(); }
 function addTodo(){
   const text=document.getElementById('nt-text').value.trim();
   if(!text)return;
@@ -1400,9 +1460,7 @@ function toggleSubitem(todoId,subId){
   const si=t.items.find(i=>i.id===subId);
   if(si) ROOT.child('todos').child(todoId).child('items').child(subId).update({done: !si.done});
 }
-function delSubitem(todoId,subId){
-  ROOT.child('todos').child(todoId).child('items').child(subId).remove();
-}
+function delSubitem(todoId,subId){ ROOT.child('todos').child(todoId).child('items').child(subId).remove(); }
 function saveSubitem(todoId,subId,text){
   text=text.trim();
   if(!text)return;
@@ -1431,7 +1489,7 @@ function renderTodoDetail(){
       <input class="sub-edit-input ${si.done?'done':''}" value="${si.text.replace(/"/g,'&quot;')}"
         onblur="saveSubitem('${t.id}','${si.id}',this.value)"
         onkeydown="if(event.key==='Enter'){saveSubitem('${t.id}','${si.id}',this.value);this.blur()}">
-      <span class="sub-del" style="opacity:1" onclick="delSubitem('${t.id}','${si.id}')">✕</span>
+      <span class="sub-del" style="opacity:1" onclick="delSubitem('${t.id}','${si.id}')">${IC.close}</span>
     </div>`).join('')
   :`<p style="color:var(--text3);font-size:13px;padding:8px 0">No items yet. Add one below.</p>`;
 }
@@ -1488,6 +1546,12 @@ function addEvent(){
 }
 
 // ====== FINANCES ======
+function finInitial(name){
+  const words = name.trim().split(/\s+/);
+  if(words.length >= 2) return (words[0][0]+words[1][0]).toUpperCase();
+  return name.slice(0,2).toUpperCase();
+}
+
 function renderFin(){
   const monthly=finMonthly();
   document.getElementById('fin-summary').innerHTML=`
@@ -1508,13 +1572,13 @@ function renderFin(){
 
   document.getElementById('fin-list').innerHTML=S.finances.map(f=>`
     <div class="fin-row">
-      <div class="fin-icon-wrap">${f.icon}</div>
+      <div class="fin-icon-wrap">${finInitial(f.name)}</div>
       <div class="fin-info">
         <div class="fin-name">${f.name}</div>
         <div class="fin-freq">${f.freq}</div>
       </div>
       <div class="fin-amt">$${f.amount.toLocaleString()}</div>
-      <div class="icon-btn" onclick="delFin('${f.id}')" style="margin-left:10px">🗑</div>
+      <div class="icon-btn" onclick="delFin('${f.id}')" style="margin-left:10px">${IC.trash}</div>
     </div>`).join('');
 }
 
@@ -1524,7 +1588,7 @@ function addFinance(){
   const amount=parseFloat(document.getElementById('nf-amt').value);
   if(!name||!amount)return;
   const id=newId();
-  ROOT.child('finances').child(id).set({id,name,amount,freq:document.getElementById('nf-freq').value,icon:document.getElementById('nf-icon').value||'💳'});
+  ROOT.child('finances').child(id).set({id,name,amount,freq:document.getElementById('nf-freq').value});
   closeModal('m-fin');
   document.getElementById('nf-name').value='';
   document.getElementById('nf-amt').value='';
@@ -1546,12 +1610,12 @@ function renderProj(){
         <div class="proj-progress-bar"><div class="proj-progress-fill" style="width:${p.progress}%"></div></div>
       </div>
       <div class="proj-meta">
-        <span class="proj-meta-item">📋 ${p.tasks} tasks</span>
-        <span class="proj-meta-item">✅ ${p.done} done</span>
+        <span class="proj-meta-item">${IC.clipboard} ${p.tasks} tasks</span>
+        <span class="proj-meta-item">${IC.check} ${p.done} done</span>
         <span class="tag ${p.status==='active'?'tag-sage':'tag-gold'}" style="margin-left:auto">${p.status}</span>
       </div>
     </div>`).join(''):
-    `<div class="empty"><div class="empty-icon">🗂</div><div class="empty-text">No projects yet. Start building something together.</div></div>`;
+    `<div class="empty"><div class="empty-icon">${IC.emptyBox}</div><div class="empty-text">No projects yet. Start building something together.</div></div>`;
 }
 
 function addProject(){
@@ -1566,23 +1630,23 @@ function addProject(){
 
 // ====== WIKI ======
 const wikiData=[
-  {section:'🛂 Documents',items:[
+  {section:'Documents', icon: IC.doc, items:[
     {label:"Adib's Passport #",value:'A12345678',s:true},
     {label:"Ummey's Passport #",value:'B87654321',s:true},
     {label:"Adib's Driver's License",value:'CA-XY12345',s:true},
     {label:"Ummey's Driver's License",value:'CA-AB98765',s:true},
   ]},
-  {section:'🏥 Insurance',items:[
+  {section:'Insurance', icon: IC.shield, items:[
     {label:'Provider',value:'Blue Shield PPO',s:false},
     {label:'Plan ID',value:'BS-9988-XYZ',s:true},
     {label:'Primary Care',value:'Dr. Patel — (415) 555-0192',s:false},
   ]},
-  {section:'🏠 Home',items:[
+  {section:'Home', icon: IC.home, items:[
     {label:'Address',value:'123 Oak Street, SF CA 94117',s:false},
     {label:'Landlord',value:'Maria Chen — (415) 555-0088',s:false},
     {label:'WiFi Password',value:'OakStreet2024!',s:true},
   ]},
-  {section:'🚨 Emergency Contacts',items:[
+  {section:'Emergency Contacts', icon: IC.alert, items:[
     {label:"Adib's Mom",value:'Amina — (703) 555-2201',s:false},
     {label:"Ummey's Dad",value:'James — (571) 555-4415',s:false},
   ]},
@@ -1591,7 +1655,7 @@ const wikiData=[
 function renderWiki(){
   document.getElementById('wiki-render').innerHTML=wikiData.map(sec=>`
     <div class="wiki-sec">
-      <div class="wiki-sec-title">${sec.section}</div>
+      <div class="wiki-sec-title">${sec.icon}${sec.section}</div>
       <div class="wiki-grid">
         ${sec.items.map(item=>`
           <div class="wiki-tile" onclick="toggleWiki(this)">
@@ -1609,12 +1673,12 @@ function toggleWiki(el){
 
 // ====== INSPIRE ======
 const inspireData=[
-  {e:'🌮',n:'Taco Crawl',d:'Hit 3 spots in one night, rate each one'},
-  {e:'🌄',n:'Sunrise Hike',d:'Pick a trail and watch the sun come up'},
-  {e:'🎨',n:'Paint Night In',d:'Supplies from the art store, chaos ensues'},
-  {e:'🎳',n:'Bowling Night',d:'Loser buys dessert — no negotiating'},
-  {e:'🧁',n:'Bake-Off',d:'Each pick a recipe, blind taste-test at the end'},
-  {e:'🚲',n:'Bike Explore',d:'Rent bikes and discover a new neighborhood'},
+  {g:'linear-gradient(135deg,#3D2B1A,#5C3D1E)',n:'Taco Crawl',d:'Hit 3 spots in one night, rate each one'},
+  {g:'linear-gradient(135deg,#1A2B3D,#1E3A5C)',n:'Sunrise Hike',d:'Pick a trail and watch the sun come up'},
+  {g:'linear-gradient(135deg,#2B1A3D,#4A1E6B)',n:'Paint Night In',d:'Supplies from the art store, chaos ensues'},
+  {g:'linear-gradient(135deg,#1A3D2B,#1E5C3A)',n:'Bowling Night',d:'Loser buys dessert — no negotiating'},
+  {g:'linear-gradient(135deg,#3D1A2B,#6B1E4A)',n:'Bake-Off',d:'Each pick a recipe, blind taste-test at the end'},
+  {g:'linear-gradient(135deg,#1A3A3D,#1E5A5C)',n:'Bike Explore',d:'Rent bikes and discover a new neighborhood'},
 ];
 const checkinQs=[
   {q:'How connected have you felt to each other this week?',scale:true},
@@ -1635,7 +1699,9 @@ function renderInspire(){
 
   document.getElementById('inspire-render').innerHTML=inspireData.map(c=>`
     <div class="inspire-tile">
-      <div class="inspire-img">${c.e}</div>
+      <div class="inspire-img" style="background:${c.g}">
+        <span class="inspire-initial">${c.n[0]}</span>
+      </div>
       <div class="inspire-body">
         <div class="inspire-name">${c.n}</div>
         <div class="inspire-desc">${c.d}</div>
