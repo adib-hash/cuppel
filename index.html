@@ -15,6 +15,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 <style>
 :root {
   --bg: #0D0F14;
@@ -929,6 +930,34 @@ textarea.input { resize: vertical; min-height: 80px; }
 .checkin-response-row { font-size: 12px; color: var(--text3); line-height: 1.8; }
 .checkin-response-row strong { color: var(--text2); font-weight: 500; }
 
+/* ======== SCRAPBOOK ======== */
+.scrap-feed { max-width: 580px; }
+.scrap-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); margin-bottom: 20px; overflow: hidden;
+  transition: var(--transition);
+}
+.scrap-card:hover { border-color: var(--border2); }
+.scrap-text-only { border-left: 3px solid var(--gold); }
+.scrap-photo { width: 100%; max-height: 360px; object-fit: cover; display: block; }
+.scrap-body { padding: 16px 20px; }
+.scrap-date {
+  display: flex; align-items: center; gap: 6px;
+  font-family: 'Playfair Display', serif;
+  font-size: 15px; font-weight: 600; color: var(--gold);
+}
+.scrap-note { font-size: 14px; color: var(--text); line-height: 1.7; white-space: pre-wrap; margin-top: 8px; }
+.scrap-upload-area {
+  border: 2px dashed var(--border2); border-radius: var(--radius-sm);
+  padding: 28px 16px; text-align: center; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center;
+  transition: var(--transition); color: var(--text3); font-size: 13px;
+  margin-bottom: 4px;
+}
+.scrap-upload-area:hover { border-color: var(--gold); color: var(--text2); }
+.scrap-upload-icon { margin: 0 auto 10px; width: 32px; height: 32px; opacity: 0.4; }
+.scrap-upload-icon svg { width: 32px; height: 32px; }
+
 /* ======== WIKI EDIT ======== */
 .wiki-sec-hd { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
 .wiki-tile-acts { display:flex; gap:2px; flex-shrink:0; }
@@ -994,6 +1023,9 @@ textarea.input { resize: vertical; min-height: 80px; }
     </div>
     <div class="sb-item" id="sb-inspire" onclick="nav('inspire')">
       <span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z"/></svg></span> Inspire
+    </div>
+    <div class="sb-item" id="sb-scrapbook" onclick="nav('scrapbook')">
+      <span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></span> Scrapbook
     </div>
     <div class="sidebar-label">App</div>
     <div class="sb-item" id="sb-settings" onclick="nav('settings')">
@@ -1169,7 +1201,7 @@ textarea.input { resize: vertical; min-height: 80px; }
         <div class="card-title" style="margin-bottom:16px">App Info</div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
           <span style="font-size:14px;color:var(--text2)">Version</span>
-          <span style="font-size:14px;font-weight:600;color:var(--gold)">v1.6.0</span>
+          <span style="font-size:14px;font-weight:600;color:var(--gold)">v1.7.0</span>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
           <span style="font-size:14px;color:var(--text2)">Couple</span>
@@ -1186,6 +1218,27 @@ textarea.input { resize: vertical; min-height: 80px; }
         <p style="font-size:13px;color:var(--text3);line-height:1.6;margin-bottom:16px">Reset all data back to the original seed data. Useful for testing. This cannot be undone.</p>
         <button class="btn btn-danger btn-sm" onclick="resetToSeed()">Reset to Seed Data</button>
       </div>
+    </section>
+
+    <!-- ===== SCRAPBOOK ===== -->
+    <section class="page" id="page-scrapbook">
+      <div class="ph">
+        <div class="ph-title">
+          <span class="ph-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></span> Scrapbook
+        </div>
+        <div class="ph-sub">Photos and memories, just for you two</div>
+      </div>
+
+      <div class="wiki-lock" style="margin-bottom:20px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;flex-shrink:0;color:var(--gold)"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Photo uploads require Firebase Storage rules to be set. In Firebase Console → Storage → Rules, allow public read/write for the <code style="background:rgba(255,255,255,0.06);padding:1px 5px;border-radius:4px;font-size:11px">scrapbook/</code> path.
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;margin-bottom:22px">
+        <button class="btn btn-gold btn-sm" onclick="openScrapModal()">+ Add Memory</button>
+      </div>
+
+      <div class="scrap-feed" id="scrap-list"></div>
     </section>
 
     <!-- ===== INSPIRE ===== -->
@@ -1246,9 +1299,9 @@ textarea.input { resize: vertical; min-height: 80px; }
       <div class="bn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
       <div class="bn-label">Calendar</div>
     </div>
-    <div class="bn-item" id="bn-wiki" onclick="nav('wiki')">
-      <div class="bn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>
-      <div class="bn-label">Wiki</div>
+    <div class="bn-item" id="bn-scrapbook" onclick="nav('scrapbook')">
+      <div class="bn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
+      <div class="bn-label">Scrapbook</div>
     </div>
     <div class="bn-item" id="bn-inspire" onclick="nav('inspire')">
       <div class="bn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z"/></svg></div>
@@ -1515,6 +1568,43 @@ textarea.input { resize: vertical; min-height: 80px; }
   </div>
 </div>
 
+<!-- SCRAPBOOK MODAL -->
+<div class="modal-bg" id="m-scrap">
+  <div class="modal">
+    <div class="modal-title" id="scrap-modal-title">Add Memory</div>
+    <div class="fg">
+      <label class="fl">Date</label>
+      <input class="input" type="date" id="scrap-date">
+    </div>
+    <div class="fg">
+      <label class="fl">Who</label>
+      <select class="input" id="scrap-who">
+        <option value="both">Both of us</option>
+        <option value="adib">Adib</option>
+        <option value="ummey">Ummey</option>
+      </select>
+    </div>
+    <div class="fg">
+      <label class="fl">Note <span style="color:var(--text3);font-weight:400">(optional)</span></label>
+      <textarea class="input" id="scrap-note" rows="3" placeholder="A little note about this moment…" style="resize:none"></textarea>
+    </div>
+    <div class="fg">
+      <label class="fl">Photo <span style="color:var(--text3);font-weight:400">(optional)</span></label>
+      <div class="scrap-upload-area" id="scrap-upload-area" onclick="document.getElementById('scrap-file').click()">
+        <div class="scrap-upload-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
+        <div style="font-size:13px;color:var(--text3)">Tap to choose a photo</div>
+      </div>
+      <input type="file" id="scrap-file" accept="image/*" style="display:none" onchange="previewScrapPhoto(this)">
+      <img id="scrap-preview" src="" alt="" style="display:none;width:100%;max-height:220px;object-fit:cover;border-radius:var(--radius-sm);margin-top:10px">
+    </div>
+    <div id="scrap-upload-progress" style="display:none;font-size:12px;color:var(--text3);margin-top:4px">Uploading…</div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeScrapModal()">Cancel</button>
+      <button class="btn btn-gold" id="scrap-save-btn" onclick="addScrap()">Save Memory</button>
+    </div>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div class="toast" id="toast">
   <span id="toast-msg">Task deleted</span>
@@ -1556,12 +1646,13 @@ const FIREBASE_CONFIG = {
 firebase.initializeApp(FIREBASE_CONFIG);
 const db = firebase.database();
 const ROOT = db.ref('cuppel');
+const storage = firebase.storage();
 
 function newId() { return db.ref().push().key; }
 let _detailTodoId = null;
 
 // ====== STATE ======
-let S = { todos:[], events:[], finances:[], projects:[], jarIdeas:[], checkins:[], wiki:[], filter:'all' };
+let S = { todos:[], events:[], finances:[], projects:[], jarIdeas:[], checkins:[], wiki:[], scrapbook:[], filter:'all' };
 
 const SEED = {
   todos: [
@@ -1642,12 +1733,13 @@ ROOT.on('value', snap => {
   S.jarIdeas = data.jarIdeas ? Object.values(data.jarIdeas) : [];
   S.checkins = data.checkins ? Object.values(data.checkins) : [];
   S.wiki = data.wiki ? Object.values(data.wiki).sort((a,b)=>(a.order||0)-(b.order||0)).map(s=>({...s,items:s.items?Object.values(s.items):[]})) : [];
+  S.scrapbook = data.scrapbook ? Object.values(data.scrapbook).sort((a,b)=>b.createdAt.localeCompare(a.createdAt)) : [];
   hideLoading();
   renderHome();
   const active = document.querySelector('.page.active');
   if (active) {
     const id = active.id.replace('page-','');
-    const renders = {todo:renderTodos,calendar:renderCal,finances:renderFin,projects:renderProj,wiki:renderWiki,inspire:renderInspire};
+    const renders = {todo:renderTodos,calendar:renderCal,finances:renderFin,projects:renderProj,wiki:renderWiki,inspire:renderInspire,scrapbook:renderScrap};
     if (renders[id]) renders[id]();
   }
   if (_detailTodoId && document.getElementById('m-todo-detail').classList.contains('open')) {
@@ -1670,7 +1762,7 @@ function nav(id) {
   document.querySelectorAll('.bn-item').forEach(i=>i.classList.remove('active'));
   const bn = document.getElementById('bn-'+id);
   if(bn) bn.classList.add('active');
-  const renders = {todo:renderTodos,calendar:renderCal,finances:renderFin,projects:renderProj,wiki:renderWiki,inspire:renderInspire};
+  const renders = {todo:renderTodos,calendar:renderCal,finances:renderFin,projects:renderProj,wiki:renderWiki,inspire:renderInspire,scrapbook:renderScrap};
   if(renders[id]) renders[id]();
 }
 
@@ -2351,6 +2443,129 @@ function markJarTried(id){
 function toggleTriedSection(){
   _triedExpanded=!_triedExpanded;
   renderInspire();
+}
+
+// ====== SCRAPBOOK ======
+let _scrapPhotoFile = null;
+
+function renderScrap() {
+  const feed = document.getElementById('scrap-list');
+  if (!feed) return;
+  if (!S.scrapbook.length) {
+    feed.innerHTML = `<div style="text-align:center;padding:60px 20px">
+      <div style="opacity:0.25;margin-bottom:16px"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
+      <div style="font-size:14px;color:var(--text3)">No memories yet — add your first one.</div>
+    </div>`;
+    return;
+  }
+  const whoLabel = {adib:'Adib', ummey:'Ummey', both:'Both'};
+  feed.innerHTML = S.scrapbook.map(m => {
+    const d = m.date ? new Date(m.date+'T00:00:00').toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'}) : '';
+    return `<div class="scrap-card${m.photoUrl?'':' scrap-text-only'}">
+      ${m.photoUrl ? `<img class="scrap-photo" src="${m.photoUrl}" alt="Memory photo" loading="lazy">` : ''}
+      <div class="scrap-body">
+        <div class="scrap-date">
+          ${d}${m.who && m.who !== 'both' ? ` · <span style="color:${m.who==='adib'?'var(--gold)':'var(--rose)'}">${whoLabel[m.who]||''}</span>` : ''}
+          <span class="icon-btn" style="margin-left:auto;color:var(--rose)" onclick="delScrap('${m.id}')" title="Delete">${IC.trash}</span>
+        </div>
+        ${m.note ? `<div class="scrap-note">${m.note}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openScrapModal() {
+  _scrapPhotoFile = null;
+  document.getElementById('scrap-date').value = new Date().toISOString().slice(0,10);
+  document.getElementById('scrap-who').value = 'both';
+  document.getElementById('scrap-note').value = '';
+  document.getElementById('scrap-file').value = '';
+  document.getElementById('scrap-preview').style.display = 'none';
+  document.getElementById('scrap-upload-area').style.display = 'flex';
+  document.getElementById('scrap-upload-progress').style.display = 'none';
+  document.getElementById('scrap-save-btn').disabled = false;
+  openModal('m-scrap');
+}
+
+function closeScrapModal() {
+  closeModal('m-scrap');
+}
+
+function previewScrapPhoto(input) {
+  if (!input.files || !input.files[0]) return;
+  _scrapPhotoFile = input.files[0];
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = document.getElementById('scrap-preview');
+    img.src = e.target.result;
+    img.style.display = 'block';
+    document.getElementById('scrap-upload-area').style.display = 'none';
+  };
+  reader.readAsDataURL(_scrapPhotoFile);
+}
+
+function compressImage(file) {
+  return new Promise(resolve => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        const MAX = 1200;
+        let w = img.width, h = img.height;
+        if (w > MAX || h > MAX) {
+          if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+          else { w = Math.round(w * MAX / h); h = MAX; }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        canvas.toBlob(blob => resolve(blob), 'image/jpeg', 0.82);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+async function addScrap() {
+  const note = document.getElementById('scrap-note').value.trim();
+  const date = document.getElementById('scrap-date').value;
+  const who  = document.getElementById('scrap-who').value;
+  if (!note && !_scrapPhotoFile) return;
+
+  const btn = document.getElementById('scrap-save-btn');
+  btn.disabled = true;
+  const prog = document.getElementById('scrap-upload-progress');
+
+  const id = newId();
+  const entry = { id, date: date||new Date().toISOString().slice(0,10), who, note: note||'', createdAt: new Date().toISOString() };
+
+  if (_scrapPhotoFile) {
+    prog.style.display = 'block';
+    prog.textContent = 'Uploading…';
+    try {
+      const blob = await compressImage(_scrapPhotoFile);
+      const ref = storage.ref(`scrapbook/${id}.jpg`);
+      await ref.put(blob, { contentType: 'image/jpeg' });
+      entry.photoUrl = await ref.getDownloadURL();
+    } catch(e) {
+      prog.textContent = 'Upload failed — saved without photo.';
+      setTimeout(() => { prog.style.display = 'none'; }, 3000);
+    }
+  }
+
+  ROOT.child('scrapbook').child(id).set(entry);
+  btn.disabled = false;
+  closeScrapModal();
+}
+
+function delScrap(id) {
+  const m = S.scrapbook.find(x => x.id === id);
+  if (m && m.photoUrl) {
+    // Best-effort delete from Storage
+    try { storage.refFromURL(m.photoUrl).delete().catch(()=>{}); } catch(e) {}
+  }
+  ROOT.child('scrapbook').child(id).remove();
 }
 
 // ====== INIT ======
