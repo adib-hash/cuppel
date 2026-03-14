@@ -1,5 +1,14 @@
 # Cuppel Changelog
 
+## v1.2.0 — 2026-03-14
+
+### Mobile UI & Typography Polish
+- **Font size bumps throughout**: `nudge-desc` 12→13px, `nudge-title` 13→14px, `ev-name` 13→14px, `proj-desc` 13→14px, `sub-text` 13→14px, `inspire-name` 13→14px, `inspire-desc` 12→13px, `jar-chip` 12→13px, `checkin-q` 15→16px — all content text now comfortably readable at arm's length
+- **Mobile todo text**: bumped from 15→16px on mobile
+- **Fixed invisible edit/delete buttons on mobile**: `.todo-edit` and `.todo-del` were `opacity: 0`, only revealed on hover — completely untappable on touch. Now always visible on mobile.
+- **Reduced todo row clutter on mobile**: category tag hidden on mobile to give the todo text, expand, who-tag, and action buttons room to breathe; row gap tightened from 13→10px
+- **Replaced `▶` Unicode arrow** in todo expand button with a proper SVG chevron — consistent with no-emoji-adjacent-characters rule
+
 ## v1.1.0 — 2026-03-14
 
 ### Mobile & UI Polish
