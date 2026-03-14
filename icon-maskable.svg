@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
+  <defs>
+    <radialGradient id="g1" cx="25%" cy="25%" r="60%">
+      <stop offset="0%" stop-color="#E8B86D" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#E8B86D" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="g2" cx="75%" cy="75%" r="60%">
+      <stop offset="0%" stop-color="#E88A8A" stop-opacity="0.14"/>
+      <stop offset="100%" stop-color="#E88A8A" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <!-- Full bleed background (maskable — no rounded corners) -->
+  <rect width="192" height="192" fill="#13161E"/>
+  <rect width="192" height="192" fill="url(#g1)"/>
+  <rect width="192" height="192" fill="url(#g2)"/>
+  <!-- Circles scaled inward to stay within the 40% safe zone -->
+  <circle cx="82" cy="96" r="26" fill="none" stroke="#E8B86D" stroke-width="6" opacity="0.92"/>
+  <circle cx="110" cy="96" r="26" fill="none" stroke="#E88A8A" stroke-width="6" opacity="0.80"/>
+</svg>

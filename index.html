@@ -4,6 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
 <title>Cuppel</title>
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0D0F14">
+<!-- iOS home screen -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Cuppel">
+<link rel="apple-touch-icon" href="icon.svg">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -887,12 +895,24 @@ textarea.input { resize: vertical; min-height: 80px; }
 }
 .jar-chip-wrap:hover .jar-chip-del { display: flex; }
 .jar-chip-del svg { width: 9px; height: 9px; }
+.jar-chip-try {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: rgba(125,184,155,0.12); border: 1px solid rgba(125,184,155,0.2);
+  color: var(--sage); display: none; align-items: center; justify-content: center;
+  cursor: pointer; flex-shrink: 0; transition: var(--transition);
+}
+.jar-chip-wrap:hover .jar-chip-try { display: flex; }
+.jar-chip-try:hover { background: rgba(125,184,155,0.25); border-color: rgba(125,184,155,0.4); }
+.jar-chip-try svg { width: 9px; height: 9px; }
+.jar-tried-date { font-size: 10px; color: var(--text3); white-space: nowrap; }
 .jar-tried-header {
   font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em;
   color: var(--text3); margin: 14px 0 8px; cursor: pointer;
   display: flex; align-items: center; gap: 6px;
 }
 .jar-tried-header:hover { color: var(--text2); }
+.jar-tried-chevron { transition: transform 0.2s ease; flex-shrink: 0; }
+.jar-tried-chevron.open { transform: rotate(90deg); }
 
 /* ======== CHECKIN PERSISTENCE ======== */
 .checkin-submitted {
@@ -908,6 +928,14 @@ textarea.input { resize: vertical; min-height: 80px; }
 .checkin-week-label { font-size: 12px; font-weight: 600; color: var(--text2); margin-bottom: 8px; }
 .checkin-response-row { font-size: 12px; color: var(--text3); line-height: 1.8; }
 .checkin-response-row strong { color: var(--text2); font-weight: 500; }
+
+/* ======== WIKI EDIT ======== */
+.wiki-sec-hd { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+.wiki-tile-acts { display:flex; gap:2px; flex-shrink:0; }
+.wiki-act-btn { width:20px; height:20px; display:flex; align-items:center; justify-content:center; border-radius:5px; cursor:pointer; color:var(--text3); transition:var(--transition); flex-shrink:0; }
+.wiki-act-btn:hover { color:var(--gold); background:var(--gold-glow); }
+.wiki-del-btn:hover { color:var(--rose) !important; background:rgba(232,138,138,0.1) !important; }
+.wiki-act-btn svg { width:10px; height:10px; }
 </style>
 </head>
 <body>
@@ -923,12 +951,17 @@ textarea.input { resize: vertical; min-height: 80px; }
     </div>
     Cuppel
   </div>
-  <div class="couple-pill">
-    <div class="couple-avatars">
-      <div class="c-avatar c-avatar-a">A</div>
-      <div class="c-avatar c-avatar-u">U</div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <div class="icon-btn" onclick="nav('settings')" title="Settings" style="width:32px;height:32px;border-radius:9px">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
     </div>
-    <span class="couple-name">Adib & Ummey</span>
+    <div class="couple-pill">
+      <div class="couple-avatars">
+        <div class="c-avatar c-avatar-a">A</div>
+        <div class="c-avatar c-avatar-u">U</div>
+      </div>
+      <span class="couple-name">Adib & Ummey</span>
+    </div>
   </div>
 </nav>
 
@@ -961,6 +994,10 @@ textarea.input { resize: vertical; min-height: 80px; }
     </div>
     <div class="sb-item" id="sb-inspire" onclick="nav('inspire')">
       <span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z"/></svg></span> Inspire
+    </div>
+    <div class="sidebar-label">App</div>
+    <div class="sb-item" id="sb-settings" onclick="nav('settings')">
+      <span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg></span> Settings
     </div>
   </aside>
 
@@ -1084,6 +1121,7 @@ textarea.input { resize: vertical; min-height: 80px; }
         </div>
         <div id="fin-list"></div>
       </div>
+      <div id="fin-breakdown"></div>
     </section>
 
     <!-- ===== PROJECTS ===== -->
@@ -1108,11 +1146,46 @@ textarea.input { resize: vertical; min-height: 80px; }
         </div>
         <div class="ph-sub">Your shared vault of important information</div>
       </div>
-      <div class="wiki-lock">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-        Sensitive fields are blurred. Tap any tile to reveal.
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:10px">
+        <div class="wiki-lock" style="margin-bottom:0;flex:1;min-width:0">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          Sensitive fields are blurred. Tap any tile to reveal.
+        </div>
+        <button class="btn btn-gold btn-sm" onclick="openModal('m-wiki-section')" style="flex-shrink:0">+ New Section</button>
       </div>
       <div id="wiki-render"></div>
+    </section>
+
+    <!-- ===== SETTINGS ===== -->
+    <section class="page" id="page-settings">
+      <div class="ph">
+        <div class="ph-title">
+          <span class="ph-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg></span> Settings
+        </div>
+        <div class="ph-sub">App preferences and information</div>
+      </div>
+
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title" style="margin-bottom:16px">App Info</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
+          <span style="font-size:14px;color:var(--text2)">Version</span>
+          <span style="font-size:14px;font-weight:600;color:var(--gold)">v1.6.0</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
+          <span style="font-size:14px;color:var(--text2)">Couple</span>
+          <span style="font-size:14px;font-weight:600;color:var(--text)">Adib & Ummey</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0">
+          <span style="font-size:14px;color:var(--text2)">Database</span>
+          <span style="font-size:14px;font-weight:500;color:var(--sage-light)">Firebase Realtime DB</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title" style="margin-bottom:12px">Developer Tools</div>
+        <p style="font-size:13px;color:var(--text3);line-height:1.6;margin-bottom:16px">Reset all data back to the original seed data. Useful for testing. This cannot be undone.</p>
+        <button class="btn btn-danger btn-sm" onclick="resetToSeed()">Reset to Seed Data</button>
+      </div>
     </section>
 
     <!-- ===== INSPIRE ===== -->
@@ -1131,7 +1204,8 @@ textarea.input { resize: vertical; min-height: 80px; }
           <span class="jar-title-sub">— your date idea bank</span>
         </div>
         <div class="jar-chips" id="jar-render"></div>
-        <div style="display:flex;gap:10px">
+        <div id="jar-tried-section"></div>
+        <div style="display:flex;gap:10px;margin-top:4px">
           <input class="input" id="jar-input" placeholder="Add a date idea…" style="flex:1" onkeydown="if(event.key==='Enter')addJar()">
           <button class="btn btn-gold btn-sm" onclick="addJar()">Add</button>
         </div>
@@ -1142,6 +1216,7 @@ textarea.input { resize: vertical; min-height: 80px; }
         Relationship Check-In
       </div>
       <div id="checkin-render"></div>
+      <div id="checkin-hist-render"></div>
 
       <hr class="divider">
 
@@ -1401,6 +1476,45 @@ textarea.input { resize: vertical; min-height: 80px; }
   </div>
 </div>
 
+<!-- WIKI ENTRY MODAL -->
+<div class="modal-bg" id="m-wiki-entry">
+  <div class="modal">
+    <div class="modal-title" id="we-modal-title">Add Entry</div>
+    <div class="fg"><label class="fl">Label</label>
+      <input class="input" id="we-label" placeholder="e.g. WiFi Password, Passport #…"></div>
+    <div class="fg"><label class="fl">Value</label>
+      <input class="input" id="we-value" placeholder="Enter the value…"></div>
+    <div class="fg" style="display:flex;align-items:center;gap:12px;padding:6px 0">
+      <input type="checkbox" id="we-sensitive" style="width:18px;height:18px;cursor:pointer;accent-color:var(--gold)">
+      <label for="we-sensitive" style="font-size:13px;color:var(--text2);cursor:pointer">Sensitive — blur by default</label>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('m-wiki-entry')">Cancel</button>
+      <button class="btn btn-gold" onclick="saveWikiEntry()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- WIKI SECTION MODAL -->
+<div class="modal-bg" id="m-wiki-section">
+  <div class="modal">
+    <div class="modal-title">New Section</div>
+    <div class="fg"><label class="fl">Section Name</label>
+      <input class="input" id="ws-name" placeholder="e.g. Vehicles, Travel, Work…"></div>
+    <div class="fg"><label class="fl">Icon</label>
+      <select class="input" id="ws-icon">
+        <option value="doc">Document</option>
+        <option value="shield">Security / Insurance</option>
+        <option value="home">Home</option>
+        <option value="alert">Alert / Emergency</option>
+      </select></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('m-wiki-section')">Cancel</button>
+      <button class="btn btn-gold" onclick="addWikiSection()">Create Section</button>
+    </div>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div class="toast" id="toast">
   <span id="toast-msg">Task deleted</span>
@@ -1447,7 +1561,7 @@ function newId() { return db.ref().push().key; }
 let _detailTodoId = null;
 
 // ====== STATE ======
-let S = { todos:[], events:[], finances:[], projects:[], jarIdeas:[], filter:'all' };
+let S = { todos:[], events:[], finances:[], projects:[], jarIdeas:[], checkins:[], wiki:[], filter:'all' };
 
 const SEED = {
   todos: [
@@ -1470,6 +1584,28 @@ const SEED = {
     {id:'-proj2', name:'Living Room Refresh', desc:'New couch, rug, gallery wall', status:'planning', progress:10, tasks:8, done:1},
   ],
   jarIdeas: ['Sunset picnic at the park','Cook a new cuisine together','Stargazing night drive','Board game marathon','Day trip to a new town'],
+  wiki: [
+    {id:'ws1',section:'Documents',iconType:'doc',order:0,items:[
+      {id:'wi1',label:"Adib's Passport #",value:'A12345678',s:true},
+      {id:'wi2',label:"Ummey's Passport #",value:'B87654321',s:true},
+      {id:'wi3',label:"Adib's Driver's License",value:'CA-XY12345',s:true},
+      {id:'wi4',label:"Ummey's Driver's License",value:'CA-AB98765',s:true},
+    ]},
+    {id:'ws2',section:'Insurance',iconType:'shield',order:1,items:[
+      {id:'wi5',label:'Provider',value:'Blue Shield PPO',s:false},
+      {id:'wi6',label:'Plan ID',value:'BS-9988-XYZ',s:true},
+      {id:'wi7',label:'Primary Care',value:'Dr. Patel — (415) 555-0192',s:false},
+    ]},
+    {id:'ws3',section:'Home',iconType:'home',order:2,items:[
+      {id:'wi8',label:'Address',value:'123 Oak Street, SF CA 94117',s:false},
+      {id:'wi9',label:'Landlord',value:'Maria Chen — (415) 555-0088',s:false},
+      {id:'wi10',label:'WiFi Password',value:'OakStreet2024!',s:true},
+    ]},
+    {id:'ws4',section:'Emergency Contacts',iconType:'alert',order:3,items:[
+      {id:'wi11',label:"Adib's Mom",value:'Amina — (703) 555-2201',s:false},
+      {id:'wi12',label:"Ummey's Dad",value:'James — (571) 555-4415',s:false},
+    ]},
+  ],
 };
 
 let _appLoaded = false;
@@ -1484,20 +1620,28 @@ ROOT.on('value', snap => {
   const data = snap.val();
   if (data === null) {
     const toObj = arr => Object.fromEntries(arr.map(x => [x.id, x]));
+    const wikiObj = {};
+    SEED.wiki.forEach(sec => {
+      const items = {}; sec.items.forEach(it => { items[it.id] = {...it}; });
+      wikiObj[sec.id] = {id:sec.id, section:sec.section, iconType:sec.iconType, order:sec.order, items};
+    });
     ROOT.set({
       todos:     toObj(SEED.todos),
       events:    toObj(SEED.events),
       finances:  toObj(SEED.finances),
       projects:  toObj(SEED.projects),
       jarIdeas:  Object.fromEntries(SEED.jarIdeas.map((t,i) => [`j${i}`, {id:`j${i}`,text:t}])),
+      wiki:      wikiObj,
     });
     return;
   }
   S.todos    = data.todos    ? Object.values(data.todos).map(t=>({...t,items:t.items?Object.values(t.items):[]})) : [];
   S.events   = data.events   ? Object.values(data.events)   : [];
   S.finances = data.finances ? Object.values(data.finances) : [];
-  S.projects = data.projects ? Object.values(data.projects) : [];
-  S.jarIdeas = data.jarIdeas ? Object.values(data.jarIdeas).map(j=>j.text) : [];
+  S.projects = data.projects ? Object.values(data.projects).map(p=>({...p,items:p.items?Object.values(p.items):[]})) : [];
+  S.jarIdeas = data.jarIdeas ? Object.values(data.jarIdeas) : [];
+  S.checkins = data.checkins ? Object.values(data.checkins) : [];
+  S.wiki = data.wiki ? Object.values(data.wiki).sort((a,b)=>(a.order||0)-(b.order||0)).map(s=>({...s,items:s.items?Object.values(s.items):[]})) : [];
   hideLoading();
   renderHome();
   const active = document.querySelector('.page.active');
@@ -1508,6 +1652,9 @@ ROOT.on('value', snap => {
   }
   if (_detailTodoId && document.getElementById('m-todo-detail').classList.contains('open')) {
     renderTodoDetail();
+  }
+  if (_detailProjId && document.getElementById('m-proj-detail').classList.contains('open')) {
+    renderProjDetail();
   }
 });
 
@@ -1571,7 +1718,9 @@ function renderHome(){
 
 function pickIdea(){
   const el = document.getElementById('hq-date-idea');
-  if(el) el.textContent = S.jarIdeas[Math.floor(Math.random()*S.jarIdeas.length)];
+  if(!el) return;
+  const active = S.jarIdeas.filter(j=>!j.tried);
+  el.textContent = active.length ? active[Math.floor(Math.random()*active.length)].text : '—';
 }
 
 function finMonthly(){
@@ -1605,6 +1754,16 @@ function renderTodos(){
   document.getElementById('todo-render').innerHTML=html;
 }
 
+function dueDateTag(due,done){
+  if(!due||done)return'';
+  const now=new Date(); now.setHours(0,0,0,0);
+  const d=new Date(due+'T00:00:00');
+  const diff=Math.round((d-now)/86400000);
+  if(diff<0)return`<span class="todo-due todo-due-over">Overdue</span>`;
+  if(diff<=3)return`<span class="todo-due todo-due-soon">${diff===0?'Today':'In '+diff+'d'}</span>`;
+  return`<span class="todo-due todo-due-ok">${d.toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span>`;
+}
+
 function todoHTML(t){
   const whoClass = t.who==='adib'?'todo-who-a':t.who==='ummey'?'todo-who-u':'todo-who-b';
   const whoLabel = t.who==='adib'?'Adib':t.who==='ummey'?'Ummey':'Both';
@@ -1613,13 +1772,16 @@ function todoHTML(t){
   const expandBtn = items.length
     ? `<span class="todo-expand" onclick="openTodoDetail('${t.id}')"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg><span class="todo-expand-count">${doneCount}/${items.length}</span></span>`
     : `<span class="todo-expand" onclick="openTodoDetail('${t.id}')">+ list</span>`;
+  const now=new Date(); now.setHours(0,0,0,0);
+  const isOverdue=t.due&&!t.done&&new Date(t.due+'T00:00:00')<now;
 
-  return `<div class="todo-item ${t.done?'done':''}" id="ti-${t.id}">
+  return `<div class="todo-item ${t.done?'done':''} ${isOverdue?'overdue':''}" id="ti-${t.id}">
     <div class="todo-main-row">
       <div class="todo-check-outer ${t.done?'checked':''}" onclick="toggleTodo('${t.id}')">
         ${t.done?'<span class="todo-check-inner">✓</span>':''}
       </div>
       <span class="todo-text">${t.text}</span>
+      ${dueDateTag(t.due,t.done)}
       ${expandBtn}
       <span class="todo-who ${whoClass}">${whoLabel}</span>
       <span class="tag tag-dim" style="font-size:10px">${t.cat}</span>
@@ -1638,9 +1800,13 @@ function addTodo(){
   const text=document.getElementById('nt-text').value.trim();
   if(!text)return;
   const id=newId();
-  ROOT.child('todos').child(id).set({id,text,who:document.getElementById('nt-who').value,cat:document.getElementById('nt-cat').value,done:false});
+  const due=document.getElementById('nt-due').value||null;
+  const obj={id,text,who:document.getElementById('nt-who').value,cat:document.getElementById('nt-cat').value,done:false};
+  if(due) obj.due=due;
+  ROOT.child('todos').child(id).set(obj);
   closeModal('m-todo');
   document.getElementById('nt-text').value='';
+  document.getElementById('nt-due').value='';
 }
 
 let _editingTodoId=null;
@@ -1651,12 +1817,15 @@ function editTodo(id){
   document.getElementById('et-text').value=t.text;
   document.getElementById('et-who').value=t.who;
   document.getElementById('et-cat').value=t.cat;
+  document.getElementById('et-due').value=t.due||'';
   openModal('m-todo-edit');
 }
 function saveEditTodo(){
   const text=document.getElementById('et-text').value.trim();
   if(!text)return;
-  ROOT.child('todos').child(_editingTodoId).update({text,who:document.getElementById('et-who').value,cat:document.getElementById('et-cat').value});
+  const due=document.getElementById('et-due').value||null;
+  const upd={text,who:document.getElementById('et-who').value,cat:document.getElementById('et-cat').value,due:due||null};
+  ROOT.child('todos').child(_editingTodoId).update(upd);
   closeModal('m-todo-edit');
 }
 
@@ -1710,18 +1879,22 @@ function addSubitemFromModal(){
 }
 
 // ====== CALENDAR ======
+let calOffset=0;
+function shiftCal(n){ calOffset+=n; renderCal(); }
 function renderCal(){
-  const now=new Date(), y=now.getFullYear(), m=now.getMonth();
-  document.getElementById('cal-title').textContent=now.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  const now=new Date();
+  const base=new Date(now.getFullYear(),now.getMonth()+calOffset,1);
+  const y=base.getFullYear(), m=base.getMonth();
+  document.getElementById('cal-title').textContent=base.toLocaleDateString('en-US',{month:'long',year:'numeric'});
   const days=['Su','Mo','Tu','We','Th','Fr','Sa'];
   document.getElementById('cal-dh').innerHTML=days.map(d=>`<div class="cal-dh">${d}</div>`).join('');
-  const first=new Date(y,m,1).getDay(), daysInM=new Date(y,m+1,0).getDate(), prevDays=new Date(y,m,0).getDate();
+  const first=base.getDay(), daysInM=new Date(y,m+1,0).getDate(), prevDays=new Date(y,m,0).getDate();
   const evDates=S.events.map(e=>e.date);
   let html='';
   for(let i=first-1;i>=0;i--) html+=`<div class="cal-cell other">${prevDays-i}</div>`;
   for(let d=1;d<=daysInM;d++){
     const ds=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const isT=d===now.getDate();
+    const isT=calOffset===0&&d===now.getDate();
     const hasEv=evDates.includes(ds);
     html+=`<div class="cal-cell ${isT?'today':''} ${hasEv?'has-ev':''}">${d}</div>`;
   }
@@ -1759,6 +1932,13 @@ function finInitial(name){
   return name.slice(0,2).toUpperCase();
 }
 
+function finPaidTag(paid){
+  if(!paid)return'';
+  const cls={adib:'fin-tag-paid-a',ummey:'fin-tag-paid-u',split:'fin-tag-paid-s'};
+  const lbl={adib:'Adib pays',ummey:'Ummey pays',split:'Split'};
+  return`<span class="fin-tag ${cls[paid]||'fin-tag-paid-s'}">${lbl[paid]||paid}</span>`;
+}
+
 function renderFin(){
   const monthly=finMonthly();
   document.getElementById('fin-summary').innerHTML=`
@@ -1782,11 +1962,43 @@ function renderFin(){
       <div class="fin-icon-wrap">${finInitial(f.name)}</div>
       <div class="fin-info">
         <div class="fin-name">${f.name}</div>
+        <div class="fin-tag-row">
+          ${f.cat?`<span class="fin-tag fin-tag-cat">${f.cat}</span>`:''}
+          ${finPaidTag(f.paid)}
+        </div>
         <div class="fin-freq">${f.freq}</div>
       </div>
       <div class="fin-amt">$${f.amount.toLocaleString()}</div>
       <div class="icon-btn" onclick="delFin('${f.id}')" style="margin-left:10px">${IC.trash}</div>
     </div>`).join('');
+
+  // Category breakdown
+  const catItems=S.finances.filter(f=>f.cat);
+  if(catItems.length){
+    const bycat={};
+    catItems.forEach(f=>{
+      const m=f.freq==='Monthly'?f.amount:f.freq==='Annual'?Math.round(f.amount/12):Math.round(f.amount*4.33);
+      bycat[f.cat]=(bycat[f.cat]||0)+m;
+    });
+    const total=Object.values(bycat).reduce((s,v)=>s+v,0)||1;
+    const sorted=Object.entries(bycat).sort((a,b)=>b[1]-a[1]);
+    document.getElementById('fin-breakdown').innerHTML=`
+      <div class="card" style="margin-top:16px">
+        <div class="card-title" style="margin-bottom:16px">By Category</div>
+        ${sorted.map(([cat,amt])=>`
+          <div style="margin-bottom:12px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+              <span style="font-size:13px;color:var(--text2);text-transform:capitalize">${cat}</span>
+              <span style="font-size:13px;font-weight:600;color:var(--text)">$${amt}/mo</span>
+            </div>
+            <div style="height:4px;background:var(--bg3);border-radius:2px;overflow:hidden">
+              <div style="height:100%;border-radius:2px;background:linear-gradient(90deg,var(--gold),var(--rose));width:${Math.round(amt/total*100)}%"></div>
+            </div>
+          </div>`).join('')}
+      </div>`;
+  } else {
+    document.getElementById('fin-breakdown').innerHTML='';
+  }
 }
 
 function delFin(id){ ROOT.child('finances').child(id).remove(); }
@@ -1795,7 +2007,7 @@ function addFinance(){
   const amount=parseFloat(document.getElementById('nf-amt').value);
   if(!name||!amount)return;
   const id=newId();
-  ROOT.child('finances').child(id).set({id,name,amount,freq:document.getElementById('nf-freq').value});
+  ROOT.child('finances').child(id).set({id,name,amount,freq:document.getElementById('nf-freq').value,cat:document.getElementById('nf-cat').value,paid:document.getElementById('nf-paid').value});
   closeModal('m-fin');
   document.getElementById('nf-name').value='';
   document.getElementById('nf-amt').value='';
@@ -1803,8 +2015,12 @@ function addFinance(){
 
 // ====== PROJECTS ======
 function renderProj(){
-  document.getElementById('proj-list').innerHTML=S.projects.length?S.projects.map(p=>`
-    <div class="proj-card">
+  document.getElementById('proj-list').innerHTML=S.projects.length?S.projects.map(p=>{
+    const items=p.items||[];
+    const doneCount=items.filter(i=>i.done).length;
+    const pct=items.length?Math.round(doneCount/items.length*100):(p.progress||0);
+    const taskCount=items.length||(p.tasks||0);
+    return`<div class="proj-card" onclick="openProjDetail('${p.id}')">
       <div class="proj-top">
         <div class="proj-name">${p.name}</div>
         <div class="proj-status-dot ${p.status}"></div>
@@ -1812,16 +2028,16 @@ function renderProj(){
       <div class="proj-desc">${p.desc}</div>
       <div class="proj-progress">
         <div class="proj-progress-label">
-          <span>Progress</span><span>${p.progress}%</span>
+          <span>Progress</span><span>${pct}%</span>
         </div>
-        <div class="proj-progress-bar"><div class="proj-progress-fill" style="width:${p.progress}%"></div></div>
+        <div class="proj-progress-bar"><div class="proj-progress-fill" style="width:${pct}%"></div></div>
       </div>
       <div class="proj-meta">
-        <span class="proj-meta-item">${IC.clipboard} ${p.tasks} tasks</span>
-        <span class="proj-meta-item">${IC.check} ${p.done} done</span>
+        <span class="proj-meta-item">${IC.clipboard} ${taskCount} tasks</span>
+        <span class="proj-meta-item">${IC.check} ${doneCount} done</span>
         <span class="tag ${p.status==='active'?'tag-sage':'tag-gold'}" style="margin-left:auto">${p.status}</span>
       </div>
-    </div>`).join(''):
+    </div>`;}).join(''):
     `<div class="empty"><div class="empty-icon">${IC.emptyBox}</div><div class="empty-text">No projects yet. Start building something together.</div></div>`;
 }
 
@@ -1835,40 +2051,118 @@ function addProject(){
   document.getElementById('np-desc').value='';
 }
 
+// ====== PROJECT DETAIL ======
+let _detailProjId=null;
+function openProjDetail(id){
+  _detailProjId=id;
+  renderProjDetail();
+  openModal('m-proj-detail');
+}
+function renderProjDetail(){
+  const p=S.projects.find(p=>p.id===_detailProjId);
+  if(!p)return;
+  document.getElementById('pd-title').textContent=p.name;
+  document.getElementById('pd-meta').innerHTML=`<span class="tag ${p.status==='active'?'tag-sage':'tag-gold'}">${p.status}</span><span style="font-size:13px;color:var(--text3);margin-left:10px">${p.desc}</span>`;
+  const items=p.items||[];
+  const doneCount=items.filter(i=>i.done).length;
+  const pct=items.length?Math.round(doneCount/items.length*100):(p.progress||0);
+  document.getElementById('pd-progress').innerHTML=`
+    <div class="proj-progress-label"><span>Progress</span><span>${pct}%</span></div>
+    <div class="proj-progress-bar"><div class="proj-progress-fill" style="width:${pct}%"></div></div>`;
+  document.getElementById('pd-checklist').innerHTML=items.length?items.map(item=>`
+    <div class="proj-ci">
+      <div class="proj-ci-check ${item.done?'checked':''}" onclick="toggleProjItem('${item.id}')">
+        ${item.done?'<span style="color:white;font-size:9px;font-weight:700">✓</span>':''}
+      </div>
+      <span class="proj-ci-text ${item.done?'done':''}">${item.text}</span>
+      <span class="proj-ci-del" onclick="event.stopPropagation();delProjItem('${item.id}')">${IC.close}</span>
+    </div>`).join(''):
+    `<p style="color:var(--text3);font-size:13px;padding:8px 0">No tasks yet. Add one below.</p>`;
+}
+function toggleProjItem(itemId){
+  const p=S.projects.find(p=>p.id===_detailProjId);
+  if(!p)return;
+  const item=(p.items||[]).find(i=>i.id===itemId);
+  if(item) ROOT.child('projects').child(_detailProjId).child('items').child(itemId).update({done:!item.done});
+}
+function delProjItem(itemId){
+  ROOT.child('projects').child(_detailProjId).child('items').child(itemId).remove();
+}
+function addProjItem(){
+  const input=document.getElementById('pd-new-item');
+  const text=input.value.trim();
+  if(!text||!_detailProjId)return;
+  const id=newId();
+  ROOT.child('projects').child(_detailProjId).child('items').child(id).set({id,text,done:false});
+  input.value='';
+}
+let _editingProjId=null;
+function openEditProj(){
+  const p=S.projects.find(p=>p.id===_detailProjId);
+  if(!p)return;
+  _editingProjId=_detailProjId;
+  document.getElementById('ep-name').value=p.name;
+  document.getElementById('ep-desc').value=p.desc;
+  document.getElementById('ep-status').value=p.status;
+  openModal('m-proj-edit');
+}
+function saveEditProj(){
+  const name=document.getElementById('ep-name').value.trim();
+  if(!name)return;
+  ROOT.child('projects').child(_editingProjId).update({name,desc:document.getElementById('ep-desc').value,status:document.getElementById('ep-status').value});
+  closeModal('m-proj-edit');
+}
+function delProj(){
+  if(!_detailProjId)return;
+  ROOT.child('projects').child(_detailProjId).remove();
+  closeModal('m-proj-detail');
+}
+function resetToSeed(){
+  if(!confirm('Reset all data to defaults? This cannot be undone.'))return;
+  const toObj=arr=>Object.fromEntries(arr.map(x=>[x.id,x]));
+  const wikiObj={};
+  SEED.wiki.forEach(sec=>{
+    const items={}; sec.items.forEach(it=>{ items[it.id]={...it}; });
+    wikiObj[sec.id]={id:sec.id,section:sec.section,iconType:sec.iconType,order:sec.order,items};
+  });
+  ROOT.set({
+    todos:toObj(SEED.todos),events:toObj(SEED.events),
+    finances:toObj(SEED.finances),projects:toObj(SEED.projects),
+    jarIdeas:Object.fromEntries(SEED.jarIdeas.map((t,i)=>[`j${i}`,{id:`j${i}`,text:t}])),
+    wiki:wikiObj,
+  });
+}
+
 // ====== WIKI ======
-const wikiData=[
-  {section:'Documents', icon: IC.doc, items:[
-    {label:"Adib's Passport #",value:'A12345678',s:true},
-    {label:"Ummey's Passport #",value:'B87654321',s:true},
-    {label:"Adib's Driver's License",value:'CA-XY12345',s:true},
-    {label:"Ummey's Driver's License",value:'CA-AB98765',s:true},
-  ]},
-  {section:'Insurance', icon: IC.shield, items:[
-    {label:'Provider',value:'Blue Shield PPO',s:false},
-    {label:'Plan ID',value:'BS-9988-XYZ',s:true},
-    {label:'Primary Care',value:'Dr. Patel — (415) 555-0192',s:false},
-  ]},
-  {section:'Home', icon: IC.home, items:[
-    {label:'Address',value:'123 Oak Street, SF CA 94117',s:false},
-    {label:'Landlord',value:'Maria Chen — (415) 555-0088',s:false},
-    {label:'WiFi Password',value:'OakStreet2024!',s:true},
-  ]},
-  {section:'Emergency Contacts', icon: IC.alert, items:[
-    {label:"Adib's Mom",value:'Amina — (703) 555-2201',s:false},
-    {label:"Ummey's Dad",value:'James — (571) 555-4415',s:false},
-  ]},
-];
+function wikiIcon(t){ return IC[t]||IC.doc; }
 
 function renderWiki(){
-  document.getElementById('wiki-render').innerHTML=wikiData.map(sec=>`
+  if(!S.wiki.length){
+    document.getElementById('wiki-render').innerHTML=`<div class="empty"><div class="empty-icon">${IC.doc}</div><div class="empty-text">No sections yet. Use "+ New Section" to get started.</div></div>`;
+    return;
+  }
+  document.getElementById('wiki-render').innerHTML=S.wiki.map(sec=>`
     <div class="wiki-sec">
-      <div class="wiki-sec-title">${sec.icon}${sec.section}</div>
+      <div class="wiki-sec-hd">
+        <div class="wiki-sec-title">${wikiIcon(sec.iconType)}${sec.section}</div>
+        <div style="display:flex;gap:6px;align-items:center;flex-shrink:0">
+          <button class="btn btn-ghost btn-sm" style="padding:5px 12px;font-size:11px" onclick="openAddWikiEntry('${sec.id}')">+ Add</button>
+          <div class="icon-btn" style="width:28px;height:28px;border-radius:8px" onclick="delWikiSection('${sec.id}')">${IC.trash}</div>
+        </div>
+      </div>
       <div class="wiki-grid">
-        ${sec.items.map(item=>`
+        ${sec.items.length ? sec.items.map(item=>`
           <div class="wiki-tile" onclick="toggleWiki(this)">
-            <div class="wiki-tile-label">${item.label}</div>
-            <div class="wiki-tile-val ${item.s?'blurred':''}" data-s="${item.s}">${item.value}</div>
-          </div>`).join('')}
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:4px">
+              <div class="wiki-tile-label" style="flex:1">${item.label}</div>
+              <div class="wiki-tile-acts" onclick="event.stopPropagation()">
+                <div class="wiki-act-btn" onclick="openEditWikiEntry('${sec.id}','${item.id}')">${IC.edit}</div>
+                <div class="wiki-act-btn wiki-del-btn" onclick="delWikiEntry('${sec.id}','${item.id}')">${IC.trash}</div>
+              </div>
+            </div>
+            <div class="wiki-tile-val ${item.s?'blurred':''}" data-s="${item.s?'true':'false'}">${item.value}</div>
+          </div>`).join('') :
+          `<div style="color:var(--text3);font-size:13px;padding:8px 0">No entries yet. Use "+ Add" to add one.</div>`}
       </div>
     </div>`).join('');
 }
@@ -1876,6 +2170,63 @@ function renderWiki(){
 function toggleWiki(el){
   const v=el.querySelector('.wiki-tile-val');
   if(v&&v.dataset.s==='true') v.classList.toggle('blurred');
+}
+
+// ====== WIKI CRUD ======
+let _editingWikiSecId=null, _editingWikiItemId=null;
+
+function openAddWikiEntry(secId){
+  _editingWikiSecId=secId;
+  _editingWikiItemId=null;
+  document.getElementById('we-modal-title').textContent='Add Entry';
+  document.getElementById('we-label').value='';
+  document.getElementById('we-value').value='';
+  document.getElementById('we-sensitive').checked=false;
+  openModal('m-wiki-entry');
+}
+function openEditWikiEntry(secId,itemId){
+  const sec=S.wiki.find(s=>s.id===secId);
+  if(!sec)return;
+  const item=sec.items.find(i=>i.id===itemId);
+  if(!item)return;
+  _editingWikiSecId=secId;
+  _editingWikiItemId=itemId;
+  document.getElementById('we-modal-title').textContent='Edit Entry';
+  document.getElementById('we-label').value=item.label;
+  document.getElementById('we-value').value=item.value;
+  document.getElementById('we-sensitive').checked=item.s||false;
+  openModal('m-wiki-entry');
+}
+function saveWikiEntry(){
+  const label=document.getElementById('we-label').value.trim();
+  const value=document.getElementById('we-value').value.trim();
+  if(!label||!value)return;
+  const s=document.getElementById('we-sensitive').checked;
+  if(_editingWikiItemId){
+    ROOT.child('wiki').child(_editingWikiSecId).child('items').child(_editingWikiItemId).update({label,value,s});
+  } else {
+    const id=newId();
+    ROOT.child('wiki').child(_editingWikiSecId).child('items').child(id).set({id,label,value,s});
+  }
+  closeModal('m-wiki-entry');
+}
+function delWikiEntry(secId,itemId){
+  ROOT.child('wiki').child(secId).child('items').child(itemId).remove();
+}
+function delWikiSection(secId){
+  const sec=S.wiki.find(s=>s.id===secId);
+  if(!sec)return;
+  if((sec.items||[]).length>0&&!confirm(`Delete "${sec.section}" and all its entries?`))return;
+  ROOT.child('wiki').child(secId).remove();
+}
+function addWikiSection(){
+  const name=document.getElementById('ws-name').value.trim();
+  if(!name)return;
+  const id=newId();
+  const maxOrder=S.wiki.reduce((m,s)=>Math.max(m,s.order||0),0);
+  ROOT.child('wiki').child(id).set({id,section:name,iconType:document.getElementById('ws-icon').value,order:maxOrder+1,items:{}});
+  closeModal('m-wiki-section');
+  document.getElementById('ws-name').value='';
 }
 
 // ====== INSPIRE ======
@@ -1893,16 +2244,63 @@ const checkinQs=[
   {q:'What\'s one thing your partner did this week that you loved?',scale:false},
 ];
 
+let _triedExpanded=false;
 function renderInspire(){
-  document.getElementById('jar-render').innerHTML=S.jarIdeas.map(idea=>`
-    <div class="jar-chip">${idea}</div>`).join('');
+  const active=S.jarIdeas.filter(j=>!j.tried);
+  const tried=S.jarIdeas.filter(j=>j.tried);
+  const checkSvg=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+  const xSvg=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
+  const chevSvg=`<svg class="jar-tried-chevron${_triedExpanded?' open':''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:10px;height:10px"><polyline points="9 18 15 12 9 6"/></svg>`;
 
-  document.getElementById('checkin-render').innerHTML=checkinQs.map((q,i)=>`
-    <div class="checkin-card">
-      <div class="checkin-q">${q.q}</div>
-      ${q.scale?`<div class="scale-row">${[1,2,3,4,5,6,7,8,9,10].map(n=>`<div class="scale-n" onclick="selScale(this,${i})">${n}</div>`).join('')}</div>`
-      :`<input class="input" placeholder="Your answer…" style="margin-top:4px">`}
-    </div>`).join('');
+  document.getElementById('jar-render').innerHTML=active.length ? active.map(idea=>`
+    <div class="jar-chip-wrap">
+      <div class="jar-chip">${idea.text}</div>
+      <div class="jar-chip-try" title="We tried it!" onclick="markJarTried('${idea.id}')">${checkSvg}</div>
+      <div class="jar-chip-del" title="Remove" onclick="delJar('${idea.id}')">${xSvg}</div>
+    </div>`).join('') :
+    `<span style="font-size:13px;color:var(--text3)">No ideas yet — add one below.</span>`;
+
+  document.getElementById('jar-tried-section').innerHTML=tried.length ? `
+    <div class="jar-tried-header" onclick="toggleTriedSection()">
+      ${chevSvg} Tried it (${tried.length})
+    </div>
+    <div class="jar-chips" id="jar-tried-list" style="display:${_triedExpanded?'flex':'none'}">
+      ${tried.map(idea=>{
+        const d=idea.triedDate?new Date(idea.triedDate+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}):'';
+        return`<div class="jar-chip-wrap">
+          <div class="jar-chip done">${idea.text}</div>
+          ${d?`<span class="jar-tried-date">${d}</span>`:''}
+          <div class="jar-chip-del" title="Remove" onclick="delJar('${idea.id}')">${xSvg}</div>
+        </div>`;}).join('')}
+    </div>` : '';
+
+  const wk=getWeekKey();
+  const thisWeek=S.checkins.find(c=>c.week===wk);
+  if(thisWeek){
+    document.getElementById('checkin-render').innerHTML=`<div class="checkin-submitted">${IC.check} Check-in submitted for this week.</div>`;
+  } else {
+    document.getElementById('checkin-render').innerHTML=checkinQs.map((q,i)=>`
+      <div class="checkin-card">
+        <div class="checkin-q">${q.q}</div>
+        ${q.scale?`<div class="scale-row">${[1,2,3,4,5,6,7,8,9,10].map(n=>`<div class="scale-n" onclick="selScale(this,${i})">${n}</div>`).join('')}</div>`
+        :`<input class="input checkin-text-input" data-qi="${i}" placeholder="Your answer…" style="margin-top:4px">`}
+      </div>`).join('')+
+      `<div style="display:flex;justify-content:flex-end;margin-top:14px">
+        <button class="btn btn-gold btn-sm" onclick="submitCheckin()">Submit Check-In</button>
+      </div>`;
+  }
+  const recent=[...S.checkins].sort((a,b)=>b.week.localeCompare(a.week)).slice(0,4);
+  document.getElementById('checkin-hist-render').innerHTML=recent.length?`
+    <div class="checkin-history">
+      <div class="checkin-history-title">Recent Check-ins</div>
+      ${recent.map(c=>`
+        <div class="checkin-week">
+          <div class="checkin-week-label">Week of ${new Date(c.week+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</div>
+          <div class="checkin-response-row">
+            ${Object.entries(c.answers||{}).map(([qi,ans])=>`<div><strong>Q${parseInt(qi)+1}:</strong> ${ans}</div>`).join('')}
+          </div>
+        </div>`).join('')}
+    </div>`:'';
 
   document.getElementById('inspire-render').innerHTML=inspireData.map(c=>`
     <div class="inspire-tile">
@@ -1916,22 +2314,54 @@ function renderInspire(){
     </div>`).join('');
 }
 
+let _checkinAnswers={};
 function selScale(el,qi){
   const row=el.closest('.scale-row');
   row.querySelectorAll('.scale-n').forEach(n=>n.classList.remove('sel'));
   el.classList.add('sel');
+  _checkinAnswers[qi]=parseInt(el.textContent);
+}
+function getWeekKey(){
+  const d=new Date(); d.setDate(d.getDate()-d.getDay());
+  return d.toISOString().slice(0,10);
+}
+function submitCheckin(){
+  document.querySelectorAll('.checkin-text-input').forEach(el=>{
+    if(el.value.trim()) _checkinAnswers[el.dataset.qi]=el.value.trim();
+  });
+  if(!Object.keys(_checkinAnswers).length)return;
+  const wk=getWeekKey();
+  ROOT.child('checkins').child(wk).set({week:wk,submittedAt:new Date().toISOString(),answers:{..._checkinAnswers}});
+  _checkinAnswers={};
 }
 
 function addJar(){
   const val=document.getElementById('jar-input').value.trim();
   if(!val)return;
   const id=newId();
-  ROOT.child('jarIdeas').child(id).set({id,text:val});
+  ROOT.child('jarIdeas').child(id).set({id,text:val,tried:false});
   document.getElementById('jar-input').value='';
+}
+function delJar(id){
+  ROOT.child('jarIdeas').child(id).remove();
+}
+function markJarTried(id){
+  ROOT.child('jarIdeas').child(id).update({tried:true,triedDate:new Date().toISOString().slice(0,10)});
+}
+function toggleTriedSection(){
+  _triedExpanded=!_triedExpanded;
+  renderInspire();
 }
 
 // ====== INIT ======
 // Initial render is handled by the ROOT.on('value') listener above
+
+// ====== PWA SERVICE WORKER ======
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}
 </script>
 </body>
 </html>
