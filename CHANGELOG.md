@@ -1,17 +1,5 @@
 # Cuppel Changelog
 
-## v1.7.0 — 2026-03-14
-
-### Sprint 5 — Scrapbook
-
-- **Scrapbook module**: New page accessible from the bottom nav (replaced Wiki, which stays in the sidebar). A chronological feed of shared memories — photos and notes.
-- **Add Memory modal**: Date picker, who dropdown (Both / Adib / Ummey), free-text note, and optional photo upload. All fields optional except at least one of note or photo.
-- **Photo upload**: Canvas-based compression before upload (max 1200px, 82% JPEG quality). Photos stored in Firebase Storage under `scrapbook/`. Upload progress shown inline; graceful fallback (saves text-only) if upload fails.
-- **Delete memory**: Trash icon on each card removes from Firebase Realtime DB and best-effort deletes the photo from Storage.
-- **Bottom nav**: Wiki swapped for Scrapbook. Wiki remains accessible via the sidebar drawer.
-- **Firebase Storage**: `firebase-storage-compat.js` SDK added. Storage requires manual rules setup in Firebase Console (Storage → Rules: allow read, write for `scrapbook/`). A notice banner on the Scrapbook page reminds about this.
-- **State + real-time sync**: `S.scrapbook` parsed from Firebase on every `ROOT.on('value')` update, sorted newest-first.
-
 ## v1.6.0 — 2026-03-14
 
 ### Sprint 4 — PWA / Add to Home Screen
