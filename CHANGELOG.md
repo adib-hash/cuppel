@@ -1,5 +1,43 @@
 # Cuppel Changelog
 
+## v1.7.0 — 2026-03-15
+
+### Sprint 5 — Calendar: Interactive & Fully Functional
+
+**Clickable date cells — Day Sheet:**
+- Tapping any day in the monthly grid opens a Day Sheet modal showing all events for that day, sorted by time
+- Each event row in the Day Sheet is clickable — opens the Event Detail modal
+- "+ Add" button in the Day Sheet pre-fills the Add Event modal with that date and closes the sheet
+- Empty state shown when a day has no events
+
+**Event Detail modal:**
+- Clicking any event (from the upcoming list or a Day Sheet) opens a full detail view
+- Shows event name, type badge, date, time (formatted as 12-hour, if set), relative label ("Today", "Tomorrow", "In Xd", "Xd ago"), and notes block
+- **Edit** button pre-fills the edit modal from the detail view
+- **Delete** button removes the event from Firebase and closes the modal immediately
+
+**Edit + Delete now fully wired:**
+- `saveEditEvent()` implemented — updates name, date, type, time, and notes via Firebase `.update()`
+- `delEvent()` implemented — removes event, closes modal, no confirmation dialog (consistent with app pattern)
+
+**Time + Notes fields on events:**
+- Optional `time` field (input type=time, stored as "HH:MM", displayed as "2:30 pm")
+- Optional `notes` field (textarea)
+- Added to both Add Event and Edit Event modals
+- Displayed in Event Detail modal and in the upcoming list (time shown inline, e.g. "Mar 28, 2026 · 10:30 am")
+
+**Upcoming list improvements:**
+- Every item is now clickable — opens Event Detail
+- Relative label chip next to each event: "Today" (gold), "Tomorrow"/"In Xd" (sage), "Xd ago" (dimmed)
+- Past events shown at 45% opacity
+
+**"Today" button:**
+- Ghost button in the calendar header, visible only when viewing a non-current month
+- Tapping it resets the view to the current month
+
+**Seed data updated:**
+- Dentist appointment now includes `time: "10:30"` and `notes` so the new fields are visible on first use
+
 ## v1.6.0 — 2026-03-14
 
 ### Sprint 4 — PWA / Add to Home Screen

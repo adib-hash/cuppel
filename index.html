@@ -937,6 +937,35 @@ textarea.input { resize: vertical; min-height: 80px; }
 .wiki-act-btn:hover { color:var(--gold); background:var(--gold-glow); }
 .wiki-del-btn:hover { color:var(--rose) !important; background:rgba(232,138,138,0.1) !important; }
 .wiki-act-btn svg { width:10px; height:10px; }
+
+/* ======== CALENDAR V2 ======== */
+#cal-today-btn.hidden { display: none; }
+.ev-item.ev-past { opacity: 0.45; }
+.ev-rel {
+  font-size: 10px; font-weight: 700; padding: 2px 8px;
+  border-radius: 999px; white-space: nowrap; flex-shrink: 0;
+}
+.ev-rel-today { background: rgba(232,184,109,0.15); color: var(--gold2); border: 1px solid rgba(232,184,109,0.25); }
+.ev-rel-future { background: rgba(125,184,155,0.12); color: var(--sage-light); border: 1px solid rgba(125,184,155,0.2); }
+.ev-rel-past { background: var(--surface); color: var(--text3); border: 1px solid var(--border); }
+/* Day Sheet */
+.ds-ev-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 0; border-bottom: 1px solid var(--border);
+  cursor: pointer; transition: var(--transition);
+}
+.ds-ev-row:last-child { border-bottom: none; }
+.ds-ev-row:hover { opacity: 0.8; }
+.ds-ev-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.ds-ev-info { flex: 1; }
+.ds-ev-name { font-size: 14px; font-weight: 500; }
+.ds-ev-time { font-size: 11px; color: var(--text3); margin-top: 2px; }
+/* Event Detail Notes */
+.ed-notes-label { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text3); margin-bottom: 8px; }
+.ed-notes-block {
+  background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm);
+  padding: 12px 14px; font-size: 13px; color: var(--text2); line-height: 1.6;
+}
 </style>
 </head>
 <body>
@@ -1093,6 +1122,7 @@ textarea.input { resize: vertical; min-height: 80px; }
               <div class="cal-nav-btn" onclick="shiftCal(-1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></div>
               <div class="cal-month" id="cal-title">March 2026</div>
               <div class="cal-nav-btn" onclick="shiftCal(1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+              <button class="btn btn-ghost btn-sm hidden" id="cal-today-btn" onclick="goToday()" style="padding:5px 13px;font-size:11px">Today</button>
             </div>
             <button class="btn btn-gold btn-sm" onclick="openModal('m-event')">+ Add</button>
           </div>
@@ -1170,7 +1200,7 @@ textarea.input { resize: vertical; min-height: 80px; }
         <div class="card-title" style="margin-bottom:16px">App Info</div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
           <span style="font-size:14px;color:var(--text2)">Version</span>
-          <span style="font-size:14px;font-weight:600;color:var(--gold)">v1.6.0</span>
+          <span style="font-size:14px;font-weight:600;color:var(--gold)">v1.7.0</span>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
           <span style="font-size:14px;color:var(--text2)">Couple</span>
@@ -1333,6 +1363,10 @@ textarea.input { resize: vertical; min-height: 80px; }
         <option value="appointment">Appointment</option>
         <option value="social">Social</option>
       </select></div>
+    <div class="fg"><label class="fl">Time (optional)</label>
+      <input class="input" type="time" id="ne-time"></div>
+    <div class="fg"><label class="fl">Notes (optional)</label>
+      <textarea class="input" id="ne-notes" placeholder="Any details…" style="min-height:70px"></textarea></div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('m-event')">Cancel</button>
       <button class="btn btn-gold" onclick="addEvent()">Add Event</button>
@@ -1428,6 +1462,10 @@ textarea.input { resize: vertical; min-height: 80px; }
         <option value="appointment">Appointment</option>
         <option value="social">Social</option>
       </select></div>
+    <div class="fg"><label class="fl">Time (optional)</label>
+      <input class="input" type="time" id="ee-time"></div>
+    <div class="fg"><label class="fl">Notes (optional)</label>
+      <textarea class="input" id="ee-notes" placeholder="Any details…" style="min-height:70px"></textarea></div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('m-event-edit')">Cancel</button>
       <button class="btn btn-gold" onclick="saveEditEvent()">Save Changes</button>
@@ -1518,6 +1556,35 @@ textarea.input { resize: vertical; min-height: 80px; }
 </div>
 
 
+<!-- DAY SHEET MODAL -->
+<div class="modal-bg" id="m-day">
+  <div class="modal">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <div class="modal-title" id="day-title" style="margin-bottom:0;font-size:19px"></div>
+      <button class="btn btn-gold btn-sm" onclick="openAddEventForDay()" style="flex-shrink:0">+ Add</button>
+    </div>
+    <div id="day-ev-list"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('m-day')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- EVENT DETAIL MODAL -->
+<div class="modal-bg" id="m-event-detail">
+  <div class="modal">
+    <div class="modal-title" id="ed-name" style="margin-bottom:12px"></div>
+    <div id="ed-meta" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px"></div>
+    <div id="ed-notes-wrap"></div>
+    <div class="modal-footer">
+      <button class="btn btn-danger btn-sm" onclick="delEvent()">Delete</button>
+      <div style="flex:1"></div>
+      <button class="btn btn-ghost" onclick="closeModal('m-event-detail')">Close</button>
+      <button class="btn btn-gold btn-sm" onclick="openEditEventModal()">Edit</button>
+    </div>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div class="toast" id="toast">
   <span id="toast-msg">Task deleted</span>
@@ -1562,6 +1629,8 @@ const ROOT = db.ref('cuppel');
 
 function newId() { return db.ref().push().key; }
 let _detailTodoId = null;
+let _detailEventId = null;
+let _daySheetDate = null;
 
 // ====== STATE ======
 let S = { todos:[], events:[], finances:[], projects:[], jarIdeas:[], checkins:[], wiki:[], filter:'all' };
@@ -1575,7 +1644,7 @@ const SEED = {
   events: [
     {id:'-ev1', name:"Ummey's Birthday", date:'2026-05-14', type:'birthday'},
     {id:'-ev2', name:'Anniversary', date:'2026-07-22', type:'anniversary'},
-    {id:'-ev3', name:'Dentist — Adib', date:'2026-03-28', type:'appointment'},
+    {id:'-ev3', name:'Dentist — Adib', date:'2026-03-28', type:'appointment', time:'10:30', notes:'Routine cleaning. Dr. Kim, Suite 204.'},
   ],
   finances: [
     {id:'-fin1', name:'Rent', amount:2400, freq:'Monthly'},
@@ -1658,6 +1727,12 @@ ROOT.on('value', snap => {
   }
   if (_detailProjId && document.getElementById('m-proj-detail').classList.contains('open')) {
     renderProjDetail();
+  }
+  if (_detailEventId && document.getElementById('m-event-detail').classList.contains('open')) {
+    renderEventDetail();
+  }
+  if (_daySheetDate && document.getElementById('m-day').classList.contains('open')) {
+    renderDaySheet();
   }
 });
 
@@ -1889,6 +1964,10 @@ function renderCal(){
   const base=new Date(now.getFullYear(),now.getMonth()+calOffset,1);
   const y=base.getFullYear(), m=base.getMonth();
   document.getElementById('cal-title').textContent=base.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+
+  const todayBtn=document.getElementById('cal-today-btn');
+  if(todayBtn) todayBtn.classList.toggle('hidden', calOffset===0);
+
   const days=['Su','Mo','Tu','We','Th','Fr','Sa'];
   document.getElementById('cal-dh').innerHTML=days.map(d=>`<div class="cal-dh">${d}</div>`).join('');
   const first=base.getDay(), daysInM=new Date(y,m+1,0).getDate(), prevDays=new Date(y,m,0).getDate();
@@ -1899,23 +1978,139 @@ function renderCal(){
     const ds=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const isT=calOffset===0&&d===now.getDate();
     const hasEv=evDates.includes(ds);
-    html+=`<div class="cal-cell ${isT?'today':''} ${hasEv?'has-ev':''}">${d}</div>`;
+    html+=`<div class="cal-cell ${isT?'today':''} ${hasEv?'has-ev':''}" onclick="openDay('${ds}')">${d}</div>`;
   }
   document.getElementById('cal-grid').innerHTML=html;
 
+  const today=new Date(); today.setHours(0,0,0,0);
   const sorted=[...S.events].sort((a,b)=>new Date(a.date)-new Date(b.date));
-  document.getElementById('ev-list').innerHTML=sorted.map(e=>{
+  const listHtml=sorted.map(e=>{
     const d=new Date(e.date+'T00:00:00');
     const col=evColors[e.type]||'#999';
-    return `<div class="ev-item">
+    const rel=evRelLabel(e.date);
+    const isPast=d<today;
+    const timeStr=e.time?` · ${fmt12(e.time)}`:'';
+    return `<div class="ev-item ${isPast?'ev-past':''}" onclick="openEventDetail('${e.id}')">
       <div class="ev-dot" style="background:${col};box-shadow:0 0 6px ${col}66"></div>
       <div class="ev-info">
         <div class="ev-name">${e.name}</div>
-        <div class="ev-date">${d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</div>
+        <div class="ev-date">${d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}${timeStr}</div>
       </div>
-      <span class="ev-type-badge" style="background:${col}22;color:${col};border:1px solid ${col}44">${e.type}</span>
+      <span class="ev-rel ${rel.cls}">${rel.text}</span>
     </div>`;
   }).join('');
+  document.getElementById('ev-list').innerHTML=listHtml||`<div class="empty"><div class="empty-icon">${IC.emptyBox}</div><div class="empty-text">No events yet.</div></div>`;
+}
+
+function fmt12(t){
+  if(!t)return'';
+  const [h,min]=t.split(':').map(Number);
+  const ampm=h<12?'am':'pm';
+  const hr=h%12||12;
+  return `${hr}:${String(min).padStart(2,'0')} ${ampm}`;
+}
+
+function evRelLabel(dateStr){
+  const today=new Date(); today.setHours(0,0,0,0);
+  const d=new Date(dateStr+'T00:00:00');
+  const diff=Math.round((d-today)/86400000);
+  if(diff===0) return {text:'Today',cls:'ev-rel-today'};
+  if(diff===1) return {text:'Tomorrow',cls:'ev-rel-future'};
+  if(diff>1&&diff<=30) return {text:`In ${diff}d`,cls:'ev-rel-future'};
+  if(diff>30) return {text:d.toLocaleDateString('en-US',{month:'short',year:'numeric'}),cls:'ev-rel-future'};
+  if(diff===-1) return {text:'Yesterday',cls:'ev-rel-past'};
+  return {text:`${Math.abs(diff)}d ago`,cls:'ev-rel-past'};
+}
+
+function goToday(){ calOffset=0; renderCal(); }
+
+function openDay(dateStr){
+  _daySheetDate=dateStr;
+  const d=new Date(dateStr+'T00:00:00');
+  document.getElementById('day-title').textContent=d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+  renderDaySheet();
+  openModal('m-day');
+}
+
+function renderDaySheet(){
+  const evs=S.events.filter(e=>e.date===_daySheetDate).sort((a,b)=>(a.time||'').localeCompare(b.time||''));
+  document.getElementById('day-ev-list').innerHTML=evs.length ? evs.map(e=>{
+    const c=evColors[e.type]||'#999';
+    return `<div class="ds-ev-row" onclick="openEventDetailFromDay('${e.id}')">
+      <div class="ds-ev-dot" style="background:${c};box-shadow:0 0 6px ${c}66"></div>
+      <div class="ds-ev-info">
+        <div class="ds-ev-name">${e.name}</div>
+        <div class="ds-ev-time">${e.time?fmt12(e.time):e.type}</div>
+      </div>
+      <span class="ev-type-badge" style="background:${c}22;color:${c};border:1px solid ${c}44">${e.type}</span>
+    </div>`;}).join('')
+  : `<div style="text-align:center;padding:28px 0;color:var(--text3);font-size:14px">No events on this day.</div>`;
+}
+
+function openAddEventForDay(){
+  closeModal('m-day');
+  document.getElementById('ne-date').value=_daySheetDate||'';
+  openModal('m-event');
+}
+
+function openEventDetail(id){
+  _detailEventId=id;
+  renderEventDetail();
+  openModal('m-event-detail');
+}
+
+function openEventDetailFromDay(id){
+  closeModal('m-day');
+  openEventDetail(id);
+}
+
+function renderEventDetail(){
+  const e=S.events.find(e=>e.id===_detailEventId);
+  if(!e)return;
+  document.getElementById('ed-name').textContent=e.name;
+  const col=evColors[e.type]||'#999';
+  const d=new Date(e.date+'T00:00:00');
+  const dateStr=d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+  const rel=evRelLabel(e.date);
+  document.getElementById('ed-meta').innerHTML=`
+    <span class="ev-type-badge" style="background:${col}22;color:${col};border:1px solid ${col}44">${e.type}</span>
+    <span class="tag tag-dim">${dateStr}</span>
+    ${e.time?`<span class="tag tag-dim">${fmt12(e.time)}</span>`:''}
+    <span class="ev-rel ${rel.cls}">${rel.text}</span>`;
+  document.getElementById('ed-notes-wrap').innerHTML=e.notes?`
+    <div style="margin-bottom:16px">
+      <div class="ed-notes-label">Notes</div>
+      <div class="ed-notes-block">${e.notes}</div>
+    </div>`:'';
+}
+
+function openEditEventModal(){
+  const e=S.events.find(e=>e.id===_detailEventId);
+  if(!e)return;
+  document.getElementById('ee-name').value=e.name;
+  document.getElementById('ee-date').value=e.date;
+  document.getElementById('ee-type').value=e.type;
+  document.getElementById('ee-time').value=e.time||'';
+  document.getElementById('ee-notes').value=e.notes||'';
+  closeModal('m-event-detail');
+  openModal('m-event-edit');
+}
+
+function saveEditEvent(){
+  const name=document.getElementById('ee-name').value.trim();
+  const date=document.getElementById('ee-date').value;
+  if(!name||!date||!_detailEventId)return;
+  const time=document.getElementById('ee-time').value||null;
+  const notes=document.getElementById('ee-notes').value.trim()||null;
+  ROOT.child('events').child(_detailEventId).update({name,date,type:document.getElementById('ee-type').value,time:time||null,notes:notes||null});
+  closeModal('m-event-edit');
+}
+
+function delEvent(){
+  if(!_detailEventId)return;
+  ROOT.child('events').child(_detailEventId).remove();
+  closeModal('m-event-detail');
+  _detailEventId=null;
 }
 
 function addEvent(){
@@ -1923,9 +2118,16 @@ function addEvent(){
   const date=document.getElementById('ne-date').value;
   if(!name||!date)return;
   const id=newId();
-  ROOT.child('events').child(id).set({id,name,date,type:document.getElementById('ne-type').value});
+  const time=document.getElementById('ne-time').value||null;
+  const notes=document.getElementById('ne-notes').value.trim()||null;
+  const obj={id,name,date,type:document.getElementById('ne-type').value};
+  if(time) obj.time=time;
+  if(notes) obj.notes=notes;
+  ROOT.child('events').child(id).set(obj);
   closeModal('m-event');
   document.getElementById('ne-name').value='';
+  document.getElementById('ne-time').value='';
+  document.getElementById('ne-notes').value='';
 }
 
 // ====== FINANCES ======
