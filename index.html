@@ -520,7 +520,7 @@ textarea.input { resize: vertical; min-height: 80px; }
 .cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 3px; }
 .cal-cell {
   aspect-ratio: 1; display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
+  align-items: center; justify-content: center; gap: 2px;
   border-radius: 10px; cursor: pointer;
   font-size: 13px; font-weight: 400;
   transition: var(--transition); position: relative;
@@ -532,12 +532,7 @@ textarea.input { resize: vertical; min-height: 80px; }
   color: #1a0f00; font-weight: 700;
 }
 .cal-cell.other { color: var(--text3); }
-.cal-cell.has-ev::after {
-  content: ''; width: 4px; height: 4px;
-  background: var(--rose); border-radius: 50%;
-  position: absolute; bottom: 4px;
-}
-.cal-cell.today.has-ev::after { background: rgba(0,0,0,0.4); }
+/* cal-cell dots rendered dynamically via JS */
 
 .ev-item {
   display: flex; align-items: center; gap: 12px;
@@ -638,8 +633,8 @@ textarea.input { resize: vertical; min-height: 80px; }
 }
 .wiki-tile:hover { background: var(--surface2); border-color: var(--border2); }
 .wiki-tile-label { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); margin-bottom: 5px; }
-.wiki-tile-val { font-size: 13px; font-weight: 500; color: var(--text); }
-.wiki-tile-val.blurred { filter: blur(6px); user-select: none; }
+.wiki-tile-val { font-size: 13px; font-weight: 500; color: var(--text); user-select: text; -webkit-user-select: text; }
+.wiki-tile-val.blurred { filter: blur(6px); user-select: none; -webkit-user-select: none; }
 .wiki-lock {
   display: flex; align-items: center; gap: 12px;
   background: rgba(232,184,109,0.06); border: 1px solid rgba(232,184,109,0.14);
@@ -968,6 +963,34 @@ textarea.input { resize: vertical; min-height: 80px; }
   background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm);
   padding: 12px 14px; font-size: 13px; color: var(--text2); line-height: 1.6;
 }
+
+/* ======== MORE PAGE ======== */
+.more-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.more-tile {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 24px 20px;
+  cursor: pointer; transition: var(--transition);
+  display: flex; flex-direction: column; gap: 10px;
+}
+.more-tile:hover { background: var(--surface2); border-color: var(--border2); transform: translateY(-2px); }
+.more-tile-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.more-tile-icon svg { width: 20px; height: 20px; }
+.more-tile-name { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 600; color: var(--text); }
+.more-tile-desc { font-size: 12px; color: var(--text3); line-height: 1.5; }
+
+/* ======== PROJ CI EDIT INPUT ======== */
+.proj-ci-edit-input {
+  flex: 1; background: transparent; border: none; border-bottom: 1px solid transparent;
+  color: var(--text2); font-family: 'Sora', sans-serif; font-size: 13px;
+  outline: none; padding: 2px 4px; width: 100%; transition: var(--transition);
+}
+.proj-ci-edit-input.done { text-decoration: line-through; color: var(--text3); }
+.proj-ci-edit-input:focus { border-bottom-color: var(--gold); color: var(--text); }
+
+/* ======== CAL DOTS ======== */
+.cal-dots { display: flex; gap: 2px; justify-content: center; margin-top: 2px; }
+.cal-dot { width: 4px; height: 4px; border-radius: 50%; flex-shrink: 0; }
+.cal-cell.today .cal-dot { opacity: 0.5; }
 </style>
 </head>
 <body>
@@ -1203,7 +1226,7 @@ textarea.input { resize: vertical; min-height: 80px; }
         <div class="card-title" style="margin-bottom:16px">App Info</div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
           <span style="font-size:14px;color:var(--text2)">Version</span>
-          <span style="font-size:14px;font-weight:600;color:var(--gold)">v1.8.0</span>
+          <span style="font-size:14px;font-weight:600;color:var(--gold)">v1.9.0</span>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
           <span style="font-size:14px;color:var(--text2)">Couple</span>
@@ -1262,6 +1285,17 @@ textarea.input { resize: vertical; min-height: 80px; }
       <div class="inspire-grid" id="inspire-render"></div>
     </section>
 
+    <!-- ===== MORE ===== -->
+    <section class="page" id="page-more">
+      <div class="ph">
+        <div class="ph-title">
+          <span class="ph-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></span> More
+        </div>
+        <div class="ph-sub">All pages in one place</div>
+      </div>
+      <div id="more-render"></div>
+    </section>
+
   </main>
 </div>
 
@@ -1285,9 +1319,9 @@ textarea.input { resize: vertical; min-height: 80px; }
       <div class="bn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></div>
       <div class="bn-label">Projects</div>
     </div>
-    <div class="bn-item" id="bn-inspire" onclick="nav('inspire')">
-      <div class="bn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z"/></svg></div>
-      <div class="bn-label">Inspire</div>
+    <div class="bn-item" id="bn-more" onclick="nav('more')">
+      <div class="bn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></div>
+      <div class="bn-label">More</div>
     </div>
   </div>
 </nav>
@@ -1758,7 +1792,7 @@ ROOT.on('value', snap => {
   const active = document.querySelector('.page.active');
   if (active) {
     const id = active.id.replace('page-','');
-    const renders = {todo:renderTodos,calendar:renderCal,finances:renderFin,projects:renderProj,wiki:renderWiki,inspire:renderInspire};
+    const renders = {todo:renderTodos,calendar:renderCal,finances:renderFin,projects:renderProj,wiki:renderWiki,inspire:renderInspire,more:renderMore};
     if (renders[id]) renders[id]();
   }
   if (_detailTodoId && document.getElementById('m-todo-detail').classList.contains('open')) {
@@ -1787,7 +1821,7 @@ function nav(id) {
   document.querySelectorAll('.bn-item').forEach(i=>i.classList.remove('active'));
   const bn = document.getElementById('bn-'+id);
   if(bn) bn.classList.add('active');
-  const renders = {todo:renderTodos,calendar:renderCal,finances:renderFin,projects:renderProj,wiki:renderWiki,inspire:renderInspire,scrapbook:renderScrap};
+  const renders = {todo:renderTodos,calendar:renderCal,finances:renderFin,projects:renderProj,wiki:renderWiki,inspire:renderInspire,more:renderMore};
   if(renders[id]) renders[id]();
 }
 
@@ -1850,6 +1884,25 @@ function renderHome(){
   if(adibS>0) chips+=`<div class="streak-chip"><div class="streak-pip" style="background:var(--gold)"></div>Adib · ${adibS} day${adibS!==1?'s':''} streak</div>`;
   if(ummeyS>0) chips+=`<div class="streak-chip"><div class="streak-pip" style="background:var(--rose)"></div>Ummey · ${ummeyS} day${ummeyS!==1?'s':''} streak</div>`;
   document.getElementById('streak-row').innerHTML=chips;
+
+  // Nudge smart re-trigger: if dismissed, check if it's been 14+ days since last date-type event
+  const dismissedAt = localStorage.getItem('cuppel_nudge_dismissed_at');
+  if(dismissedAt){
+    const dateEvents = S.events.filter(e=>e.type==='date');
+    const nudgeBar = document.getElementById('nudge-bar');
+    if(dateEvents.length){
+      const latest = dateEvents.reduce((a,b)=>a.date>b.date?a:b);
+      const daysSince = Math.round((Date.now()-new Date(latest.date+'T00:00:00').getTime())/86400000);
+      if(daysSince>=14){
+        localStorage.removeItem('cuppel_nudge_dismissed_at');
+        if(nudgeBar) nudgeBar.style.display='';
+      }
+    } else {
+      // No date events at all — show nudge
+      localStorage.removeItem('cuppel_nudge_dismissed_at');
+      if(nudgeBar) nudgeBar.style.display='';
+    }
+  }
 
   pickIdea();
 }
@@ -1947,6 +2000,7 @@ function toggleTodo(id){
   if(t){
     const upd={done:!t.done};
     if(!t.done) upd.doneAt=new Date().toISOString().slice(0,10);
+    else upd.doneAt=null;
     ROOT.child('todos').child(id).update(upd);
   }
 }
@@ -2048,14 +2102,20 @@ function renderCal(){
   const days=['Su','Mo','Tu','We','Th','Fr','Sa'];
   document.getElementById('cal-dh').innerHTML=days.map(d=>`<div class="cal-dh">${d}</div>`).join('');
   const first=base.getDay(), daysInM=new Date(y,m+1,0).getDate(), prevDays=new Date(y,m,0).getDate();
-  const evDates=S.events.map(e=>e.date);
+  // Build a map of date -> array of event type colors
+  const evByDate={};
+  S.events.forEach(e=>{
+    if(!evByDate[e.date]) evByDate[e.date]=[];
+    evByDate[e.date].push(evColors[e.type]||'#999');
+  });
   let html='';
   for(let i=first-1;i>=0;i--) html+=`<div class="cal-cell other">${prevDays-i}</div>`;
   for(let d=1;d<=daysInM;d++){
     const ds=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const isT=calOffset===0&&d===now.getDate();
-    const hasEv=evDates.includes(ds);
-    html+=`<div class="cal-cell ${isT?'today':''} ${hasEv?'has-ev':''}" onclick="openDay('${ds}')">${d}</div>`;
+    const dayColors=evByDate[ds]||[];
+    const dotsHtml=dayColors.length?`<div class="cal-dots">${dayColors.slice(0,3).map(c=>`<span class="cal-dot" style="background:${c}"></span>`).join('')}</div>`:'';
+    html+=`<div class="cal-cell ${isT?'today':''}" onclick="openDay('${ds}')">${d}${dotsHtml}</div>`;
   }
   document.getElementById('cal-grid').innerHTML=html;
 
@@ -2239,6 +2299,11 @@ function renderFin(){
       <div class="fin-stat-lbl">Active Items</div>
     </div>`;
 
+  if(!S.finances.length){
+    document.getElementById('fin-list').innerHTML=`<div class="empty"><div class="empty-icon"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div><div class="empty-text">No expenses yet. Tap + Add to track your first one.</div></div>`;
+    document.getElementById('fin-breakdown').innerHTML='';
+    return;
+  }
   document.getElementById('fin-list').innerHTML=S.finances.map(f=>`
     <div class="fin-row">
       <div class="fin-icon-wrap">${finInitial(f.name)}</div>
@@ -2359,7 +2424,9 @@ function renderProjDetail(){
       <div class="proj-ci-check ${item.done?'checked':''}" onclick="toggleProjItem('${item.id}')">
         ${item.done?'<span style="color:white;font-size:9px;font-weight:700">✓</span>':''}
       </div>
-      <span class="proj-ci-text ${item.done?'done':''}">${item.text}</span>
+      <input class="proj-ci-edit-input ${item.done?'done':''}" value="${item.text.replace(/"/g,'&quot;')}"
+        onblur="saveProjItem('${item.id}',this.value)"
+        onkeydown="if(event.key==='Enter'){saveProjItem('${item.id}',this.value);this.blur()}">
       <span class="proj-ci-del" onclick="event.stopPropagation();delProjItem('${item.id}')">${IC.close}</span>
     </div>`).join(''):
     `<p style="color:var(--text3);font-size:13px;padding:8px 0">No tasks yet. Add one below.</p>`;
@@ -2380,6 +2447,11 @@ function addProjItem(){
   const id=newId();
   ROOT.child('projects').child(_detailProjId).child('items').child(id).set({id,text,done:false});
   input.value='';
+}
+function saveProjItem(itemId,text){
+  text=text.trim();
+  if(!text||!_detailProjId)return;
+  ROOT.child('projects').child(_detailProjId).child('items').child(itemId).update({text});
 }
 let _editingProjId=null;
 function openEditProj(){
@@ -2663,6 +2735,7 @@ let _lastCleared=null;
 function clearCompleted(){
   const done=S.todos.filter(t=>t.done);
   if(!done.length) return;
+  if(!confirm(`Clear all ${done.length} completed task${done.length!==1?'s':''}?`)) return;
   _lastCleared=done.map(t=>({...t}));
   done.forEach(t=>ROOT.child('todos').child(t.id).remove());
   _completedExpanded=false;
@@ -2672,10 +2745,53 @@ function clearCompleted(){
   });
 }
 
+// ====== MORE PAGE ======
+function renderMore(){
+  const tiles=[
+    {
+      page:'inspire',
+      icon:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z"/></svg>`,
+      iconBg:'rgba(232,138,138,0.15)',iconColor:'var(--rose)',
+      name:'Inspire',
+      desc:'Date ideas, check-ins & relationship sparks'
+    },
+    {
+      page:'wiki',
+      icon:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>`,
+      iconBg:'rgba(232,184,109,0.15)',iconColor:'var(--gold)',
+      name:'UsWiki',
+      desc:'Your shared vault of important information'
+    },
+    {
+      page:'finances',
+      icon:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>`,
+      iconBg:'rgba(125,184,155,0.15)',iconColor:'var(--sage)',
+      name:'Finances',
+      desc:'Subscriptions, bills & shared expenses'
+    },
+    {
+      page:'settings',
+      icon:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>`,
+      iconBg:'rgba(106,180,212,0.15)',iconColor:'#6AB4D4',
+      name:'Settings',
+      desc:'App preferences and information'
+    },
+  ];
+  document.getElementById('more-render').innerHTML=`
+    <div class="more-grid">
+      ${tiles.map(t=>`
+        <div class="more-tile" onclick="nav('${t.page}')">
+          <div class="more-tile-icon" style="background:${t.iconBg};color:${t.iconColor}">${t.icon}</div>
+          <div class="more-tile-name">${t.name}</div>
+          <div class="more-tile-desc">${t.desc}</div>
+        </div>`).join('')}
+    </div>`;
+}
+
 // ====== NUDGE ======
 function dismissNudge(){
   document.getElementById('nudge-bar').style.display='none';
-  localStorage.setItem('cuppel_nudge_dismissed','1');
+  localStorage.setItem('cuppel_nudge_dismissed_at', new Date().toISOString());
 }
 
 // ====== FINANCE EDIT ======
@@ -2713,9 +2829,9 @@ function toggleWikiAll(){
 // ====== INIT ======
 // Initial render is handled by the ROOT.on('value') listener above
 
-// Restore nudge dismissed state
+// Restore nudge dismissed state immediately on load
 (function(){
-  if(localStorage.getItem('cuppel_nudge_dismissed')){
+  if(localStorage.getItem('cuppel_nudge_dismissed_at')){
     const el=document.getElementById('nudge-bar');
     if(el) el.style.display='none';
   }

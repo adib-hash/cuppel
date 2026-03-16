@@ -1,5 +1,24 @@
 # Cuppel Changelog
 
+## v1.9.0 — 2026-03-16
+
+### Bug Fixes, Features & Navigation
+
+**Critical bug fixes:**
+- **Dead `renderScrap` reference removed**: `scrapbook:renderScrap` was left in the `renders` object in `nav()` after the Scrapbook feature was reverted. Removed to prevent runtime errors.
+- **`doneAt` now cleared on un-check**: When a todo is unchecked, `doneAt` is explicitly set to `null` in the Firebase update inside `toggleTodo()`. Previously it was never cleared, causing incorrect streak calculations.
+- **Wiki tile values are now copyable**: Added `user-select: text; -webkit-user-select: text` to `.wiki-tile-val` so revealed values can be selected and copied on iOS and all other platforms. The `.blurred` state still uses `user-select: none`.
+
+**Navigation fix:**
+- **"More" tab replaces "Inspire" in bottom nav**: Wiki, Finances, Inspire, and Settings were unreachable on mobile without a sidebar. The 5th bottom nav slot is now a "More" tab that navigates to a new `page-more` page. The More page shows a 2-column grid of large navigation tiles (Inspire, UsWiki, Finances, Settings) with icon, name, and description. Sidebar on desktop still navigates directly to Inspire.
+
+**New features:**
+- **Project checklist items now editable**: In `renderProjDetail()`, the static `<span class="proj-ci-text">` is replaced with an `<input class="proj-ci-edit-input">`. Edits save on blur or Enter via the new `saveProjItem(itemId, text)` function which calls Firebase `.update({text})`.
+- **Calendar grid shows colored event dots**: The single CSS `::after` dot is replaced with dynamically rendered dots (up to 3) per day cell. Each dot is colored to match the event type (rose for date, gold for birthday, purple for anniversary, sage for appointment, blue for social). Rendered as a `.cal-dots` flex row below the day number.
+- **Nudge smart re-trigger**: `dismissNudge()` now stores a timestamp (`cuppel_nudge_dismissed_at`) instead of a boolean flag. In `renderHome()`, after Firebase data loads, the app checks: if it's been 14+ days since the last `date`-type event (or no date events exist), the dismissal is cleared and the nudge bar is shown again. The init script is updated to read the new key.
+- **Finances empty state**: When `S.finances` is empty, `renderFin()` now shows a proper empty state (icon + "No expenses yet. Tap + Add to track your first one.") inside `fin-list`. The hero summary still renders with $0 values.
+- **"Clear all completed" confirmation**: `clearCompleted()` now shows a confirmation dialog ("Clear all N completed tasks?") before deleting. Cancelling aborts the operation.
+
 ## v1.8.0 — 2026-03-16
 
 ### Bug Fixes, Feature Completions & UX Polish
