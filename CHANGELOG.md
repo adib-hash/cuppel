@@ -1,5 +1,26 @@
 # Cuppel Changelog
 
+## v1.8.0 — 2026-03-16
+
+### Bug Fixes, Feature Completions & UX Polish
+
+**Critical bug fixes:**
+- **Streak row now populated**: `renderHome()` now computes and renders streak chips for Adib and Ummey. Streak = consecutive days (up to today) where at least one task was marked done. `toggleTodo()` now stores a `doneAt` date string when a task is completed. Chips show "Adib · N day streak" and "Ummey · N day streak" with matching accent pip colors.
+- **"Next Up" no longer stuck on "Loading…"**: When `S.events` is empty or has no future events, the card now falls back to "No upcoming events / Tap to add one" instead of remaining permanently on the loading placeholder.
+- **Nudge dismissal now persists**: Tapping × stores `cuppel_nudge_dismissed` in `localStorage`. The nudge does not reappear on reload. Init script restores the dismissed state immediately on load.
+- **Projects now reachable on mobile**: Bottom nav "Wiki" slot replaced with "Projects" (matching icon). Wiki remains accessible from the desktop sidebar. Settings was already reachable via the gear icon in the top nav.
+
+**High-impact feature gaps:**
+- **Expense editing**: Every finance row now has an Edit (pencil) button alongside the Delete button. Tapping it opens a pre-populated "Edit Expense" modal with all fields (name, amount, frequency, category, paid by). `saveEditFin()` updates via Firebase `.update()`.
+- **Completed todos collapse by default**: The "Completed (N)" section is now collapsed on load. A chevron toggle expands/collapses it. When expanded, a "Clear all" button appears — deleting all completed tasks with an undo toast (3.5s window).
+- **Toast wired up**: `showToast(msg, undoFn)` and `undoToast()` implemented. Used by "Clear all completed".
+
+**Mobile polish:**
+- **Jar chip actions always visible on mobile**: `.jar-chip-del` and `.jar-chip-try` now display as `flex` on screens ≤900px, matching the todo action button behavior.
+
+**Wiki:**
+- **"Reveal all" toggle**: New ghost button in the UsWiki header. Tapping "Reveal all" unblurs all sensitive tiles at once for the session; tapping "Hide all" re-blurs them. Per-tile tap-to-reveal still works independently.
+
 ## v1.7.0 — 2026-03-15
 
 ### Sprint 5 — Calendar: Interactive & Fully Functional

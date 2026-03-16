@@ -784,6 +784,8 @@ textarea.input { resize: vertical; min-height: 80px; }
   .input, .sub-add-input, .sub-edit-input { font-size: 16px; }
   /* Always show action buttons on mobile — no hover state on touch */
   .todo-edit, .todo-del { opacity: 1; }
+  /* Always show jar chip actions on mobile */
+  .jar-chip-del, .jar-chip-try { display: flex !important; }
   /* Hide category tag from main todo row on mobile to reduce clutter */
   .todo-main-row .tag.tag-dim { display: none; }
   /* Tighten todo row gap slightly on mobile */
@@ -1053,7 +1055,7 @@ textarea.input { resize: vertical; min-height: 80px; }
           <div class="nudge-title">It's been a while since your last date night</div>
           <div class="nudge-desc">Pick an idea from The Jar and make it happen this weekend.</div>
         </div>
-        <div class="nudge-close" onclick="document.getElementById('nudge-bar').style.display='none'">×</div>
+        <div class="nudge-close" onclick="dismissNudge()">×</div>
       </div>
 
       <div class="home-quick" style="margin-bottom:14px">
@@ -1182,6 +1184,7 @@ textarea.input { resize: vertical; min-height: 80px; }
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
           Sensitive fields are blurred. Tap any tile to reveal.
         </div>
+        <button class="btn btn-ghost btn-sm" id="wiki-reveal-btn" onclick="toggleWikiAll()" style="flex-shrink:0">Reveal all</button>
         <button class="btn btn-gold btn-sm" onclick="openModal('m-wiki-section')" style="flex-shrink:0">+ New Section</button>
       </div>
       <div id="wiki-render"></div>
@@ -1200,7 +1203,7 @@ textarea.input { resize: vertical; min-height: 80px; }
         <div class="card-title" style="margin-bottom:16px">App Info</div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
           <span style="font-size:14px;color:var(--text2)">Version</span>
-          <span style="font-size:14px;font-weight:600;color:var(--gold)">v1.7.0</span>
+          <span style="font-size:14px;font-weight:600;color:var(--gold)">v1.8.0</span>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
           <span style="font-size:14px;color:var(--text2)">Couple</span>
@@ -1278,9 +1281,9 @@ textarea.input { resize: vertical; min-height: 80px; }
       <div class="bn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
       <div class="bn-label">Calendar</div>
     </div>
-    <div class="bn-item" id="bn-wiki" onclick="nav('wiki')">
-      <div class="bn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>
-      <div class="bn-label">Wiki</div>
+    <div class="bn-item" id="bn-projects" onclick="nav('projects')">
+      <div class="bn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></div>
+      <div class="bn-label">Projects</div>
     </div>
     <div class="bn-item" id="bn-inspire" onclick="nav('inspire')">
       <div class="bn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z"/></svg></div>
@@ -1585,6 +1588,42 @@ textarea.input { resize: vertical; min-height: 80px; }
   </div>
 </div>
 
+<!-- FINANCE EDIT MODAL -->
+<div class="modal-bg" id="m-fin-edit">
+  <div class="modal">
+    <div class="modal-title">Edit Expense</div>
+    <div class="fg"><label class="fl">Name</label>
+      <input class="input" id="ef-name" placeholder="Netflix, Rent, Gym…"></div>
+    <div class="fg"><label class="fl">Amount ($)</label>
+      <input class="input" type="number" id="ef-amt" placeholder="0"></div>
+    <div class="fg"><label class="fl">Frequency</label>
+      <select class="input" id="ef-freq">
+        <option>Monthly</option><option>Annual</option><option>Weekly</option>
+      </select></div>
+    <div class="fg"><label class="fl">Category</label>
+      <select class="input" id="ef-cat">
+        <option value="housing">Housing</option>
+        <option value="food">Food</option>
+        <option value="transport">Transport</option>
+        <option value="health">Health</option>
+        <option value="entertainment">Entertainment</option>
+        <option value="subscriptions">Subscriptions</option>
+        <option value="utilities">Utilities</option>
+        <option value="other">Other</option>
+      </select></div>
+    <div class="fg"><label class="fl">Paid By</label>
+      <select class="input" id="ef-paid">
+        <option value="split">Split</option>
+        <option value="adib">Adib</option>
+        <option value="ummey">Ummey</option>
+      </select></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('m-fin-edit')">Cancel</button>
+      <button class="btn btn-gold" onclick="saveEditFin()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div class="toast" id="toast">
   <span id="toast-msg">Task deleted</span>
@@ -1779,17 +1818,38 @@ function renderHome(){
   const monthly = finMonthly();
   document.getElementById('hq-spend').textContent = '$'+monthly.toLocaleString();
 
+  const todayStart = new Date(); todayStart.setHours(0,0,0,0);
   const sorted = [...S.events].sort((a,b)=>new Date(a.date)-new Date(b.date));
-  const next = sorted.find(e=>new Date(e.date+'T00:00:00')>=new Date());
+  const next = sorted.find(e=>new Date(e.date+'T00:00:00')>=todayStart);
   if(next){
     document.getElementById('hq-next-event').textContent = next.name;
     document.getElementById('hq-next-date').textContent = new Date(next.date+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  } else {
+    document.getElementById('hq-next-event').textContent = 'No upcoming events';
+    document.getElementById('hq-next-date').textContent = 'Tap to add one';
   }
 
   const badge = document.getElementById('sb-badge-todo');
   if(badge) badge.textContent = pending.length;
   const dot = document.getElementById('bn-dot-todo');
   if(dot) dot.style.display = pending.length?'block':'none';
+
+  // Streak chips
+  function calcStreak(person){
+    let streak=0; const day=new Date(todayStart);
+    while(true){
+      const ds=day.toISOString().slice(0,10);
+      const hasDone=S.todos.some(t=>t.done&&t.doneAt===ds&&(t.who===person||t.who==='both'));
+      if(!hasDone) break;
+      streak++; day.setDate(day.getDate()-1);
+    }
+    return streak;
+  }
+  const adibS=calcStreak('adib'), ummeyS=calcStreak('ummey');
+  let chips='';
+  if(adibS>0) chips+=`<div class="streak-chip"><div class="streak-pip" style="background:var(--gold)"></div>Adib · ${adibS} day${adibS!==1?'s':''} streak</div>`;
+  if(ummeyS>0) chips+=`<div class="streak-chip"><div class="streak-pip" style="background:var(--rose)"></div>Ummey · ${ummeyS} day${ummeyS!==1?'s':''} streak</div>`;
+  document.getElementById('streak-row').innerHTML=chips;
 
   pickIdea();
 }
@@ -1807,6 +1867,7 @@ function finMonthly(){
 
 // ====== TODOS ======
 let activeFilter='all';
+let _completedExpanded=false;
 function todoFilter(f,el){
   activeFilter=f;
   document.querySelectorAll('.tab-btn').forEach(t=>t.classList.remove('active'));
@@ -1822,14 +1883,26 @@ function renderTodos(){
   else if(activeFilter==='shopping') items=items.filter(t=>t.cat==='shopping');
 
   const pending=items.filter(t=>!t.done), done=items.filter(t=>t.done);
+  const chevOpen=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;transform:rotate(90deg)"><polyline points="9 18 15 12 9 6"/></svg>`;
+  const chevClosed=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px"><polyline points="9 18 15 12 9 6"/></svg>`;
   let html='';
   if(pending.length) html+=pending.map(todoHTML).join('');
   if(done.length){
-    html+=`<div class="todo-section-label" style="margin-top:${pending.length?'16px':'0'}">Completed (${done.length})</div>`;
-    html+=done.map(todoHTML).join('');
+    html+=`<div style="display:flex;align-items:center;justify-content:space-between;margin-top:${pending.length?'16px':'0'};margin-bottom:6px">
+      <div class="todo-section-label" style="margin-top:0;cursor:pointer;display:flex;align-items:center;gap:6px" onclick="toggleCompleted()">
+        ${_completedExpanded?chevOpen:chevClosed} Completed (${done.length})
+      </div>
+      ${_completedExpanded?`<button class="btn btn-ghost btn-sm" style="font-size:11px;padding:4px 12px" onclick="clearCompleted()">Clear all</button>`:''}
+    </div>`;
+    if(_completedExpanded) html+=done.map(todoHTML).join('');
   }
   if(!items.length) html=`<div class="empty"><div class="empty-icon">${IC.empty}</div><div class="empty-text">Nothing here — you're all caught up!</div></div>`;
   document.getElementById('todo-render').innerHTML=html;
+}
+
+function toggleCompleted(){
+  _completedExpanded=!_completedExpanded;
+  renderTodos();
 }
 
 function dueDateTag(due,done){
@@ -1871,7 +1944,11 @@ function todoHTML(t){
 
 function toggleTodo(id){
   const t=S.todos.find(t=>t.id===id);
-  if(t) ROOT.child('todos').child(id).update({done: !t.done});
+  if(t){
+    const upd={done:!t.done};
+    if(!t.done) upd.doneAt=new Date().toISOString().slice(0,10);
+    ROOT.child('todos').child(id).update(upd);
+  }
 }
 function delTodo(id){ ROOT.child('todos').child(id).remove(); }
 function addTodo(){
@@ -2174,7 +2251,10 @@ function renderFin(){
         <div class="fin-freq">${f.freq}</div>
       </div>
       <div class="fin-amt">$${f.amount.toLocaleString()}</div>
-      <div class="icon-btn" onclick="delFin('${f.id}')" style="margin-left:10px">${IC.trash}</div>
+      <div style="display:flex;gap:4px;margin-left:10px">
+        <div class="icon-btn" onclick="editFin('${f.id}')" title="Edit">${IC.edit}</div>
+        <div class="icon-btn" onclick="delFin('${f.id}')" title="Delete">${IC.trash}</div>
+      </div>
     </div>`).join('');
 
   // Category breakdown
@@ -2559,8 +2639,87 @@ function toggleTriedSection(){
 }
 
 
+// ====== TOAST ======
+let _toastTimer=null, _toastUndo=null;
+function showToast(msg, undoFn){
+  const toast=document.getElementById('toast');
+  document.getElementById('toast-msg').textContent=msg;
+  const undoEl=toast.querySelector('.toast-undo');
+  undoEl.style.display=undoFn?'':'none';
+  _toastUndo=undoFn||null;
+  clearTimeout(_toastTimer);
+  toast.classList.add('show');
+  _toastTimer=setTimeout(()=>{ toast.classList.remove('show'); _toastUndo=null; },3500);
+}
+function undoToast(){
+  if(_toastUndo) _toastUndo();
+  document.getElementById('toast').classList.remove('show');
+  _toastUndo=null;
+  clearTimeout(_toastTimer);
+}
+
+// ====== CLEAR COMPLETED TODOS ======
+let _lastCleared=null;
+function clearCompleted(){
+  const done=S.todos.filter(t=>t.done);
+  if(!done.length) return;
+  _lastCleared=done.map(t=>({...t}));
+  done.forEach(t=>ROOT.child('todos').child(t.id).remove());
+  _completedExpanded=false;
+  showToast(`Cleared ${done.length} completed task${done.length!==1?'s':''}`, ()=>{
+    if(_lastCleared) _lastCleared.forEach(t=>ROOT.child('todos').child(t.id).set(t));
+    _lastCleared=null;
+  });
+}
+
+// ====== NUDGE ======
+function dismissNudge(){
+  document.getElementById('nudge-bar').style.display='none';
+  localStorage.setItem('cuppel_nudge_dismissed','1');
+}
+
+// ====== FINANCE EDIT ======
+let _editingFinId=null;
+function editFin(id){
+  const f=S.finances.find(f=>f.id===id);
+  if(!f)return;
+  _editingFinId=id;
+  document.getElementById('ef-name').value=f.name;
+  document.getElementById('ef-amt').value=f.amount;
+  document.getElementById('ef-freq').value=f.freq;
+  document.getElementById('ef-cat').value=f.cat||'other';
+  document.getElementById('ef-paid').value=f.paid||'split';
+  openModal('m-fin-edit');
+}
+function saveEditFin(){
+  const name=document.getElementById('ef-name').value.trim();
+  const amount=parseFloat(document.getElementById('ef-amt').value);
+  if(!name||!amount||!_editingFinId)return;
+  ROOT.child('finances').child(_editingFinId).update({name,amount,freq:document.getElementById('ef-freq').value,cat:document.getElementById('ef-cat').value,paid:document.getElementById('ef-paid').value});
+  closeModal('m-fin-edit');
+}
+
+// ====== WIKI REVEAL ALL ======
+let _wikiRevealed=false;
+function toggleWikiAll(){
+  _wikiRevealed=!_wikiRevealed;
+  document.querySelectorAll('.wiki-tile-val[data-s="true"]').forEach(el=>{
+    el.classList.toggle('blurred',!_wikiRevealed);
+  });
+  const btn=document.getElementById('wiki-reveal-btn');
+  if(btn) btn.textContent=_wikiRevealed?'Hide all':'Reveal all';
+}
+
 // ====== INIT ======
 // Initial render is handled by the ROOT.on('value') listener above
+
+// Restore nudge dismissed state
+(function(){
+  if(localStorage.getItem('cuppel_nudge_dismissed')){
+    const el=document.getElementById('nudge-bar');
+    if(el) el.style.display='none';
+  }
+})();
 
 // ====== PWA SERVICE WORKER ======
 if ('serviceWorker' in navigator) {
