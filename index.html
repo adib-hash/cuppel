@@ -1864,7 +1864,6 @@ async function createHousehold() {
       photoURL: user.photoURL || null,
       joinedAt: new Date().toISOString(),
     },
-    [`households/${hid}/createdAt`]: new Date().toISOString(),
     [`inviteCodes/${code}`]: { householdId: hid, createdBy: user.uid, expiresAt },
   });
   await initHousehold(user, hid);
