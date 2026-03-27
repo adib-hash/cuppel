@@ -1737,21 +1737,47 @@ function showScreen(id) {
 }
 
 auth.onAuthStateChanged(async user => {
-  if (!user) { showScreen('screen-auth'); return; }
+  if (!user) {
+    // If invite link is in URL, pre-fill for after sign-in
+    showScreen('screen-auth');
+    return;
+  }
   const userSnap = await db.ref('users/' + user.uid).once('value');
   const userData = userSnap.val();
   if (userData && userData.householdId) {
     await initHousehold(user, userData.householdId);
   } else {
+    // Save user profile
     await db.ref('users/' + user.uid).set({
       displayName: user.displayName || user.email,
       email: user.email,
       photoURL: user.photoURL || null,
       householdId: null,
     });
-    const el = document.getElementById('setup-name-greeting');
-    if (el) el.textContent = 'Hi ' + ((user.displayName||'there').split(' ')[0]) + '. Let\'s get set up.';
-    showScreen('screen-setup');
+    // If the user arrived via an invite link, auto-join without showing setup screen
+    const urlCode = new URLSearchParams(location.search).get('join');
+    if (urlCode) {
+      // Show a joining state — update the loading screen text instead of showing setup
+      const loadEl = document.getElementById('app-loading');
+      if (loadEl) { loadEl.style.display = 'flex'; loadEl.textContent = 'Joining household…'; }
+      try {
+        await performJoin(user, urlCode.toUpperCase().slice(0, 8));
+      } catch(e) {
+        console.error('Auto-join failed:', e);
+        if (loadEl) loadEl.style.display = 'none';
+        // Fall back to setup screen with code pre-filled
+        const inp = document.getElementById('join-code-input');
+        if (inp) inp.value = urlCode.toUpperCase().slice(0, 8);
+        const el = document.getElementById('setup-name-greeting');
+        if (el) el.textContent = 'Hi ' + ((user.displayName||'there').split(' ')[0]) + '. Let\'s get set up.';
+        showScreen('screen-setup');
+        alert('Could not auto-join. Please tap "Join" to try again.');
+      }
+    } else {
+      const el = document.getElementById('setup-name-greeting');
+      if (el) el.textContent = 'Hi ' + ((user.displayName||'there').split(' ')[0]) + '. Let\'s get set up.';
+      showScreen('screen-setup');
+    }
   }
 });
 
@@ -1872,21 +1898,37 @@ async function createHousehold() {
   await initHousehold(user, hid);
 }
 
+// Called from the Join button on setup screen
 async function joinWithCode() {
   const user = auth.currentUser;
   if (!user) return;
   const inp = document.getElementById('join-code-input');
   const code = (inp ? inp.value.trim() : '').toUpperCase();
   if (!code || code.length !== 8) { alert('Enter the 8-character invite code.'); return; }
-  const btn = document.querySelector('#screen-setup .btn-ghost');
+  const btn = document.querySelector('#screen-setup .join-btn');
   if (btn) { btn.disabled = true; btn.textContent = 'Joining…'; }
+  try {
+    await performJoin(user, code);
+  } catch(e) {
+    console.error('Join failed:', e);
+    alert('Could not join. Please check the code and try again.');
+    if (btn) { btn.disabled = false; btn.textContent = 'Join'; }
+  }
+}
+
+// Core join logic — used by both the Join button and auto-join from ?join= URL param
+async function performJoin(user, code) {
+  // Validate the invite code (read at /inviteCodes/{code} is allowed for any auth'd user)
   const codeSnap = await db.ref('inviteCodes/' + code).once('value');
   const codeData = codeSnap.val();
-  if (!codeData) { alert('Code not found. Double-check with your partner.'); if (btn) { btn.disabled=false; btn.textContent='Join'; } return; }
-  if (Date.now() > codeData.expiresAt) { alert('This code has expired. Ask your partner to generate a new one.'); if (btn) { btn.disabled=false; btn.textContent='Join'; } return; }
+  if (!codeData) throw new Error('Code not found');
+  if (Date.now() > codeData.expiresAt) throw new Error('Code expired');
   const hid = codeData.householdId;
-  const membersSnap = await db.ref('households/' + hid + '/members').once('value');
-  if (membersSnap.numChildren() >= 2) { alert('This household is already full.'); if (btn) { btn.disabled=false; btn.textContent='Join'; } return; }
+
+  // Write: add self as member + delete invite code (atomic)
+  // NOTE: Do NOT include any household-level paths (e.g. pendingInviteCode) here —
+  // the household write rule requires being a member, which we aren't yet.
+  // The members/$uid override rule only covers this specific path.
   await db.ref().update({
     [`users/${user.uid}/householdId`]: hid,
     [`households/${hid}/members/${user.uid}`]: {
@@ -1896,8 +1938,11 @@ async function joinWithCode() {
       joinedAt: new Date().toISOString(),
     },
     [`inviteCodes/${code}`]: null,
-    [`households/${hid}/pendingInviteCode`]: null,
   });
+
+  // User is now a member — clean up pendingInviteCode from household
+  try { await db.ref('households/' + hid + '/pendingInviteCode').remove(); } catch(_) {}
+
   await initHousehold(user, hid);
 }
 
@@ -1916,8 +1961,8 @@ function showWaitingScreen(householdId) {
 }
 
 function copyInviteLink() {
-  const code = (document.getElementById('invite-code-display')||{}).textContent || '';
-  if (!code) return;
+  const code = ((document.getElementById('invite-code-display')||{}).textContent || '').trim();
+  if (!code) { alert('Invite code not loaded yet — please wait a moment and try again.'); return; }
   const url = location.origin + location.pathname + '?join=' + code;
   navigator.clipboard.writeText(url).then(() => {
     const btn = document.getElementById('copy-invite-btn');
@@ -3040,14 +3085,7 @@ function renderQuickNote(){
   }
 })();
 
-// Auto-fill invite code from ?join=XXXXXXXX URL param
-(function(){
-  const code = new URLSearchParams(location.search).get('join');
-  if(code){
-    const inp=document.getElementById('join-code-input');
-    if(inp) inp.value=code.toUpperCase().slice(0,8);
-  }
-})();
+// ?join=CODE auto-join is handled in auth.onAuthStateChanged above
 
 // ====== PWA SERVICE WORKER ======
 if ('serviceWorker' in navigator) {
@@ -3083,7 +3121,7 @@ if ('serviceWorker' in navigator) {
       <div class="setup-divider">or join an existing one</div>
       <div class="setup-join-row">
         <input class="input" id="join-code-input" placeholder="Enter invite code" maxlength="8" autocapitalize="characters" autocorrect="off" spellcheck="false" style="font-size:16px;text-transform:uppercase;letter-spacing:0.12em;flex:1">
-        <button class="btn btn-ghost" onclick="joinWithCode()">Join</button>
+        <button class="btn btn-ghost join-btn" onclick="joinWithCode()">Join</button>
       </div>
     </div>
     <button class="btn btn-ghost btn-sm" style="opacity:0.5;font-size:12px" onclick="auth.signOut()">Sign out &amp; switch account</button>
