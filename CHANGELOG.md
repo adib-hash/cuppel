@@ -1,5 +1,27 @@
 # Cuppel Changelog
 
+## v2.0.0 — 2026-03-27
+
+### UX & Reliability Sprint
+
+**Modal scroll lock fix (CLAUDE.md compliance):**
+- `openModal`/`closeModal`/backdrop click handler all switched from `document.body.style.overflow = 'hidden'` to the `position: fixed` pattern. This prevents the iOS page-jump-to-top bug that `overflow: hidden` causes. A `_lockScroll()`/`_unlockScroll()` helper pair handles save/restore of scroll position.
+
+**Undo on all destructive actions:**
+- `delTodo`, `delEvent`, `delFin`, `delProj`, `delJar` all now show a toast with an Undo button. The deleted item's data is snapshotted before removal; tapping Undo re-sets it to Firebase. `delProj` also now correctly resets `_detailProjId = null` after deletion (it was missing before, leaving stale state).
+
+**Optimistic UI on todo toggle:**
+- `toggleTodo()` now immediately updates the DOM (`done` class, checkmark appearance) before the Firebase round-trip. The Firebase `.on('value')` listener still confirms and re-renders on sync — the optimistic update just eliminates the visible lag.
+
+**Offline / connection indicator:**
+- Firebase `.info/connected` listener added. When the app loses connectivity, a slim bar appears below the top nav after a 2-second grace period (prevents flash on normal page load). Bar disappears immediately when connection is restored.
+
+**Check-in history — show all:**
+- Removed the `.slice(0, 4)` cap that limited the history view to the 4 most recent check-ins. All check-ins are now shown. Title updated to "Check-in History (N)" with the count.
+
+**Swipe gestures on todo list:**
+- Touch event delegation on `#todo-render`. Swipe right → complete the task (calls `toggleTodo`). Swipe left → delete with undo (calls `delTodo` which shows the toast). Threshold: 80px. Directional lock after 8px movement prevents conflicts with vertical scrolling. Visual feedback via `swiping-right` / `swiping-left` background color classes during swipe.
+
 ## v1.9.0 — 2026-03-16
 
 ### Bug Fixes, Features & Navigation

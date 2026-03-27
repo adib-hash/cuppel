@@ -911,6 +911,22 @@ textarea.input { resize: vertical; min-height: 80px; }
 .jar-tried-chevron { transition: transform 0.2s ease; flex-shrink: 0; }
 .jar-tried-chevron.open { transform: rotate(90deg); }
 
+/* ======== OFFLINE BAR ======== */
+.offline-bar {
+  position: fixed; top: var(--nav-h); left: 0; right: 0;
+  background: rgba(232,138,138,0.15); border-bottom: 1px solid rgba(232,138,138,0.3);
+  color: var(--rose-light); font-size: 12px; font-weight: 500;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 8px 16px; z-index: 199;
+  transform: translateY(-100%); transition: transform 0.3s ease;
+  backdrop-filter: blur(8px); pointer-events: none;
+}
+.offline-bar.show { transform: translateY(0); }
+
+/* ======== SWIPE GESTURES ======== */
+.todo-item.swiping-right { background: rgba(125,184,155,0.2); border-color: rgba(125,184,155,0.3); }
+.todo-item.swiping-left  { background: rgba(232,138,138,0.2); border-color: rgba(232,138,138,0.3); }
+
 /* ======== CHECKIN PERSISTENCE ======== */
 .checkin-submitted {
   display: flex; align-items: center; gap: 10px;
@@ -1226,7 +1242,7 @@ textarea.input { resize: vertical; min-height: 80px; }
         <div class="card-title" style="margin-bottom:16px">App Info</div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
           <span style="font-size:14px;color:var(--text2)">Version</span>
-          <span style="font-size:14px;font-weight:600;color:var(--gold)">v1.9.0</span>
+          <span style="font-size:14px;font-weight:600;color:var(--gold)">v2.0.0</span>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
           <span style="font-size:14px;color:var(--text2)">Couple</span>
@@ -1658,6 +1674,12 @@ textarea.input { resize: vertical; min-height: 80px; }
   </div>
 </div>
 
+<!-- OFFLINE BAR -->
+<div id="offline-bar" class="offline-bar">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0119 12.55M5 12.55a10.94 10.94 0 015.17-2.39M10.71 5.05A16 16 0 0122.56 9M1.42 9a15.91 15.91 0 014.7-2.88M8.53 16.11a6 6 0 016.95 0M12 20h.01"/></svg>
+  No internet connection
+</div>
+
 <!-- TOAST -->
 <div class="toast" id="toast">
   <span id="toast-msg">Task deleted</span>
@@ -1699,6 +1721,20 @@ const FIREBASE_CONFIG = {
 firebase.initializeApp(FIREBASE_CONFIG);
 const db = firebase.database();
 const ROOT = db.ref('cuppel');
+
+// Offline indicator — 2s grace period prevents flash on page load
+let _offlineTimer=null;
+db.ref('.info/connected').on('value',snap=>{
+  const connected=snap.val();
+  const bar=document.getElementById('offline-bar');
+  if(!bar)return;
+  if(connected){
+    clearTimeout(_offlineTimer);
+    bar.classList.remove('show');
+  } else {
+    _offlineTimer=setTimeout(()=>bar.classList.add('show'),2000);
+  }
+});
 
 function newId() { return db.ref().push().key; }
 let _detailTodoId = null;
@@ -1826,16 +1862,29 @@ function nav(id) {
 }
 
 // ====== MODAL ======
+function _lockScroll(){
+  const y=window.scrollY;
+  document.body.style.position='fixed';
+  document.body.style.top=`-${y}px`;
+  document.body.style.width='100%';
+}
+function _unlockScroll(){
+  const y=Math.abs(parseInt(document.body.style.top||'0'));
+  document.body.style.position='';
+  document.body.style.top='';
+  document.body.style.width='';
+  window.scrollTo(0,y);
+}
 function openModal(id){
   document.getElementById(id).classList.add('open');
-  document.body.style.overflow = 'hidden';
+  _lockScroll();
 }
 function closeModal(id){
   document.getElementById(id).classList.remove('open');
-  document.body.style.overflow = '';
+  _unlockScroll();
 }
 document.querySelectorAll('.modal-bg').forEach(m=>m.addEventListener('click',e=>{
-  if(e.target===m){ m.classList.remove('open'); document.body.style.overflow = ''; }
+  if(e.target===m){ m.classList.remove('open'); _unlockScroll(); }
 }));
 
 // ====== HOME ======
@@ -1997,14 +2046,30 @@ function todoHTML(t){
 
 function toggleTodo(id){
   const t=S.todos.find(t=>t.id===id);
-  if(t){
-    const upd={done:!t.done};
-    if(!t.done) upd.doneAt=new Date().toISOString().slice(0,10);
-    else upd.doneAt=null;
-    ROOT.child('todos').child(id).update(upd);
+  if(!t)return;
+  const newDone=!t.done;
+  // Optimistic DOM update
+  const el=document.getElementById('ti-'+id);
+  if(el){
+    el.classList.toggle('done',newDone);
+    const outer=el.querySelector('.todo-check-outer');
+    if(outer){
+      outer.classList.toggle('checked',newDone);
+      outer.innerHTML=newDone?'<span class="todo-check-inner">✓</span>':'';
+    }
   }
+  const upd={done:newDone};
+  if(newDone) upd.doneAt=new Date().toISOString().slice(0,10);
+  else upd.doneAt=null;
+  ROOT.child('todos').child(id).update(upd);
 }
-function delTodo(id){ ROOT.child('todos').child(id).remove(); }
+function delTodo(id){
+  const t=S.todos.find(t=>t.id===id);
+  if(!t)return;
+  const snap={...t};
+  ROOT.child('todos').child(id).remove();
+  showToast('Task deleted',()=>{ ROOT.child('todos').child(id).set(snap); });
+}
 function addTodo(){
   const text=document.getElementById('nt-text').value.trim();
   if(!text)return;
@@ -2245,9 +2310,13 @@ function saveEditEvent(){
 
 function delEvent(){
   if(!_detailEventId)return;
-  ROOT.child('events').child(_detailEventId).remove();
+  const e=S.events.find(e=>e.id===_detailEventId);
+  const snap=e?{...e}:null;
+  const eid=_detailEventId;
+  ROOT.child('events').child(eid).remove();
   closeModal('m-event-detail');
   _detailEventId=null;
+  if(snap) showToast('Event deleted',()=>{ ROOT.child('events').child(eid).set(snap); });
 }
 
 function addEvent(){
@@ -2351,7 +2420,13 @@ function renderFin(){
   }
 }
 
-function delFin(id){ ROOT.child('finances').child(id).remove(); }
+function delFin(id){
+  const f=S.finances.find(f=>f.id===id);
+  if(!f)return;
+  const snap={...f};
+  ROOT.child('finances').child(id).remove();
+  showToast('Expense deleted',()=>{ ROOT.child('finances').child(id).set(snap); });
+}
 function addFinance(){
   const name=document.getElementById('nf-name').value.trim();
   const amount=parseFloat(document.getElementById('nf-amt').value);
@@ -2471,8 +2546,13 @@ function saveEditProj(){
 }
 function delProj(){
   if(!_detailProjId)return;
-  ROOT.child('projects').child(_detailProjId).remove();
+  const p=S.projects.find(p=>p.id===_detailProjId);
+  const snap=p?{...p}:null;
+  const pid=_detailProjId;
+  ROOT.child('projects').child(pid).remove();
   closeModal('m-proj-detail');
+  _detailProjId=null;
+  if(snap) showToast('Project deleted',()=>{ ROOT.child('projects').child(pid).set(snap); });
 }
 function resetToSeed(){
   if(!confirm('Reset all data to defaults? This cannot be undone.'))return;
@@ -2646,10 +2726,10 @@ function renderInspire(){
         <button class="btn btn-gold btn-sm" onclick="submitCheckin()">Submit Check-In</button>
       </div>`;
   }
-  const recent=[...S.checkins].sort((a,b)=>b.week.localeCompare(a.week)).slice(0,4);
+  const recent=[...S.checkins].sort((a,b)=>b.week.localeCompare(a.week));
   document.getElementById('checkin-hist-render').innerHTML=recent.length?`
     <div class="checkin-history">
-      <div class="checkin-history-title">Recent Check-ins</div>
+      <div class="checkin-history-title">Check-in History (${recent.length})</div>
       ${recent.map(c=>`
         <div class="checkin-week">
           <div class="checkin-week-label">Week of ${new Date(c.week+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</div>
@@ -2700,7 +2780,11 @@ function addJar(){
   document.getElementById('jar-input').value='';
 }
 function delJar(id){
+  const j=S.jarIdeas.find(j=>j.id===id);
+  if(!j)return;
+  const snap={...j};
   ROOT.child('jarIdeas').child(id).remove();
+  showToast('Idea removed',()=>{ ROOT.child('jarIdeas').child(id).set(snap); });
 }
 function markJarTried(id){
   ROOT.child('jarIdeas').child(id).update({tried:true,triedDate:new Date().toISOString().slice(0,10)});
@@ -2825,6 +2909,65 @@ function toggleWikiAll(){
   const btn=document.getElementById('wiki-reveal-btn');
   if(btn) btn.textContent=_wikiRevealed?'Hide all':'Reveal all';
 }
+
+// ====== SWIPE GESTURES (todo list) ======
+// Right swipe → complete, Left swipe → delete with undo
+(function(){
+  const THRESHOLD=80, CONFIRM_PX=8;
+  let item=null, startX=0, startY=0, dx=0, confirmed=false;
+
+  function cancel(){
+    if(item){
+      const row=item.querySelector('.todo-main-row');
+      row.style.transition='transform 0.2s ease';
+      row.style.transform='';
+      item.classList.remove('swiping-right','swiping-left');
+      setTimeout(()=>{ row.style.transition=''; },200);
+    }
+    item=null; dx=0; confirmed=false;
+  }
+
+  const container=document.getElementById('todo-render');
+  container.addEventListener('touchstart',e=>{
+    const t=e.target.closest('.todo-item');
+    if(!t)return;
+    item=t; startX=e.touches[0].clientX; startY=e.touches[0].clientY;
+    dx=0; confirmed=false;
+  },{passive:true});
+
+  container.addEventListener('touchmove',e=>{
+    if(!item)return;
+    const cx=e.touches[0].clientX, cy=e.touches[0].clientY;
+    const adx=Math.abs(cx-startX), ady=Math.abs(cy-startY);
+    if(!confirmed){
+      if(adx<CONFIRM_PX&&ady<CONFIRM_PX)return;
+      if(ady>adx){ cancel(); return; } // vertical scroll
+      confirmed=true;
+    }
+    e.preventDefault();
+    dx=cx-startX;
+    const row=item.querySelector('.todo-main-row');
+    row.style.transition='none';
+    row.style.transform=`translateX(${dx}px)`;
+    item.classList.toggle('swiping-right',dx>0);
+    item.classList.toggle('swiping-left',dx<0);
+  },{passive:false});
+
+  function onEnd(){
+    if(!item||!confirmed){ item=null; return; }
+    if(dx>THRESHOLD){
+      const id=item.id.replace('ti-','');
+      cancel(); toggleTodo(id);
+    } else if(dx<-THRESHOLD){
+      const id=item.id.replace('ti-','');
+      cancel(); delTodo(id);
+    } else {
+      cancel();
+    }
+  }
+  container.addEventListener('touchend',onEnd,{passive:true});
+  container.addEventListener('touchcancel',cancel,{passive:true});
+})();
 
 // ====== INIT ======
 // Initial render is handled by the ROOT.on('value') listener above
