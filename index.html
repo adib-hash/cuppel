@@ -1856,6 +1856,7 @@ async function createHousehold() {
   const hid = db.ref().push().key;
   const code = generateInviteCode();
   const expiresAt = Date.now() + 48 * 60 * 60 * 1000;
+  // Write member record + invite code (member path uses the members.$uid override rule)
   await db.ref().update({
     [`users/${user.uid}/householdId`]: hid,
     [`households/${hid}/members/${user.uid}`]: {
@@ -1866,6 +1867,8 @@ async function createHousehold() {
     },
     [`inviteCodes/${code}`]: { householdId: hid, createdBy: user.uid, expiresAt },
   });
+  // User is now a member — store the code inside the household so it survives page reloads
+  await db.ref('households/' + hid + '/pendingInviteCode').set(code);
   await initHousehold(user, hid);
 }
 
@@ -1893,6 +1896,7 @@ async function joinWithCode() {
       joinedAt: new Date().toISOString(),
     },
     [`inviteCodes/${code}`]: null,
+    [`households/${hid}/pendingInviteCode`]: null,
   });
   await initHousehold(user, hid);
 }
@@ -1903,10 +1907,10 @@ function generateInviteCode() {
 }
 
 function showWaitingScreen(householdId) {
-  db.ref('inviteCodes').orderByChild('householdId').equalTo(householdId).once('value', snap => {
-    const codes = snap.val();
+  db.ref('households/' + householdId + '/pendingInviteCode').once('value', snap => {
+    const code = snap.val();
     const el = document.getElementById('invite-code-display');
-    if (el && codes) el.textContent = Object.keys(codes)[0];
+    if (el && code) el.textContent = code;
   });
   showScreen('screen-waiting');
 }
