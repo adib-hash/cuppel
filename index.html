@@ -15,6 +15,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <style>
 :root {
   --bg: #0D0F14;
@@ -993,6 +994,64 @@ textarea.input { resize: vertical; min-height: 80px; }
   margin-top: 10px; transition: var(--transition);
 }
 .checkin-prompt:hover { background: rgba(232,184,109,0.2); }
+
+/* ======== AUTH SCREENS ======== */
+.full-screen-overlay {
+  position: fixed; inset: 0; z-index: 9000;
+  background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+}
+.auth-card {
+  width: 100%; max-width: 380px;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 18px; text-align: center;
+}
+.auth-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 40px; font-weight: 700; color: var(--gold);
+  letter-spacing: -0.02em;
+}
+.auth-tagline { font-size: 15px; color: var(--text2); line-height: 1.5; }
+.btn-google {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: var(--radius-sm); padding: 14px 24px;
+  font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 500;
+  color: var(--text); cursor: pointer; transition: var(--transition);
+  width: 100%; justify-content: center;
+}
+.btn-google:hover { background: rgba(255,255,255,0.1); border-color: var(--gold); }
+.auth-privacy { font-size: 11px; color: var(--text3); line-height: 1.6; max-width: 280px; }
+.invite-code-display {
+  font-family: 'Playfair Display', serif; font-size: 36px; font-weight: 700;
+  letter-spacing: 0.25em; color: var(--gold);
+  background: var(--gold-glow); border: 1px solid rgba(232,184,109,0.25);
+  border-radius: var(--radius-sm); padding: 18px 32px;
+}
+.setup-divider { font-size: 12px; color: var(--text3); }
+.setup-options { display: flex; flex-direction: column; gap: 14px; width: 100%; }
+.setup-join-row { display: flex; gap: 10px; }
+.waiting-pulse { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text3); }
+.waiting-dot {
+  width: 8px; height: 8px; border-radius: 50%; background: var(--gold); flex-shrink: 0;
+  animation: wdot 1.5s ease-in-out infinite;
+}
+@keyframes wdot { 0%,100% { opacity: 1; } 50% { opacity: 0.25; } }
+.auth-lock-icon { opacity: 0.4; }
+.settings-user-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 0; border-bottom: 1px solid var(--border);
+}
+.settings-avatar {
+  width: 36px; height: 36px; border-radius: 50%; object-fit: cover;
+  background: var(--surface2); flex-shrink: 0;
+}
+.settings-avatar-initials {
+  width: 36px; height: 36px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 600; flex-shrink: 0;
+}
 </style>
 </head>
 <body>
@@ -1012,12 +1071,11 @@ textarea.input { resize: vertical; min-height: 80px; }
     <div class="icon-btn" onclick="nav('settings')" title="Settings" style="width:32px;height:32px;border-radius:9px">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
     </div>
-    <div class="couple-pill">
-      <div class="couple-avatars">
-        <div class="c-avatar c-avatar-a">A</div>
-        <div class="c-avatar c-avatar-u">U</div>
+    <div class="couple-pill" id="couple-pill">
+      <div class="couple-avatars" id="couple-avatars">
+        <div class="c-avatar c-avatar-a">—</div>
       </div>
-      <span class="couple-name">Adib & Ummey</span>
+      <span class="couple-name" id="couple-pill-name">Household</span>
     </div>
   </div>
 </nav>
@@ -1134,12 +1192,11 @@ textarea.input { resize: vertical; min-height: 80px; }
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:18px">
         <div class="tabs" id="todo-tabs">
           <div class="tab-btn active" onclick="todoFilter('all',this)">All</div>
-          <div class="tab-btn" onclick="todoFilter('adib',this)">Adib</div>
-          <div class="tab-btn" onclick="todoFilter('ummey',this)">Ummey</div>
+          <span id="todo-member-tabs"></span>
           <div class="tab-btn" onclick="todoFilter('chores',this)">Chores</div>
           <div class="tab-btn" onclick="todoFilter('shopping',this)">Shopping</div>
         </div>
-        <button class="btn btn-gold btn-sm" onclick="openModal('m-todo')">+ Add Task</button>
+        <button class="btn btn-gold btn-sm" onclick="openAddTodo()">+ Add Task</button>
       </div>
 
       <div id="todo-render"></div>
@@ -1220,22 +1277,29 @@ textarea.input { resize: vertical; min-height: 80px; }
         <div class="card-title" style="margin-bottom:16px">App Info</div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
           <span style="font-size:14px;color:var(--text2)">Version</span>
-          <span style="font-size:14px;font-weight:600;color:var(--gold)">v2.1.0</span>
+          <span style="font-size:14px;font-weight:600;color:var(--gold)">v3.0.0</span>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
-          <span style="font-size:14px;color:var(--text2)">Couple</span>
-          <span style="font-size:14px;font-weight:600;color:var(--text)">Adib & Ummey</span>
+          <span style="font-size:14px;color:var(--text2)">Household</span>
+          <span style="font-size:14px;font-weight:600;color:var(--text)" id="settings-couple-name">—</span>
         </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
           <span style="font-size:14px;color:var(--text2)">Database</span>
           <span style="font-size:14px;font-weight:500;color:var(--sage-light)">Firebase Realtime DB</span>
         </div>
+        <div id="settings-users-list"></div>
+      </div>
+
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title" style="margin-bottom:12px">Account</div>
+        <p style="font-size:13px;color:var(--text3);line-height:1.6;margin-bottom:16px">Signing out will return you to the login screen. Your household data is safe.</p>
+        <button class="btn btn-danger btn-sm" onclick="confirmSignOut()">Sign Out</button>
       </div>
 
       <div class="card">
         <div class="card-title" style="margin-bottom:12px">Developer Tools</div>
-        <p style="font-size:13px;color:var(--text3);line-height:1.6;margin-bottom:16px">Reset all data back to the original seed data. Useful for testing. This cannot be undone.</p>
-        <button class="btn btn-danger btn-sm" onclick="resetToSeed()">Reset to Seed Data</button>
+        <p style="font-size:13px;color:var(--text3);line-height:1.6;margin-bottom:16px">Clear all household data (todos, events, projects, jar, wiki). This cannot be undone.</p>
+        <button class="btn btn-danger btn-sm" onclick="resetToSeed()">Clear All Data</button>
       </div>
     </section>
 
@@ -1330,8 +1394,6 @@ textarea.input { resize: vertical; min-height: 80px; }
       <input class="input" id="nt-text" placeholder="Describe the task…"></div>
     <div class="fg"><label class="fl">Assign to</label>
       <select class="input" id="nt-who">
-        <option value="adib">Adib</option>
-        <option value="ummey">Ummey</option>
         <option value="both">Both of us</option>
       </select></div>
     <div class="fg"><label class="fl">Category</label>
@@ -1358,8 +1420,6 @@ textarea.input { resize: vertical; min-height: 80px; }
       <input class="input" id="et-text" placeholder="Describe the task…"></div>
     <div class="fg"><label class="fl">Assign to</label>
       <select class="input" id="et-who">
-        <option value="adib">Adib</option>
-        <option value="ummey">Ummey</option>
         <option value="both">Both of us</option>
       </select></div>
     <div class="fg"><label class="fl">Category</label>
@@ -1626,7 +1686,10 @@ const FIREBASE_CONFIG = {
 };
 firebase.initializeApp(FIREBASE_CONFIG);
 const db = firebase.database();
-const ROOT = db.ref('cuppel');
+const auth = firebase.auth();
+const googleProvider = new firebase.auth.GoogleAuthProvider();
+let ROOT = null;
+let HOUSEHOLD_ID = null;
 
 // Offline indicator — 2s grace period prevents flash on page load
 let _offlineTimer=null;
@@ -1648,46 +1711,12 @@ let _detailEventId = null;
 let _daySheetDate = null;
 
 // ====== STATE ======
-let S = { todos:[], events:[], projects:[], jarIdeas:[], checkins:[], wiki:[], quickNote:{text:'',updatedAt:null} };
-
-const SEED = {
-  todos: [
-    {id:'-seed1', text:'Pick up dry cleaning', who:'adib', cat:'chores', done:false},
-    {id:'-seed2', text:'Restock pantry — pasta, olive oil, coffee', who:'ummey', cat:'shopping', done:false},
-    {id:'-seed3', text:'Book anniversary dinner', who:'both', cat:'admin', done:false},
-  ],
-  events: [
-    {id:'-ev1', name:"Ummey's Birthday", date:'2026-05-14', type:'birthday'},
-    {id:'-ev2', name:'Anniversary', date:'2026-07-22', type:'anniversary'},
-    {id:'-ev3', name:'Dentist — Adib', date:'2026-03-28', type:'appointment', time:'10:30', notes:'Routine cleaning. Dr. Kim, Suite 204.'},
-  ],
-  projects: [
-    {id:'-proj1', name:'Italy Trip 2026', desc:'Rome, Florence & the Amalfi Coast', status:'active', progress:35, tasks:12, done:4},
-    {id:'-proj2', name:'Living Room Refresh', desc:'New couch, rug, gallery wall', status:'planning', progress:10, tasks:8, done:1},
-  ],
-  jarIdeas: ['Sunset picnic at the park','Cook a new cuisine together','Stargazing night drive','Board game marathon','Day trip to a new town'],
-  wiki: [
-    {id:'ws1',section:'Documents',iconType:'doc',order:0,items:[
-      {id:'wi1',label:"Adib's Passport #",value:'A12345678',s:true},
-      {id:'wi2',label:"Ummey's Passport #",value:'B87654321',s:true},
-      {id:'wi3',label:"Adib's Driver's License",value:'CA-XY12345',s:true},
-      {id:'wi4',label:"Ummey's Driver's License",value:'CA-AB98765',s:true},
-    ]},
-    {id:'ws2',section:'Insurance',iconType:'shield',order:1,items:[
-      {id:'wi5',label:'Provider',value:'Blue Shield PPO',s:false},
-      {id:'wi6',label:'Plan ID',value:'BS-9988-XYZ',s:true},
-      {id:'wi7',label:'Primary Care',value:'Dr. Patel — (415) 555-0192',s:false},
-    ]},
-    {id:'ws3',section:'Home',iconType:'home',order:2,items:[
-      {id:'wi8',label:'Address',value:'123 Oak Street, SF CA 94117',s:false},
-      {id:'wi9',label:'Landlord',value:'Maria Chen — (415) 555-0088',s:false},
-      {id:'wi10',label:'WiFi Password',value:'OakStreet2024!',s:true},
-    ]},
-    {id:'ws4',section:'Emergency Contacts',iconType:'alert',order:3,items:[
-      {id:'wi11',label:"Adib's Mom",value:'Amina — (703) 555-2201',s:false},
-      {id:'wi12',label:"Ummey's Dad",value:'James — (571) 555-4415',s:false},
-    ]},
-  ],
+let S = {
+  myUid: null,
+  partnerUid: null,
+  members: {},
+  todos:[], events:[], projects:[], jarIdeas:[], checkins:[], wiki:[],
+  quickNote:{text:'',updatedAt:null}
 };
 
 let _appLoaded = false;
@@ -1698,51 +1727,259 @@ function hideLoading() {
   if (el) { el.style.opacity='0'; el.style.transition='opacity 0.3s'; setTimeout(()=>el.remove(),300); }
 }
 
-ROOT.on('value', snap => {
-  const data = snap.val();
-  if (data === null) {
-    const toObj = arr => Object.fromEntries(arr.map(x => [x.id, x]));
-    const wikiObj = {};
-    SEED.wiki.forEach(sec => {
-      const items = {}; sec.items.forEach(it => { items[it.id] = {...it}; });
-      wikiObj[sec.id] = {id:sec.id, section:sec.section, iconType:sec.iconType, order:sec.order, items};
+// ====== AUTH SCREENS ======
+function showScreen(id) {
+  ['screen-auth','screen-setup','screen-waiting','app-loading'].forEach(s => {
+    const el = document.getElementById(s);
+    if (!el) return;
+    el.style.display = (s === id) ? 'flex' : 'none';
+  });
+}
+
+auth.onAuthStateChanged(async user => {
+  if (!user) { showScreen('screen-auth'); return; }
+  const userSnap = await db.ref('users/' + user.uid).once('value');
+  const userData = userSnap.val();
+  if (userData && userData.householdId) {
+    await initHousehold(user, userData.householdId);
+  } else {
+    await db.ref('users/' + user.uid).set({
+      displayName: user.displayName || user.email,
+      email: user.email,
+      photoURL: user.photoURL || null,
+      householdId: null,
     });
-    ROOT.set({
-      todos:     toObj(SEED.todos),
-      events:    toObj(SEED.events),
-      projects:  toObj(SEED.projects),
-      jarIdeas:  Object.fromEntries(SEED.jarIdeas.map((t,i) => [`j${i}`, {id:`j${i}`,text:t}])),
-      wiki:      wikiObj,
-    });
-    return;
-  }
-  S.todos    = data.todos    ? Object.values(data.todos).map(t=>({...t,items:t.items?Object.values(t.items):[]})) : [];
-  S.events   = data.events   ? Object.values(data.events)   : [];
-  S.projects = data.projects ? Object.values(data.projects).map(p=>({...p,items:p.items?Object.values(p.items):[]})) : [];
-  S.jarIdeas = data.jarIdeas ? Object.values(data.jarIdeas) : [];
-  S.checkins = data.checkins ? Object.values(data.checkins) : [];
-  S.wiki = data.wiki ? Object.values(data.wiki).sort((a,b)=>(a.order||0)-(b.order||0)).map(s=>({...s,items:s.items?Object.values(s.items):[]})) : [];
-  hideLoading();
-  renderHome();
-  const active = document.querySelector('.page.active');
-  if (active) {
-    const id = active.id.replace('page-','');
-    const renders = {todo:renderTodos,calendar:renderCal,projects:renderProj,wiki:renderWiki,inspire:renderInspire,more:renderMore};
-    if (renders[id]) renders[id]();
-  }
-  if (_detailTodoId && document.getElementById('m-todo-detail').classList.contains('open')) {
-    renderTodoDetail();
-  }
-  if (_detailProjId && document.getElementById('m-proj-detail').classList.contains('open')) {
-    renderProjDetail();
-  }
-  if (_detailEventId && document.getElementById('m-event-detail').classList.contains('open')) {
-    renderEventDetail();
-  }
-  if (_daySheetDate && document.getElementById('m-day').classList.contains('open')) {
-    renderDaySheet();
+    const el = document.getElementById('setup-name-greeting');
+    if (el) el.textContent = 'Hi ' + ((user.displayName||'there').split(' ')[0]) + '. Let\'s get set up.';
+    showScreen('screen-setup');
   }
 });
+
+let _membersRef = null;
+async function initHousehold(user, householdId) {
+  HOUSEHOLD_ID = householdId;
+  ROOT = db.ref('households/' + householdId);
+  S.myUid = user.uid;
+  if (_membersRef) _membersRef.off('value');
+  _membersRef = db.ref('households/' + householdId + '/members');
+  _membersRef.on('value', snap => {
+    const members = snap.val() || {};
+    const uids = Object.keys(members);
+    S.members = members;
+    S.partnerUid = uids.find(u => u !== user.uid) || null;
+    renderTodoFilters();
+    renderSettingsUsers();
+    if (uids.length >= 2) {
+      ['screen-auth','screen-setup','screen-waiting'].forEach(s => {
+        const el = document.getElementById(s); if (el) el.style.display = 'none';
+      });
+      attachRootListener();
+    } else {
+      showWaitingScreen(householdId);
+    }
+  });
+}
+
+let _rootListenerAttached = false;
+let _qnListenerAttached = false;
+function attachRootListener() {
+  if (_rootListenerAttached) return;
+  _rootListenerAttached = true;
+  ROOT.on('value', snap => {
+    const data = snap.val();
+    if (data === null) {
+      ROOT.set({ todos:{}, events:{}, projects:{}, jarIdeas:{}, wiki:{} });
+      return;
+    }
+    S.todos    = data.todos    ? Object.values(data.todos).map(t=>({...t,items:t.items?Object.values(t.items):[]})) : [];
+    S.events   = data.events   ? Object.values(data.events)   : [];
+    S.projects = data.projects ? Object.values(data.projects).map(p=>({...p,items:p.items?Object.values(p.items):[]})) : [];
+    S.jarIdeas = data.jarIdeas ? Object.values(data.jarIdeas) : [];
+    S.checkins = data.checkins ? Object.values(data.checkins) : [];
+    S.wiki = data.wiki ? Object.values(data.wiki).sort((a,b)=>(a.order||0)-(b.order||0)).map(s=>({...s,items:s.items?Object.values(s.items):[]})) : [];
+    hideLoading();
+    renderHome();
+    const active = document.querySelector('.page.active');
+    if (active) {
+      const id = active.id.replace('page-','');
+      const renders = {todo:renderTodos,calendar:renderCal,projects:renderProj,wiki:renderWiki,inspire:renderInspire,more:renderMore};
+      if (renders[id]) renders[id]();
+    }
+    if (_detailTodoId && document.getElementById('m-todo-detail').classList.contains('open')) renderTodoDetail();
+    if (_detailProjId && document.getElementById('m-proj-detail').classList.contains('open')) renderProjDetail();
+    if (_detailEventId && document.getElementById('m-event-detail').classList.contains('open')) renderEventDetail();
+    if (_daySheetDate && document.getElementById('m-day').classList.contains('open')) renderDaySheet();
+  });
+  // Quick note real-time sync — separate listener so both partners see edits live
+  if (!_qnListenerAttached) {
+    _qnListenerAttached = true;
+    ROOT.child('quickNote').on('value', snap => {
+      S.quickNote = snap.val() || {text:'',updatedAt:null};
+      renderQuickNote();
+    });
+  }
+}
+
+// ====== AUTH FUNCTIONS ======
+async function signInWithGoogle() {
+  const btn = document.getElementById('btn-google-signin');
+  if (btn) { btn.disabled = true; btn.textContent = 'Signing in…'; }
+  try { await auth.signInWithPopup(googleProvider); }
+  catch(e) {
+    console.error(e);
+    if (btn) { btn.disabled = false; btn.innerHTML = googleSignInBtnContent(); }
+  }
+}
+
+function googleSignInBtnContent() {
+  return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+  Continue with Google`;
+}
+
+function confirmSignOut() {
+  if (!confirm('Sign out of Cuppel?')) return;
+  if (_membersRef) { _membersRef.off('value'); _membersRef = null; }
+  if (ROOT) { ROOT.off('value'); }
+  ROOT = null; HOUSEHOLD_ID = null;
+  S.myUid = null; S.partnerUid = null; S.members = {};
+  S.todos=[]; S.events=[]; S.projects=[]; S.jarIdeas=[]; S.checkins=[]; S.wiki=[];
+  _rootListenerAttached = false;
+  _qnListenerAttached = false;
+  auth.signOut();
+}
+
+async function createHousehold() {
+  const user = auth.currentUser;
+  if (!user) return;
+  const btn = document.querySelector('#screen-setup .btn-gold');
+  if (btn) { btn.disabled = true; btn.textContent = 'Creating…'; }
+  const hid = db.ref().push().key;
+  const code = generateInviteCode();
+  const expiresAt = Date.now() + 48 * 60 * 60 * 1000;
+  await db.ref().update({
+    [`users/${user.uid}/householdId`]: hid,
+    [`households/${hid}/members/${user.uid}`]: {
+      displayName: user.displayName || user.email,
+      email: user.email,
+      photoURL: user.photoURL || null,
+      joinedAt: new Date().toISOString(),
+    },
+    [`households/${hid}/createdAt`]: new Date().toISOString(),
+    [`inviteCodes/${code}`]: { householdId: hid, createdBy: user.uid, expiresAt },
+  });
+  await initHousehold(user, hid);
+}
+
+async function joinWithCode() {
+  const user = auth.currentUser;
+  if (!user) return;
+  const inp = document.getElementById('join-code-input');
+  const code = (inp ? inp.value.trim() : '').toUpperCase();
+  if (!code || code.length !== 8) { alert('Enter the 8-character invite code.'); return; }
+  const btn = document.querySelector('#screen-setup .btn-ghost');
+  if (btn) { btn.disabled = true; btn.textContent = 'Joining…'; }
+  const codeSnap = await db.ref('inviteCodes/' + code).once('value');
+  const codeData = codeSnap.val();
+  if (!codeData) { alert('Code not found. Double-check with your partner.'); if (btn) { btn.disabled=false; btn.textContent='Join'; } return; }
+  if (Date.now() > codeData.expiresAt) { alert('This code has expired. Ask your partner to generate a new one.'); if (btn) { btn.disabled=false; btn.textContent='Join'; } return; }
+  const hid = codeData.householdId;
+  const membersSnap = await db.ref('households/' + hid + '/members').once('value');
+  if (membersSnap.numChildren() >= 2) { alert('This household is already full.'); if (btn) { btn.disabled=false; btn.textContent='Join'; } return; }
+  await db.ref().update({
+    [`users/${user.uid}/householdId`]: hid,
+    [`households/${hid}/members/${user.uid}`]: {
+      displayName: user.displayName || user.email,
+      email: user.email,
+      photoURL: user.photoURL || null,
+      joinedAt: new Date().toISOString(),
+    },
+    [`inviteCodes/${code}`]: null,
+  });
+  await initHousehold(user, hid);
+}
+
+function generateInviteCode() {
+  return Array.from(crypto.getRandomValues(new Uint8Array(4)))
+    .map(b => b.toString(16).padStart(2,'0')).join('').toUpperCase();
+}
+
+function showWaitingScreen(householdId) {
+  db.ref('inviteCodes').orderByChild('householdId').equalTo(householdId).once('value', snap => {
+    const codes = snap.val();
+    const el = document.getElementById('invite-code-display');
+    if (el && codes) el.textContent = Object.keys(codes)[0];
+  });
+  showScreen('screen-waiting');
+}
+
+function copyInviteLink() {
+  const code = (document.getElementById('invite-code-display')||{}).textContent || '';
+  if (!code) return;
+  const url = location.origin + location.pathname + '?join=' + code;
+  navigator.clipboard.writeText(url).then(() => {
+    const btn = document.getElementById('copy-invite-btn');
+    if (btn) { btn.textContent='Copied!'; setTimeout(()=>{ btn.textContent='Copy invite link'; },2000); }
+  });
+}
+
+function renderTodoFilters() {
+  const container = document.getElementById('todo-member-tabs');
+  if (!container || !S.myUid) return;
+  const me = (S.members[S.myUid]||{}).displayName||'Me';
+  const partner = S.partnerUid ? (S.members[S.partnerUid]||{}).displayName||'Partner' : null;
+  let html = `<div class="tab-btn" onclick="todoFilter('${S.myUid}',this)">${me.split(' ')[0]}</div>`;
+  if (partner) html += `<div class="tab-btn" onclick="todoFilter('${S.partnerUid}',this)">${partner.split(' ')[0]}</div>`;
+  container.innerHTML = html;
+}
+
+function renderSettingsUsers() {
+  const listEl = document.getElementById('settings-users-list');
+  const coupleEl = document.getElementById('settings-couple-name');
+  if (!listEl) return;
+  const members = Object.values(S.members);
+  const firstNames = members.map(m=>(m.displayName||m.email||'').split(' ')[0]);
+  if (coupleEl) coupleEl.textContent = firstNames.join(' & ') || '—';
+  // Update couple pill in top nav
+  const pillName = document.getElementById('couple-pill-name');
+  if (pillName) pillName.textContent = firstNames.join(' & ') || 'Household';
+  const pillAvatars = document.getElementById('couple-avatars');
+  if (pillAvatars) {
+    const colors = [['#E8B86D','#D4854A','#1a0f00'],['#E88A8A','#C45A8A','white']];
+    pillAvatars.innerHTML = Object.values(S.members).slice(0,2).map((m,i)=>{
+      const init = (m.displayName||m.email||'?')[0].toUpperCase();
+      const [c1,c2,ct] = colors[i] || colors[1];
+      return `<div class="c-avatar" style="background:linear-gradient(135deg,${c1},${c2});color:${ct};${i>0?'margin-left:-8px':''}">${init}</div>`;
+    }).join('');
+  }
+  listEl.innerHTML = members.map(m => {
+    const isMe = S.myUid && m === S.members[S.myUid];
+    const name = m.displayName || m.email;
+    const initials = name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    const color = isMe ? 'linear-gradient(135deg,var(--gold),#D4854A)' : 'linear-gradient(135deg,var(--rose),#C45A8A)';
+    const textColor = isMe ? '#1a0f00' : 'white';
+    const label = isMe ? 'You' : 'Partner';
+    return `<div class="settings-user-row">
+      <div class="settings-avatar-initials" style="background:${color};color:${textColor}">${initials}</div>
+      <div style="flex:1">
+        <div style="font-size:14px;font-weight:600;color:var(--text)">${name}</div>
+        <div style="font-size:12px;color:var(--text3)">${m.email||''}</div>
+      </div>
+      <span style="font-size:11px;color:var(--text3);font-weight:500">${label}</span>
+    </div>`;
+  }).join('');
+}
+
+function populateWhoSelects() {
+  ['nt-who','et-who'].forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    const me = (S.members[S.myUid]||{}).displayName || 'Me';
+    const partner = S.partnerUid ? ((S.members[S.partnerUid]||{}).displayName || 'Partner') : null;
+    sel.innerHTML = `<option value="${S.myUid}">${me.split(' ')[0]}</option>` +
+      (partner ? `<option value="${S.partnerUid}">${partner.split(' ')[0]}</option>` : '') +
+      `<option value="both">Both of us</option>`;
+  });
+}
 
 const evColors = {date:'#E88A8A',birthday:'#E8B86D',anniversary:'#C49AE8',appointment:'#7DB89B',social:'#6AB4D4'};
 
@@ -1790,12 +2027,13 @@ document.querySelectorAll('.modal-bg').forEach(m=>m.addEventListener('click',e=>
 function renderHome(){
   const now = new Date();
   const h = now.getHours();
-  document.getElementById('home-greeting').textContent = (h<12?'Good morning':h<17?'Good afternoon':'Good evening')+', Adib ✦';
+  const myFirstName = S.myUid ? ((S.members[S.myUid]||{}).displayName||'').split(' ')[0] || 'there' : 'there';
+  document.getElementById('home-greeting').textContent = (h<12?'Good morning':h<17?'Good afternoon':'Good evening')+', '+myFirstName+' ✦';
   document.getElementById('home-date-str').textContent = now.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
 
   const pending = S.todos.filter(t=>!t.done);
   document.getElementById('hq-tasks').textContent = pending.length;
-  document.getElementById('hq-badge-who').textContent = pending.filter(t=>t.who==='adib').length+' yours';
+  document.getElementById('hq-badge-who').textContent = pending.filter(t=>S.myUid&&(t.who===S.myUid||t.who==='both')).length+' yours';
 
   const todayStart = new Date(); todayStart.setHours(0,0,0,0);
 
@@ -1839,20 +2077,25 @@ function renderHome(){
   if(dot) dot.style.display = pending.length?'block':'none';
 
   // Streak chips
-  function calcStreak(person){
+  function calcStreak(uid){
     let streak=0; const day=new Date(todayStart);
     while(true){
       const ds=day.toISOString().slice(0,10);
-      const hasDone=S.todos.some(t=>t.done&&t.doneAt===ds&&(t.who===person||t.who==='both'));
+      const hasDone=S.todos.some(t=>t.done&&t.doneAt===ds&&(t.who===uid||t.who==='both'));
       if(!hasDone) break;
       streak++; day.setDate(day.getDate()-1);
     }
     return streak;
   }
-  const adibS=calcStreak('adib'), ummeyS=calcStreak('ummey');
+  const pipColors=['#E8B86D','#E88A8A','#7DB89B'];
   let chips='';
-  if(adibS>0) chips+=`<div class="streak-chip"><div class="streak-pip" style="background:var(--gold)"></div>Adib · ${adibS} day${adibS!==1?'s':''} streak</div>`;
-  if(ummeyS>0) chips+=`<div class="streak-chip"><div class="streak-pip" style="background:var(--rose)"></div>Ummey · ${ummeyS} day${ummeyS!==1?'s':''} streak</div>`;
+  Object.entries(S.members).forEach(([uid,m],idx)=>{
+    const s=calcStreak(uid);
+    if(s>0){
+      const name=(m.displayName||m.email||'').split(' ')[0];
+      chips+=`<div class="streak-chip"><div class="streak-pip" style="background:${pipColors[idx%pipColors.length]}"></div>${name} · ${s} day${s!==1?'s':''} streak</div>`;
+    }
+  });
   document.getElementById('streak-row').innerHTML=chips;
 
   // Nudge smart re-trigger: if dismissed, check if it's been 14+ days since last date-type event
@@ -1897,8 +2140,8 @@ function todoFilter(f,el){
 
 function renderTodos(){
   let items = S.todos;
-  if(activeFilter==='adib') items=items.filter(t=>t.who==='adib');
-  else if(activeFilter==='ummey') items=items.filter(t=>t.who==='ummey');
+  if(S.myUid && activeFilter===S.myUid) items=items.filter(t=>t.who===S.myUid);
+  else if(S.partnerUid && activeFilter===S.partnerUid) items=items.filter(t=>t.who===S.partnerUid);
   else if(activeFilter==='chores') items=items.filter(t=>t.cat==='chores');
   else if(activeFilter==='shopping') items=items.filter(t=>t.cat==='shopping');
 
@@ -1936,8 +2179,10 @@ function dueDateTag(due,done){
 }
 
 function todoHTML(t){
-  const whoClass = t.who==='adib'?'todo-who-a':t.who==='ummey'?'todo-who-u':'todo-who-b';
-  const whoLabel = t.who==='adib'?'Adib':t.who==='ummey'?'Ummey':'Both';
+  const whoClass = t.who===S.myUid?'todo-who-a':t.who===S.partnerUid?'todo-who-u':'todo-who-b';
+  const myName = S.myUid ? ((S.members[S.myUid]||{}).displayName||'Me').split(' ')[0] : 'Me';
+  const partnerName = S.partnerUid ? ((S.members[S.partnerUid]||{}).displayName||'Partner').split(' ')[0] : 'Partner';
+  const whoLabel = t.who===S.myUid?myName:t.who===S.partnerUid?partnerName:'Both';
   const items = t.items || [];
   const doneCount = items.filter(i=>i.done).length;
   const expandBtn = items.length
@@ -1988,6 +2233,12 @@ function delTodo(id){
   ROOT.child('todos').child(id).remove();
   showToast('Task deleted',()=>{ ROOT.child('todos').child(id).set(snap); });
 }
+function openAddTodo(){
+  populateWhoSelects();
+  const sel=document.getElementById('nt-who');
+  if(sel&&S.myUid) sel.value=S.myUid;
+  openModal('m-todo');
+}
 function addTodo(){
   const text=document.getElementById('nt-text').value.trim();
   if(!text)return;
@@ -2006,6 +2257,7 @@ function editTodo(id){
   const t=S.todos.find(t=>t.id===id);
   if(!t)return;
   _editingTodoId=id;
+  populateWhoSelects();
   document.getElementById('et-text').value=t.text;
   document.getElementById('et-who').value=t.who;
   document.getElementById('et-cat').value=t.cat;
@@ -2045,8 +2297,10 @@ function renderTodoDetail(){
   const t=S.todos.find(t=>t.id===_detailTodoId);
   if(!t)return;
   document.getElementById('td-title').textContent=t.text;
-  const whoClass=t.who==='adib'?'tag-gold':t.who==='ummey'?'tag-rose':'tag-sage';
-  const whoLabel=t.who==='adib'?'Adib':t.who==='ummey'?'Ummey':'Both';
+  const whoClass=t.who===S.myUid?'tag-gold':t.who===S.partnerUid?'tag-rose':'tag-sage';
+  const myNameD = S.myUid ? ((S.members[S.myUid]||{}).displayName||'Me').split(' ')[0] : 'Me';
+  const partnerNameD = S.partnerUid ? ((S.members[S.partnerUid]||{}).displayName||'Partner').split(' ')[0] : 'Partner';
+  const whoLabel=t.who===S.myUid?myNameD:t.who===S.partnerUid?partnerNameD:'Both';
   document.getElementById('td-meta').innerHTML=`<span class="tag ${whoClass}">${whoLabel}</span><span class="tag tag-dim">${t.cat}</span>`;
   const items=t.items||[];
   document.getElementById('td-subitems').innerHTML=items.length?items.map(si=>`
@@ -2372,19 +2626,9 @@ function delProj(){
   if(snap) showToast('Project deleted',()=>{ ROOT.child('projects').child(pid).set(snap); });
 }
 function resetToSeed(){
-  if(!confirm('Reset all data to defaults? This cannot be undone.'))return;
-  const toObj=arr=>Object.fromEntries(arr.map(x=>[x.id,x]));
-  const wikiObj={};
-  SEED.wiki.forEach(sec=>{
-    const items={}; sec.items.forEach(it=>{ items[it.id]={...it}; });
-    wikiObj[sec.id]={id:sec.id,section:sec.section,iconType:sec.iconType,order:sec.order,items};
-  });
-  ROOT.set({
-    todos:toObj(SEED.todos),events:toObj(SEED.events),
-    projects:toObj(SEED.projects),
-    jarIdeas:Object.fromEntries(SEED.jarIdeas.map((t,i)=>[`j${i}`,{id:`j${i}`,text:t}])),
-    wiki:wikiObj,
-  });
+  if(!ROOT){alert('Not connected to a household.');return;}
+  if(!confirm('Clear all household data? This permanently deletes all todos, events, projects, jar ideas, and wiki entries. This cannot be undone.'))return;
+  ROOT.set({ todos:{}, events:{}, projects:{}, jarIdeas:{}, wiki:{} });
 }
 
 // ====== WIKI ======
@@ -2721,11 +2965,7 @@ function renderQuickNote(){
     },800);
   };
 }
-// Real-time sync for quick note (separate listener so partners see each other's edits live)
-ROOT.child('quickNote').on('value',snap=>{
-  S.quickNote=snap.val()||{text:'',updatedAt:null};
-  renderQuickNote();
-});
+// Real-time sync for quick note is attached in attachRootListener() after household is ready
 
 // ====== SWIPE GESTURES (todo list) ======
 // Right swipe → complete, Left swipe → delete with undo
@@ -2787,13 +3027,22 @@ ROOT.child('quickNote').on('value',snap=>{
 })();
 
 // ====== INIT ======
-// Initial render is handled by the ROOT.on('value') listener above
+// Auth state machine drives all rendering — see auth.onAuthStateChanged above
 
 // Restore nudge dismissed state immediately on load
 (function(){
   if(localStorage.getItem('cuppel_nudge_dismissed_at')){
     const el=document.getElementById('nudge-bar');
     if(el) el.style.display='none';
+  }
+})();
+
+// Auto-fill invite code from ?join=XXXXXXXX URL param
+(function(){
+  const code = new URLSearchParams(location.search).get('join');
+  if(code){
+    const inp=document.getElementById('join-code-input');
+    if(inp) inp.value=code.toUpperCase().slice(0,8);
   }
 })();
 
@@ -2804,5 +3053,55 @@ if ('serviceWorker' in navigator) {
   });
 }
 </script>
+
+<!-- ===== AUTH SCREEN ===== -->
+<div id="screen-auth" class="full-screen-overlay" style="display:none">
+  <div class="auth-card">
+    <div class="auth-lock-icon">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="rgba(232,184,109,0.5)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+    </div>
+    <div class="auth-logo">Cuppel</div>
+    <p class="auth-tagline">Your shared space, just for two.<br>Only your household can see what's inside.</p>
+    <button id="btn-google-signin" class="btn-google" onclick="signInWithGoogle()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+      Continue with Google
+    </button>
+    <p class="auth-privacy">Your data is private. Only you and your partner can access your household.</p>
+  </div>
+</div>
+
+<!-- ===== SETUP SCREEN ===== -->
+<div id="screen-setup" class="full-screen-overlay" style="display:none">
+  <div class="auth-card">
+    <div class="auth-logo">Welcome</div>
+    <p class="auth-tagline" id="setup-name-greeting">Let's get set up.</p>
+    <div class="setup-options">
+      <button class="btn btn-gold" style="width:100%;padding:14px;font-size:15px" onclick="createHousehold()">Create a new household</button>
+      <div class="setup-divider">or join an existing one</div>
+      <div class="setup-join-row">
+        <input class="input" id="join-code-input" placeholder="Enter invite code" maxlength="8" autocapitalize="characters" autocorrect="off" spellcheck="false" style="font-size:16px;text-transform:uppercase;letter-spacing:0.12em;flex:1">
+        <button class="btn btn-ghost" onclick="joinWithCode()">Join</button>
+      </div>
+    </div>
+    <button class="btn btn-ghost btn-sm" style="opacity:0.5;font-size:12px" onclick="auth.signOut()">Sign out &amp; switch account</button>
+  </div>
+</div>
+
+<!-- ===== WAITING SCREEN ===== -->
+<div id="screen-waiting" class="full-screen-overlay" style="display:none">
+  <div class="auth-card">
+    <div class="auth-logo">Household ready</div>
+    <p class="auth-tagline">Share this code with your partner to connect</p>
+    <div class="invite-code-display" id="invite-code-display" style="user-select:all"></div>
+    <button id="copy-invite-btn" class="btn btn-ghost btn-sm" onclick="copyInviteLink()">Copy invite link</button>
+    <div class="waiting-pulse">
+      <div class="waiting-dot"></div>
+      Waiting for your partner to join…
+    </div>
+    <p style="font-size:11px;color:var(--text3);line-height:1.5;max-width:280px">The code expires in 48 hours. Once your partner joins, the app will open automatically.</p>
+    <button class="btn btn-ghost btn-sm" style="margin-top:8px;opacity:0.5;font-size:12px" onclick="confirmSignOut()">Sign out</button>
+  </div>
+</div>
+
 </body>
 </html>

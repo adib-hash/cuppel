@@ -1,5 +1,44 @@
 # Cuppel Changelog
 
+## v3.0.0 — 2026-03-27
+
+### Google Auth + Household Security
+
+**Authentication — Google Sign-In:**
+- Full Google OAuth login via Firebase Auth. The app now requires a Google account before any data is visible.
+- Auth screen with lock icon, Cuppel branding, and "Continue with Google" button (Google G logo SVG — no emojis).
+- Sign-out from Settings page with confirmation dialog.
+
+**Household model — two-person private space:**
+- First-time users choose: Create a new household, or Join an existing one with an invite code.
+- Creating a household generates an 8-character random hex invite code (4 billion combinations), expires in 48 hours, single-use.
+- The waiting screen displays the code + a "Copy invite link" button. The link auto-fills the code for the joining partner via `?join=CODE` URL param.
+- Once two members are in a household, the app opens automatically with no further action needed.
+
+**Firebase Security Rules (`database.rules.json`):**
+- All data moved from `/cuppel/` to `/households/{householdId}/`. New households start empty.
+- `/users/$uid` — only the matching authenticated user can read/write their own profile.
+- `/households/$hid` — read/write requires your UID to exist in `members`. Strangers with the URL see nothing.
+- `/households/$hid/members/$uid` — each user can only add themselves, and only once (`!data.exists()` guard).
+- `/inviteCodes/$code` — any authenticated user can read a code (needed to validate before joining); only the creator can write it. Codes are deleted on use.
+
+**Dynamic identity — no more hardcoded names:**
+- The `who` field on todos now stores the user's Firebase UID (not 'adib'/'ummey').
+- Filter tabs, todo labels, streak chips, greeting, and the "yours" badge all derive names from `S.members[uid].displayName`.
+- Todo filter tabs for household members are rendered dynamically after login — first names from Google profiles.
+- Add/Edit Task "Assign to" selects are populated dynamically with real first names.
+
+**Settings page updated:**
+- Shows both household members (name, email, avatar initials) with "You" / "Partner" labels.
+- "Household" row shows both members' first names (e.g. "Adib & Ummey").
+- Account section with Sign Out button.
+- Developer Tools: "Clear All Data" replaces the old "Reset to Seed Data" (seed data removed).
+
+**One-time Firebase Console setup (user must do):**
+1. Firebase Console → Authentication → Sign-in method → Enable Google
+2. Authorized domains → add `cuppel.ihsan.build`
+3. Realtime Database → Rules → paste contents of `database.rules.json`
+
 ## v2.1.0 — 2026-03-27
 
 ### Clean & Sharpen
