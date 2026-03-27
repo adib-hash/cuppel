@@ -1,5 +1,22 @@
 # Cuppel Changelog
 
+## v2.1.0 — 2026-03-27
+
+### Clean & Sharpen
+
+**Removed: Finances section**
+- Removed the Finances page, Add/Edit modals, sidebar nav item, and More page tile entirely. Finance data was useful but didn't drive daily shared behavior or decision-making — removing it simplifies navigation meaningfully.
+- All finance CSS (~46 lines), JS (~150 lines including 8 functions), HTML (page section, 2 modals, sidebar item), and Firebase state references cleaned up.
+
+**Home: Countdown card (replaces Monthly Spend)**
+- The Monthly Spend quick card is replaced with a "Countdown" card showing days until the next birthday or anniversary from the Calendar. Finds the next annual occurrence (this year or next if already passed) and displays the event name + days remaining. Links to Calendar. Falls back to "No birthdays or anniversaries" if none exist.
+
+**Home: Shared Quick Note**
+- A new "Quick Note" card at the bottom of the Home page. One shared textarea synced to `ROOT.child('quickNote')` in real time — both partners see each other's changes live via a dedicated Firebase listener. Auto-saves 800ms after typing stops, shows a brief "Saved" indicator. Character counter (max 500). iOS-safe font-size (16px, no auto-zoom). The input respects focus state so typing is never overwritten by incoming syncs.
+
+**Home: Check-in freshness prompt**
+- If no weekly check-in has been submitted in 7+ days (or ever), a small amber "Weekly check-in — last done X days ago" chip appears in the Home hero below the streak row. Tapping navigates directly to Inspire. Hidden when up-to-date.
+
 ## v2.0.0 — 2026-03-27
 
 ### UX & Reliability Sprint

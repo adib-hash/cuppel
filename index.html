@@ -550,44 +550,6 @@ textarea.input { resize: vertical; min-height: 80px; }
   border-radius: 999px; text-transform: capitalize;
 }
 
-/* ======== FINANCES ======== */
-.fin-hero {
-  background: linear-gradient(135deg, rgba(232,184,109,0.1), rgba(212,133,74,0.05));
-  border: 1px solid rgba(232,184,109,0.2);
-  border-radius: var(--radius); padding: 26px 28px;
-  margin-bottom: 22px; display: flex; gap: 32px;
-}
-.fin-stat { flex: 1; }
-.fin-stat-val {
-  font-family: 'Playfair Display', serif;
-  font-size: 36px; font-weight: 700; color: var(--gold);
-  line-height: 1; margin-bottom: 4px;
-}
-.fin-stat-lbl { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); }
-.fin-divider { width: 1px; background: var(--border); align-self: stretch; }
-
-.fin-row {
-  display: flex; align-items: center; gap: 14px;
-  padding: 14px 0; border-bottom: 1px solid var(--border);
-}
-.fin-row:last-child { border-bottom: none; }
-.fin-icon-wrap {
-  width: 42px; height: 42px; border-radius: 12px;
-  display: flex; align-items: center; justify-content: center;
-  font-family: 'Playfair Display', serif;
-  font-size: 16px; font-weight: 700;
-  flex-shrink: 0;
-  background: var(--surface2); border: 1px solid var(--border);
-  color: var(--text2);
-  letter-spacing: -0.02em;
-}
-.fin-info { flex: 1; }
-.fin-name { font-size: 14px; font-weight: 500; }
-.fin-freq { font-size: 11px; color: var(--text3); margin-top: 2px; }
-.fin-amt {
-  font-family: 'Playfair Display', serif;
-  font-size: 20px; font-weight: 600; color: var(--text);
-}
 
 /* ======== PROJECTS ======== */
 .proj-card {
@@ -768,9 +730,7 @@ textarea.input { resize: vertical; min-height: 80px; }
   .cal-wrapper { grid-template-columns: 1fr; }
   .grid2 { grid-template-columns: 1fr; }
   .home-quick { grid-template-columns: 1fr 1fr; }
-  .fin-hero { flex-direction: column; gap: 16px; }
-  .fin-divider { display: none; }
-  .inspire-grid { grid-template-columns: 1fr 1fr; }
+.inspire-grid { grid-template-columns: 1fr 1fr; }
   .home-greeting { font-size: 26px; }
   .ph-title { font-size: 26px; }
   .ph-sub { font-size: 14px; }
@@ -852,13 +812,6 @@ textarea.input { resize: vertical; min-height: 80px; }
 .ev-act-btn:hover.del { background: rgba(232,138,138,0.12); border-color: rgba(232,138,138,0.2); color: var(--rose); }
 .ev-act-btn svg { width: 13px; height: 13px; }
 
-/* ======== FINANCE TAGS ======== */
-.fin-tag-row { display: flex; gap: 6px; margin-top: 4px; flex-wrap: wrap; }
-.fin-tag { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 999px; }
-.fin-tag-cat { background: rgba(106,180,212,0.12); color: #6AB4D4; border: 1px solid rgba(106,180,212,0.2); }
-.fin-tag-paid-a { background: rgba(232,184,109,0.1); color: var(--gold2); border: 1px solid rgba(232,184,109,0.15); }
-.fin-tag-paid-u { background: rgba(232,138,138,0.1); color: var(--rose-light); border: 1px solid rgba(232,138,138,0.15); }
-.fin-tag-paid-s { background: rgba(125,184,155,0.1); color: var(--sage-light); border: 1px solid rgba(125,184,155,0.15); }
 
 /* ======== PROJECT DETAIL ======== */
 .proj-card-actions { display: flex; gap: 6px; align-items: flex-start; }
@@ -1007,6 +960,39 @@ textarea.input { resize: vertical; min-height: 80px; }
 .cal-dots { display: flex; gap: 2px; justify-content: center; margin-top: 2px; }
 .cal-dot { width: 4px; height: 4px; border-radius: 50%; flex-shrink: 0; }
 .cal-cell.today .cal-dot { opacity: 0.5; }
+
+/* ======== QUICK NOTE ======== */
+.quick-note-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 18px; margin-top: 16px;
+}
+.quick-note-label {
+  font-size: 10px; font-weight: 600; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--text3); margin-bottom: 10px;
+}
+.quick-note-input {
+  width: 100%; background: transparent; border: none; resize: none;
+  color: var(--text); font-family: 'Sora', sans-serif; font-size: 16px;
+  line-height: 1.6; outline: none; min-height: 72px; max-height: 200px;
+  overflow-y: auto;
+}
+.quick-note-input::placeholder { color: var(--text3); }
+.quick-note-footer {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border);
+}
+.quick-note-status { font-size: 11px; color: var(--sage-light); }
+.quick-note-chars { font-size: 11px; color: var(--text3); }
+
+/* ======== CHECK-IN PROMPT ======== */
+.checkin-prompt {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 12px; color: var(--gold2); cursor: pointer;
+  padding: 8px 12px; border-radius: var(--radius-sm);
+  background: var(--gold-glow); border: 1px solid rgba(232,184,109,0.2);
+  margin-top: 10px; transition: var(--transition);
+}
+.checkin-prompt:hover { background: rgba(232,184,109,0.2); }
 </style>
 </head>
 <body>
@@ -1053,10 +1039,7 @@ textarea.input { resize: vertical; min-height: 80px; }
     <div class="sb-item" id="sb-calendar" onclick="nav('calendar')">
       <span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span> Calendar
     </div>
-    <div class="sb-item" id="sb-finances" onclick="nav('finances')">
-      <span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></span> Finances
-    </div>
-    <div class="sb-item" id="sb-projects" onclick="nav('projects')">
+<div class="sb-item" id="sb-projects" onclick="nav('projects')">
       <span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></span> Projects
     </div>
     <div class="sidebar-label">Our Space</div>
@@ -1083,6 +1066,11 @@ textarea.input { resize: vertical; min-height: 80px; }
           <div class="home-greeting" id="home-greeting">Good evening, Adib ✦</div>
           <div class="home-date" id="home-date-str"></div>
           <div class="streak-row" id="streak-row"></div>
+          <div id="checkin-prompt" class="checkin-prompt" style="display:none" onclick="nav('inspire')">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z"/></svg>
+            Weekly check-in — last done <span class="checkin-prompt-days"></span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
         </div>
       </div>
 
@@ -1104,10 +1092,10 @@ textarea.input { resize: vertical; min-height: 80px; }
           <div class="hq-sub">things to do</div>
           <div class="hq-badge" id="hq-badge-who"></div>
         </div>
-        <div class="hq-card" onclick="nav('finances')">
-          <div class="hq-label">Monthly Spend</div>
-          <div class="hq-value" id="hq-spend">—</div>
-          <div class="hq-sub">across all expenses</div>
+        <div class="hq-card" onclick="nav('calendar')">
+          <div class="hq-label">Countdown</div>
+          <div class="hq-value" id="hq-countdown-val">—</div>
+          <div class="hq-sub" id="hq-countdown-sub">loading…</div>
         </div>
       </div>
 
@@ -1121,6 +1109,15 @@ textarea.input { resize: vertical; min-height: 80px; }
           <div class="hq-label">Date Idea</div>
           <div id="hq-date-idea" style="font-size:14px;font-weight:600;color:var(--gold2);margin-bottom:8px">—</div>
           <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();pickIdea()" style="font-size:11px;padding:5px 13px">Shuffle</button>
+        </div>
+      </div>
+
+      <div class="quick-note-card">
+        <div class="quick-note-label">Quick Note</div>
+        <textarea id="quick-note-input" class="quick-note-input" placeholder="Leave a note for each other…" maxlength="500"></textarea>
+        <div class="quick-note-footer">
+          <span id="quick-note-status" class="quick-note-status"></span>
+          <span id="quick-note-chars" class="quick-note-chars">0 / 500</span>
         </div>
       </div>
     </section>
@@ -1177,26 +1174,7 @@ textarea.input { resize: vertical; min-height: 80px; }
       </div>
     </section>
 
-    <!-- ===== FINANCES ===== -->
-    <section class="page" id="page-finances">
-      <div class="ph">
-        <div class="ph-title">
-          <span class="ph-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></span> Finances
-        </div>
-        <div class="ph-sub">Subscriptions, bills & shared expenses</div>
-      </div>
-      <div class="fin-hero" id="fin-summary"></div>
-      <div class="card">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-          <div class="card-title" style="margin-bottom:0">Recurring</div>
-          <button class="btn btn-gold btn-sm" onclick="openModal('m-fin')">+ Add</button>
-        </div>
-        <div id="fin-list"></div>
-      </div>
-      <div id="fin-breakdown"></div>
-    </section>
-
-    <!-- ===== PROJECTS ===== -->
+<!-- ===== PROJECTS ===== -->
     <section class="page" id="page-projects">
       <div class="ph">
         <div class="ph-title">
@@ -1242,7 +1220,7 @@ textarea.input { resize: vertical; min-height: 80px; }
         <div class="card-title" style="margin-bottom:16px">App Info</div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
           <span style="font-size:14px;color:var(--text2)">Version</span>
-          <span style="font-size:14px;font-weight:600;color:var(--gold)">v2.0.0</span>
+          <span style="font-size:14px;font-weight:600;color:var(--gold)">v2.1.0</span>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
           <span style="font-size:14px;color:var(--text2)">Couple</span>
@@ -1427,42 +1405,6 @@ textarea.input { resize: vertical; min-height: 80px; }
   </div>
 </div>
 
-<!-- FINANCE MODAL -->
-<div class="modal-bg" id="m-fin">
-  <div class="modal">
-    <div class="modal-title">Add Expense</div>
-    <div class="fg"><label class="fl">Name</label>
-      <input class="input" id="nf-name" placeholder="Netflix, Rent, Gym…"></div>
-    <div class="fg"><label class="fl">Amount ($)</label>
-      <input class="input" type="number" id="nf-amt" placeholder="0"></div>
-    <div class="fg"><label class="fl">Frequency</label>
-      <select class="input" id="nf-freq">
-        <option>Monthly</option><option>Annual</option><option>Weekly</option>
-      </select></div>
-    <div class="fg"><label class="fl">Category</label>
-      <select class="input" id="nf-cat">
-        <option value="housing">Housing</option>
-        <option value="food">Food</option>
-        <option value="transport">Transport</option>
-        <option value="health">Health</option>
-        <option value="entertainment">Entertainment</option>
-        <option value="subscriptions">Subscriptions</option>
-        <option value="utilities">Utilities</option>
-        <option value="other">Other</option>
-      </select></div>
-    <div class="fg"><label class="fl">Paid By</label>
-      <select class="input" id="nf-paid">
-        <option value="split">Split</option>
-        <option value="adib">Adib</option>
-        <option value="ummey">Ummey</option>
-      </select></div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('m-fin')">Cancel</button>
-      <button class="btn btn-gold" onclick="addFinance()">Add</button>
-    </div>
-  </div>
-</div>
-
 <!-- PROJECT MODAL -->
 <div class="modal-bg" id="m-proj">
   <div class="modal">
@@ -1638,42 +1580,6 @@ textarea.input { resize: vertical; min-height: 80px; }
   </div>
 </div>
 
-<!-- FINANCE EDIT MODAL -->
-<div class="modal-bg" id="m-fin-edit">
-  <div class="modal">
-    <div class="modal-title">Edit Expense</div>
-    <div class="fg"><label class="fl">Name</label>
-      <input class="input" id="ef-name" placeholder="Netflix, Rent, Gym…"></div>
-    <div class="fg"><label class="fl">Amount ($)</label>
-      <input class="input" type="number" id="ef-amt" placeholder="0"></div>
-    <div class="fg"><label class="fl">Frequency</label>
-      <select class="input" id="ef-freq">
-        <option>Monthly</option><option>Annual</option><option>Weekly</option>
-      </select></div>
-    <div class="fg"><label class="fl">Category</label>
-      <select class="input" id="ef-cat">
-        <option value="housing">Housing</option>
-        <option value="food">Food</option>
-        <option value="transport">Transport</option>
-        <option value="health">Health</option>
-        <option value="entertainment">Entertainment</option>
-        <option value="subscriptions">Subscriptions</option>
-        <option value="utilities">Utilities</option>
-        <option value="other">Other</option>
-      </select></div>
-    <div class="fg"><label class="fl">Paid By</label>
-      <select class="input" id="ef-paid">
-        <option value="split">Split</option>
-        <option value="adib">Adib</option>
-        <option value="ummey">Ummey</option>
-      </select></div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('m-fin-edit')">Cancel</button>
-      <button class="btn btn-gold" onclick="saveEditFin()">Save Changes</button>
-    </div>
-  </div>
-</div>
-
 <!-- OFFLINE BAR -->
 <div id="offline-bar" class="offline-bar">
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0119 12.55M5 12.55a10.94 10.94 0 015.17-2.39M10.71 5.05A16 16 0 0122.56 9M1.42 9a15.91 15.91 0 014.7-2.88M8.53 16.11a6 6 0 016.95 0M12 20h.01"/></svg>
@@ -1742,7 +1648,7 @@ let _detailEventId = null;
 let _daySheetDate = null;
 
 // ====== STATE ======
-let S = { todos:[], events:[], finances:[], projects:[], jarIdeas:[], checkins:[], wiki:[], filter:'all' };
+let S = { todos:[], events:[], projects:[], jarIdeas:[], checkins:[], wiki:[], quickNote:{text:'',updatedAt:null} };
 
 const SEED = {
   todos: [
@@ -1754,11 +1660,6 @@ const SEED = {
     {id:'-ev1', name:"Ummey's Birthday", date:'2026-05-14', type:'birthday'},
     {id:'-ev2', name:'Anniversary', date:'2026-07-22', type:'anniversary'},
     {id:'-ev3', name:'Dentist — Adib', date:'2026-03-28', type:'appointment', time:'10:30', notes:'Routine cleaning. Dr. Kim, Suite 204.'},
-  ],
-  finances: [
-    {id:'-fin1', name:'Rent', amount:2400, freq:'Monthly'},
-    {id:'-fin2', name:'Spotify Duo', amount:17, freq:'Monthly'},
-    {id:'-fin3', name:'Netflix', amount:22, freq:'Monthly'},
   ],
   projects: [
     {id:'-proj1', name:'Italy Trip 2026', desc:'Rome, Florence & the Amalfi Coast', status:'active', progress:35, tasks:12, done:4},
@@ -1809,7 +1710,6 @@ ROOT.on('value', snap => {
     ROOT.set({
       todos:     toObj(SEED.todos),
       events:    toObj(SEED.events),
-      finances:  toObj(SEED.finances),
       projects:  toObj(SEED.projects),
       jarIdeas:  Object.fromEntries(SEED.jarIdeas.map((t,i) => [`j${i}`, {id:`j${i}`,text:t}])),
       wiki:      wikiObj,
@@ -1818,7 +1718,6 @@ ROOT.on('value', snap => {
   }
   S.todos    = data.todos    ? Object.values(data.todos).map(t=>({...t,items:t.items?Object.values(t.items):[]})) : [];
   S.events   = data.events   ? Object.values(data.events)   : [];
-  S.finances = data.finances ? Object.values(data.finances) : [];
   S.projects = data.projects ? Object.values(data.projects).map(p=>({...p,items:p.items?Object.values(p.items):[]})) : [];
   S.jarIdeas = data.jarIdeas ? Object.values(data.jarIdeas) : [];
   S.checkins = data.checkins ? Object.values(data.checkins) : [];
@@ -1828,7 +1727,7 @@ ROOT.on('value', snap => {
   const active = document.querySelector('.page.active');
   if (active) {
     const id = active.id.replace('page-','');
-    const renders = {todo:renderTodos,calendar:renderCal,finances:renderFin,projects:renderProj,wiki:renderWiki,inspire:renderInspire,more:renderMore};
+    const renders = {todo:renderTodos,calendar:renderCal,projects:renderProj,wiki:renderWiki,inspire:renderInspire,more:renderMore};
     if (renders[id]) renders[id]();
   }
   if (_detailTodoId && document.getElementById('m-todo-detail').classList.contains('open')) {
@@ -1857,7 +1756,7 @@ function nav(id) {
   document.querySelectorAll('.bn-item').forEach(i=>i.classList.remove('active'));
   const bn = document.getElementById('bn-'+id);
   if(bn) bn.classList.add('active');
-  const renders = {todo:renderTodos,calendar:renderCal,finances:renderFin,projects:renderProj,wiki:renderWiki,inspire:renderInspire,more:renderMore};
+  const renders = {todo:renderTodos,calendar:renderCal,projects:renderProj,wiki:renderWiki,inspire:renderInspire,more:renderMore};
   if(renders[id]) renders[id]();
 }
 
@@ -1898,10 +1797,32 @@ function renderHome(){
   document.getElementById('hq-tasks').textContent = pending.length;
   document.getElementById('hq-badge-who').textContent = pending.filter(t=>t.who==='adib').length+' yours';
 
-  const monthly = finMonthly();
-  document.getElementById('hq-spend').textContent = '$'+monthly.toLocaleString();
-
   const todayStart = new Date(); todayStart.setHours(0,0,0,0);
+
+  // Countdown to next birthday / anniversary
+  const specials = S.events
+    .filter(e=>e.type==='birthday'||e.type==='anniversary')
+    .map(e=>{
+      const d=new Date(e.date+'T00:00:00');
+      const thisYear=new Date(todayStart.getFullYear(),d.getMonth(),d.getDate());
+      const candidate=thisYear>=todayStart?thisYear:new Date(todayStart.getFullYear()+1,d.getMonth(),d.getDate());
+      return{name:e.name,days:Math.round((candidate-todayStart)/86400000)};
+    })
+    .sort((a,b)=>a.days-b.days);
+  const nextSpecial=specials[0];
+  document.getElementById('hq-countdown-val').textContent=nextSpecial?nextSpecial.days+'d':'—';
+  document.getElementById('hq-countdown-sub').textContent=nextSpecial?nextSpecial.name:'No birthdays or anniversaries';
+
+  // Check-in freshness prompt
+  const lastCheckin=S.checkins.length?[...S.checkins].sort((a,b)=>b.week.localeCompare(a.week))[0]:null;
+  const daysSinceCheckin=lastCheckin?Math.round((Date.now()-new Date(lastCheckin.week+'T00:00:00'))/86400000):999;
+  const checkinPrompt=document.getElementById('checkin-prompt');
+  if(checkinPrompt){
+    checkinPrompt.style.display=daysSinceCheckin>=7?'':'none';
+    const daysEl=checkinPrompt.querySelector('.checkin-prompt-days');
+    if(daysEl) daysEl.textContent=lastCheckin?daysSinceCheckin+'d ago':'never';
+  }
+
   const sorted = [...S.events].sort((a,b)=>new Date(a.date)-new Date(b.date));
   const next = sorted.find(e=>new Date(e.date+'T00:00:00')>=todayStart);
   if(next){
@@ -1954,6 +1875,7 @@ function renderHome(){
   }
 
   pickIdea();
+  renderQuickNote();
 }
 
 function pickIdea(){
@@ -1961,10 +1883,6 @@ function pickIdea(){
   if(!el) return;
   const active = S.jarIdeas.filter(j=>!j.tried);
   el.textContent = active.length ? active[Math.floor(Math.random()*active.length)].text : '—';
-}
-
-function finMonthly(){
-  return S.finances.reduce((s,f)=>s+(f.freq==='Monthly'?f.amount:f.freq==='Annual'?Math.round(f.amount/12):Math.round(f.amount*4.33)),0);
 }
 
 // ====== TODOS ======
@@ -2337,107 +2255,6 @@ function addEvent(){
 }
 
 // ====== FINANCES ======
-function finInitial(name){
-  const words = name.trim().split(/\s+/);
-  if(words.length >= 2) return (words[0][0]+words[1][0]).toUpperCase();
-  return name.slice(0,2).toUpperCase();
-}
-
-function finPaidTag(paid){
-  if(!paid)return'';
-  const cls={adib:'fin-tag-paid-a',ummey:'fin-tag-paid-u',split:'fin-tag-paid-s'};
-  const lbl={adib:'Adib pays',ummey:'Ummey pays',split:'Split'};
-  return`<span class="fin-tag ${cls[paid]||'fin-tag-paid-s'}">${lbl[paid]||paid}</span>`;
-}
-
-function renderFin(){
-  const monthly=finMonthly();
-  document.getElementById('fin-summary').innerHTML=`
-    <div class="fin-stat">
-      <div class="fin-stat-val">$${monthly.toLocaleString()}</div>
-      <div class="fin-stat-lbl">Monthly Total</div>
-    </div>
-    <div class="fin-divider"></div>
-    <div class="fin-stat">
-      <div class="fin-stat-val">$${(monthly*12).toLocaleString()}</div>
-      <div class="fin-stat-lbl">Annual Total</div>
-    </div>
-    <div class="fin-divider"></div>
-    <div class="fin-stat">
-      <div class="fin-stat-val">${S.finances.length}</div>
-      <div class="fin-stat-lbl">Active Items</div>
-    </div>`;
-
-  if(!S.finances.length){
-    document.getElementById('fin-list').innerHTML=`<div class="empty"><div class="empty-icon"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div><div class="empty-text">No expenses yet. Tap + Add to track your first one.</div></div>`;
-    document.getElementById('fin-breakdown').innerHTML='';
-    return;
-  }
-  document.getElementById('fin-list').innerHTML=S.finances.map(f=>`
-    <div class="fin-row">
-      <div class="fin-icon-wrap">${finInitial(f.name)}</div>
-      <div class="fin-info">
-        <div class="fin-name">${f.name}</div>
-        <div class="fin-tag-row">
-          ${f.cat?`<span class="fin-tag fin-tag-cat">${f.cat}</span>`:''}
-          ${finPaidTag(f.paid)}
-        </div>
-        <div class="fin-freq">${f.freq}</div>
-      </div>
-      <div class="fin-amt">$${f.amount.toLocaleString()}</div>
-      <div style="display:flex;gap:4px;margin-left:10px">
-        <div class="icon-btn" onclick="editFin('${f.id}')" title="Edit">${IC.edit}</div>
-        <div class="icon-btn" onclick="delFin('${f.id}')" title="Delete">${IC.trash}</div>
-      </div>
-    </div>`).join('');
-
-  // Category breakdown
-  const catItems=S.finances.filter(f=>f.cat);
-  if(catItems.length){
-    const bycat={};
-    catItems.forEach(f=>{
-      const m=f.freq==='Monthly'?f.amount:f.freq==='Annual'?Math.round(f.amount/12):Math.round(f.amount*4.33);
-      bycat[f.cat]=(bycat[f.cat]||0)+m;
-    });
-    const total=Object.values(bycat).reduce((s,v)=>s+v,0)||1;
-    const sorted=Object.entries(bycat).sort((a,b)=>b[1]-a[1]);
-    document.getElementById('fin-breakdown').innerHTML=`
-      <div class="card" style="margin-top:16px">
-        <div class="card-title" style="margin-bottom:16px">By Category</div>
-        ${sorted.map(([cat,amt])=>`
-          <div style="margin-bottom:12px">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
-              <span style="font-size:13px;color:var(--text2);text-transform:capitalize">${cat}</span>
-              <span style="font-size:13px;font-weight:600;color:var(--text)">$${amt}/mo</span>
-            </div>
-            <div style="height:4px;background:var(--bg3);border-radius:2px;overflow:hidden">
-              <div style="height:100%;border-radius:2px;background:linear-gradient(90deg,var(--gold),var(--rose));width:${Math.round(amt/total*100)}%"></div>
-            </div>
-          </div>`).join('')}
-      </div>`;
-  } else {
-    document.getElementById('fin-breakdown').innerHTML='';
-  }
-}
-
-function delFin(id){
-  const f=S.finances.find(f=>f.id===id);
-  if(!f)return;
-  const snap={...f};
-  ROOT.child('finances').child(id).remove();
-  showToast('Expense deleted',()=>{ ROOT.child('finances').child(id).set(snap); });
-}
-function addFinance(){
-  const name=document.getElementById('nf-name').value.trim();
-  const amount=parseFloat(document.getElementById('nf-amt').value);
-  if(!name||!amount)return;
-  const id=newId();
-  ROOT.child('finances').child(id).set({id,name,amount,freq:document.getElementById('nf-freq').value,cat:document.getElementById('nf-cat').value,paid:document.getElementById('nf-paid').value});
-  closeModal('m-fin');
-  document.getElementById('nf-name').value='';
-  document.getElementById('nf-amt').value='';
-}
-
 // ====== PROJECTS ======
 function renderProj(){
   document.getElementById('proj-list').innerHTML=S.projects.length?S.projects.map(p=>{
@@ -2564,7 +2381,7 @@ function resetToSeed(){
   });
   ROOT.set({
     todos:toObj(SEED.todos),events:toObj(SEED.events),
-    finances:toObj(SEED.finances),projects:toObj(SEED.projects),
+    projects:toObj(SEED.projects),
     jarIdeas:Object.fromEntries(SEED.jarIdeas.map((t,i)=>[`j${i}`,{id:`j${i}`,text:t}])),
     wiki:wikiObj,
   });
@@ -2847,13 +2664,6 @@ function renderMore(){
       desc:'Your shared vault of important information'
     },
     {
-      page:'finances',
-      icon:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>`,
-      iconBg:'rgba(125,184,155,0.15)',iconColor:'var(--sage)',
-      name:'Finances',
-      desc:'Subscriptions, bills & shared expenses'
-    },
-    {
       page:'settings',
       icon:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>`,
       iconBg:'rgba(106,180,212,0.15)',iconColor:'#6AB4D4',
@@ -2878,27 +2688,6 @@ function dismissNudge(){
   localStorage.setItem('cuppel_nudge_dismissed_at', new Date().toISOString());
 }
 
-// ====== FINANCE EDIT ======
-let _editingFinId=null;
-function editFin(id){
-  const f=S.finances.find(f=>f.id===id);
-  if(!f)return;
-  _editingFinId=id;
-  document.getElementById('ef-name').value=f.name;
-  document.getElementById('ef-amt').value=f.amount;
-  document.getElementById('ef-freq').value=f.freq;
-  document.getElementById('ef-cat').value=f.cat||'other';
-  document.getElementById('ef-paid').value=f.paid||'split';
-  openModal('m-fin-edit');
-}
-function saveEditFin(){
-  const name=document.getElementById('ef-name').value.trim();
-  const amount=parseFloat(document.getElementById('ef-amt').value);
-  if(!name||!amount||!_editingFinId)return;
-  ROOT.child('finances').child(_editingFinId).update({name,amount,freq:document.getElementById('ef-freq').value,cat:document.getElementById('ef-cat').value,paid:document.getElementById('ef-paid').value});
-  closeModal('m-fin-edit');
-}
-
 // ====== WIKI REVEAL ALL ======
 let _wikiRevealed=false;
 function toggleWikiAll(){
@@ -2909,6 +2698,34 @@ function toggleWikiAll(){
   const btn=document.getElementById('wiki-reveal-btn');
   if(btn) btn.textContent=_wikiRevealed?'Hide all':'Reveal all';
 }
+
+// ====== QUICK NOTE ======
+let _noteDebounce=null;
+function renderQuickNote(){
+  const inp=document.getElementById('quick-note-input');
+  const chars=document.getElementById('quick-note-chars');
+  if(!inp)return;
+  // Only update value if input is not focused (avoid clobbering in-progress typing)
+  if(document.activeElement!==inp){
+    inp.value=S.quickNote.text||'';
+  }
+  if(chars) chars.textContent=(S.quickNote.text||'').length+' / 500';
+  inp.oninput=()=>{
+    const val=inp.value;
+    if(chars) chars.textContent=val.length+' / 500';
+    clearTimeout(_noteDebounce);
+    _noteDebounce=setTimeout(()=>{
+      ROOT.child('quickNote').set({text:val,updatedAt:new Date().toISOString()});
+      const status=document.getElementById('quick-note-status');
+      if(status){ status.textContent='Saved'; setTimeout(()=>{ status.textContent=''; },1500); }
+    },800);
+  };
+}
+// Real-time sync for quick note (separate listener so partners see each other's edits live)
+ROOT.child('quickNote').on('value',snap=>{
+  S.quickNote=snap.val()||{text:'',updatedAt:null};
+  renderQuickNote();
+});
 
 // ====== SWIPE GESTURES (todo list) ======
 // Right swipe → complete, Left swipe → delete with undo
