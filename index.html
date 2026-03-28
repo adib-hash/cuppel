@@ -41,7 +41,7 @@
   --radius-xs: 8px;
   --nav-h: 64px;
   --bottom-h: 76px;
-  --transition: all 0.28s cubic-bezier(0.4,0,0.2,1);
+  --transition: background-color 0.28s cubic-bezier(0.4,0,0.2,1), border-color 0.28s cubic-bezier(0.4,0,0.2,1), color 0.28s cubic-bezier(0.4,0,0.2,1), opacity 0.28s cubic-bezier(0.4,0,0.2,1), transform 0.28s cubic-bezier(0.4,0,0.2,1), box-shadow 0.28s cubic-bezier(0.4,0,0.2,1);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -58,10 +58,10 @@ body {
   overflow-x: hidden;
 }
 
-/* Ambient background orbs */
+/* Ambient background orbs — absolute to avoid compositing layer on scroll */
 body::before {
   content: '';
-  position: fixed;
+  position: absolute;
   top: -200px; left: -200px;
   width: 600px; height: 600px;
   background: radial-gradient(circle, rgba(232,184,109,0.07) 0%, transparent 70%);
@@ -70,7 +70,7 @@ body::before {
 }
 body::after {
   content: '';
-  position: fixed;
+  position: absolute;
   bottom: -150px; right: -150px;
   width: 500px; height: 500px;
   background: radial-gradient(circle, rgba(232,138,138,0.06) 0%, transparent 70%);
@@ -202,13 +202,22 @@ body::after {
 /* ======== PAGES ======== */
 .page {
   display: none;
-  animation: fadeUp 0.32s cubic-bezier(0.4,0,0.2,1);
+  animation: fadeUp 0.28s cubic-bezier(0.4,0,0.2,1);
 }
 .page.active { display: block; }
+.page.page-exit {
+  display: block;
+  animation: fadeOut 0.15s cubic-bezier(0.4,0,0.2,1) forwards;
+  pointer-events: none;
+}
 
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(14px); }
+  from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
 }
 
 /* ======== PAGE HEADER ======== */
@@ -232,8 +241,6 @@ body::after {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 22px;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
   transition: var(--transition);
 }
 .card:hover { border-color: var(--border2); background: var(--surface2); }
@@ -453,6 +460,12 @@ textarea.input { resize: vertical; min-height: 80px; }
 .todo-check-outer.checked {
   background: linear-gradient(135deg, var(--sage), #4A9B7A);
   border-color: var(--sage);
+  animation: checkPop 0.3s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes checkPop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.25); }
+  100% { transform: scale(1); }
 }
 .todo-check-inner { color: white; font-size: 11px; font-weight: 700; }
 .todo-text { flex: 1; font-size: 14px; font-weight: 400; }
@@ -679,6 +692,9 @@ textarea.input { resize: vertical; min-height: 80px; }
   padding: 20px;
 }
 .modal-bg.open { display: flex; }
+.modal-bg.closing { display: flex; pointer-events: none; }
+.modal-bg.closing .modal { animation: modalOut 0.2s cubic-bezier(0.4,0,0.2,1) forwards; }
+.modal-bg.closing { animation: backdropOut 0.2s cubic-bezier(0.4,0,0.2,1) forwards; }
 .modal {
   background: var(--bg2); border: 1px solid var(--border2);
   border-radius: var(--radius); padding: 28px;
@@ -686,12 +702,20 @@ textarea.input { resize: vertical; min-height: 80px; }
   max-height: 90dvh; overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
-  animation: modalIn 0.25s cubic-bezier(0.4,0,0.2,1);
+  animation: modalIn 0.22s cubic-bezier(0.4,0,0.2,1);
   box-shadow: 0 32px 80px rgba(0,0,0,0.6);
 }
 @keyframes modalIn {
   from { opacity: 0; transform: scale(0.94) translateY(16px); }
   to { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes modalOut {
+  from { opacity: 1; transform: scale(1) translateY(0); }
+  to { opacity: 0; transform: scale(0.94) translateY(12px); }
+}
+@keyframes backdropOut {
+  from { background: rgba(0,0,0,0.65); }
+  to { background: rgba(0,0,0,0); }
 }
 .modal-title {
   font-family: 'Playfair Display', serif;
@@ -724,9 +748,18 @@ textarea.input { resize: vertical; min-height: 80px; }
 }
 .bn-icon { width: 24px; height: 24px; transition: var(--transition); display: flex; align-items: center; justify-content: center; }
 .bn-icon svg { width: 22px; height: 22px; }
-.bn-label { font-size: 10px; font-weight: 600; color: var(--text3); transition: var(--transition); }
+.bn-label { font-size: 10px; font-weight: 600; color: var(--text3); transition: color 0.2s ease; }
 .bn-item.active .bn-label { color: var(--gold); }
-.bn-item.active .bn-icon { color: var(--gold); transform: scale(1.12); }
+.bn-item.active .bn-icon { color: var(--gold); transform: scale(1.08); }
+.bn-item.active::after {
+  content: '';
+  width: 4px; height: 4px; border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 6px rgba(232,184,109,0.5);
+  position: absolute; bottom: 6px;
+  left: 50%; transform: translateX(-50%);
+}
+.bn-item { position: relative; }
 .bn-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--rose); margin-top: -2px; }
 
 /* ======== RESPONSIVE ======== */
@@ -750,12 +783,43 @@ textarea.input { resize: vertical; min-height: 80px; }
   .jar-chip-del, .jar-chip-try { display: flex !important; }
   /* Tighten todo row gap slightly on mobile */
   .todo-main-row { gap: 10px; }
+  /* Calendar cells: larger text and better tap targets */
+  .cal-cell { font-size: 14px; font-weight: 500; min-height: 44px; }
+  .cal-dh { font-size: 12px; }
+  /* Todo filter tabs: scroll horizontally if names are long */
+  .tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; flex-shrink: 0; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab-btn { white-space: nowrap; flex-shrink: 0; }
+  /* Home hero tighter on mobile */
+  .home-hero { padding: 24px 20px; margin-bottom: 16px; }
+  .home-greeting { font-size: 24px; }
+  .home-date { margin-bottom: 14px; }
+  /* Nudge tighter */
+  .nudge { margin-bottom: 16px; padding: 12px 14px; }
+  /* Project detail modal less cramped */
+  .proj-canvas { max-height: 160px; }
+  /* Delete buttons always visible on mobile */
+  .proj-ci-del, .sub-del { opacity: 1 !important; }
 }
 @media (max-width: 500px) {
   .home-quick { grid-template-columns: 1fr 1fr; }
   .inspire-grid { grid-template-columns: 1fr; }
   .grid3 { grid-template-columns: 1fr; }
 }
+
+/* ======== STAGGERED LIST ITEMS ======== */
+.todo-item, .ev-item, .proj-card, .wiki-tile, .hq-card, .more-tile, .checkin-card, .jar-chip-wrap {
+  animation: fadeUp 0.28s cubic-bezier(0.4,0,0.2,1) both;
+}
+.todo-item:nth-child(1), .ev-item:nth-child(1), .proj-card:nth-child(1), .hq-card:nth-child(1), .more-tile:nth-child(1) { animation-delay: 0s; }
+.todo-item:nth-child(2), .ev-item:nth-child(2), .proj-card:nth-child(2), .hq-card:nth-child(2), .more-tile:nth-child(2) { animation-delay: 0.03s; }
+.todo-item:nth-child(3), .ev-item:nth-child(3), .proj-card:nth-child(3), .hq-card:nth-child(3), .more-tile:nth-child(3) { animation-delay: 0.06s; }
+.todo-item:nth-child(4), .ev-item:nth-child(4), .proj-card:nth-child(4) { animation-delay: 0.09s; }
+.todo-item:nth-child(5), .ev-item:nth-child(5), .proj-card:nth-child(5) { animation-delay: 0.12s; }
+.todo-item:nth-child(6), .ev-item:nth-child(6) { animation-delay: 0.15s; }
+.todo-item:nth-child(7), .ev-item:nth-child(7) { animation-delay: 0.18s; }
+.todo-item:nth-child(8), .ev-item:nth-child(8) { animation-delay: 0.21s; }
+.todo-item:nth-child(n+9), .ev-item:nth-child(n+9) { animation-delay: 0.24s; }
 
 /* ======== EMPTY STATE ======== */
 .empty {
@@ -783,7 +847,8 @@ textarea.input { resize: vertical; min-height: 80px; }
   z-index: 600; opacity: 0; pointer-events: none;
   transition: opacity 0.22s, transform 0.22s; white-space: nowrap;
 }
-.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: all; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: all; touch-action: pan-y; }
+.toast.swiping { transition: none !important; }
 .toast-undo { color: var(--gold); font-weight: 700; cursor: pointer; font-size: 13px; padding: 3px 10px; border-radius: 6px; transition: var(--transition); }
 .toast-undo:hover { background: var(--gold-glow); }
 @media (min-width: 901px) { .toast { bottom: 32px; } }
@@ -1115,7 +1180,7 @@ textarea.input { resize: vertical; min-height: 80px; }
     <div class="icon-btn" onclick="nav('settings')" title="Settings" style="width:32px;height:32px;border-radius:9px">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
     </div>
-    <div class="couple-pill" id="couple-pill">
+    <div class="couple-pill" id="couple-pill" onclick="nav('more')">
       <div class="couple-avatars" id="couple-avatars">
         <div class="c-avatar c-avatar-a">—</div>
       </div>
@@ -1322,7 +1387,7 @@ textarea.input { resize: vertical; min-height: 80px; }
         <div class="card-title" style="margin-bottom:16px">App Info</div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
           <span style="font-size:14px;color:var(--text2)">Version</span>
-          <span style="font-size:14px;font-weight:600;color:var(--gold)">v3.3.0</span>
+          <span style="font-size:14px;font-weight:600;color:var(--gold)">v3.4.0</span>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
           <span style="font-size:14px;color:var(--text2)">Household</span>
@@ -1422,9 +1487,9 @@ textarea.input { resize: vertical; min-height: 80px; }
       <div class="bn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></div>
       <div class="bn-label">Projects</div>
     </div>
-    <div class="bn-item" id="bn-more" onclick="nav('more')">
-      <div class="bn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></div>
-      <div class="bn-label">More</div>
+    <div class="bn-item" id="bn-inspire" onclick="nav('inspire')">
+      <div class="bn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z"/></svg></div>
+      <div class="bn-label">Inspire</div>
     </div>
   </div>
 </nav>
@@ -1577,7 +1642,7 @@ textarea.input { resize: vertical; min-height: 80px; }
     <div class="fg"><label class="fl">Notes (optional)</label>
       <textarea class="input" id="ee-notes" placeholder="Any details…" style="min-height:70px"></textarea></div>
     <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('m-event-edit')">Cancel</button>
+      <button class="btn btn-ghost" onclick="cancelEditEvent()">Cancel</button>
       <button class="btn btn-gold" onclick="saveEditEvent()">Save Changes</button>
     </div>
   </div>
@@ -1634,7 +1699,7 @@ textarea.input { resize: vertical; min-height: 80px; }
         <option value="active">Active</option>
       </select></div>
     <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('m-proj-edit')">Cancel</button>
+      <button class="btn btn-ghost" onclick="cancelEditProj()">Cancel</button>
       <button class="btn btn-gold" onclick="saveEditProj()">Save Changes</button>
     </div>
   </div>
@@ -1700,12 +1765,13 @@ textarea.input { resize: vertical; min-height: 80px; }
     <div class="modal-title" id="ed-name" style="margin-bottom:12px"></div>
     <div id="ed-meta" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px"></div>
     <div id="ed-notes-wrap"></div>
-    <div class="modal-footer">
-      <button class="btn btn-danger btn-sm" onclick="delEvent()">Delete</button>
-      <div style="flex:1"></div>
-      <button class="btn btn-ghost btn-sm" onclick="sendEventToCalendar()">+ Google Cal</button>
-      <button class="btn btn-ghost" onclick="closeModal('m-event-detail')">Close</button>
-      <button class="btn btn-gold btn-sm" onclick="openEditEventModal()">Edit</button>
+    <div style="display:flex;flex-direction:column;gap:12px;margin-top:22px;padding-top:18px;border-top:1px solid var(--border)">
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn btn-ghost btn-sm" onclick="sendEventToCalendar()">+ Google Cal</button>
+        <button class="btn btn-gold btn-sm" onclick="openEditEventModal()">Edit</button>
+        <button class="btn btn-ghost" onclick="closeModal('m-event-detail')">Close</button>
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="delEvent()" style="align-self:flex-start;font-size:11px;padding:5px 14px;opacity:0.7">Delete event</button>
     </div>
   </div>
 </div>
@@ -1722,10 +1788,37 @@ textarea.input { resize: vertical; min-height: 80px; }
   <span class="toast-undo" onclick="undoToast()">Undo</span>
 </div>
 
-<div id="app-loading" style="position:fixed;inset:0;background:var(--bg);display:flex;
-  align-items:center;justify-content:center;z-index:9999;color:var(--gold);
-  font-family:'Sora',sans-serif;font-size:15px;letter-spacing:0.06em;">
-  Loading your space…
+<div id="app-loading" style="position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;padding-top:calc(var(--nav-h) + 20px)">
+  <style>
+    .skel { background: linear-gradient(90deg, var(--surface) 25%, var(--surface2) 50%, var(--surface) 75%);
+      background-size: 200% 100%; border-radius: var(--radius-sm); animation: skelPulse 1.5s ease-in-out infinite; }
+    @keyframes skelPulse { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+  </style>
+  <div style="padding:20px 16px">
+    <!-- Hero skeleton -->
+    <div class="skel" style="height:140px;border-radius:var(--radius);margin-bottom:16px"></div>
+    <!-- Nudge skeleton -->
+    <div class="skel" style="height:48px;margin-bottom:16px"></div>
+    <!-- Quick cards skeleton -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+      <div class="skel" style="height:100px;border-radius:var(--radius)"></div>
+      <div class="skel" style="height:100px;border-radius:var(--radius)"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">
+      <div class="skel" style="height:100px;border-radius:var(--radius)"></div>
+      <div class="skel" style="height:100px;border-radius:var(--radius)"></div>
+    </div>
+    <!-- Quick note skeleton -->
+    <div class="skel" style="height:120px;border-radius:var(--radius)"></div>
+  </div>
+  <!-- Bottom nav skeleton -->
+  <div style="position:fixed;bottom:0;left:0;right:0;height:var(--bottom-h);display:flex;gap:4px;padding:12px 16px;background:rgba(13,15,20,0.92)">
+    <div class="skel" style="flex:1;border-radius:8px"></div>
+    <div class="skel" style="flex:1;border-radius:8px"></div>
+    <div class="skel" style="flex:1;border-radius:8px"></div>
+    <div class="skel" style="flex:1;border-radius:8px"></div>
+    <div class="skel" style="flex:1;border-radius:8px"></div>
+  </div>
 </div>
 
 <script>
@@ -2105,17 +2198,47 @@ function populateWhoSelects() {
 const evColors = {date:'#E88A8A',birthday:'#E8B86D',anniversary:'#C49AE8',appointment:'#7DB89B',social:'#6AB4D4'};
 
 // ====== NAV ======
+let _navTransitioning = false;
 function nav(id) {
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById('page-'+id).classList.add('active');
+  const current = document.querySelector('.page.active');
+  const target = document.getElementById('page-'+id);
+  if (!target || target === current || _navTransitioning) return;
+
+  // Update sidebar + bottom nav immediately
   document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
   const sb = document.getElementById('sb-'+id);
   if(sb) sb.classList.add('active');
   document.querySelectorAll('.bn-item').forEach(i=>i.classList.remove('active'));
   const bn = document.getElementById('bn-'+id);
   if(bn) bn.classList.add('active');
+
+  // Crossfade: exit old page, enter new page
+  if (current) {
+    _navTransitioning = true;
+    current.classList.remove('active');
+    current.classList.add('page-exit');
+    current.addEventListener('animationend', function onEnd() {
+      current.removeEventListener('animationend', onEnd);
+      current.classList.remove('page-exit');
+      target.classList.add('active');
+      _navTransitioning = false;
+    }, { once: true });
+    // Fallback in case animationend doesn't fire
+    setTimeout(() => {
+      if (_navTransitioning) {
+        current.classList.remove('page-exit');
+        target.classList.add('active');
+        _navTransitioning = false;
+      }
+    }, 200);
+  } else {
+    target.classList.add('active');
+  }
+
   const renders = {todo:renderTodos,calendar:renderCal,projects:renderProj,wiki:renderWiki,inspire:renderInspire,more:renderMore};
   if(renders[id]) renders[id]();
+  // Scroll to top on page switch
+  window.scrollTo(0, 0);
 }
 
 // ====== MODAL ======
@@ -2140,13 +2263,30 @@ function _unlockScroll(){
   }
 }
 function openModal(id){
-  document.getElementById(id).classList.add('open');
+  const el = document.getElementById(id);
+  el.classList.remove('closing');
+  el.classList.add('open');
   _lockScroll();
 }
-function closeModal(id){
-  if(id==='m-proj-detail'){ closeProjDetail(); return; }
-  document.getElementById(id).classList.remove('open');
-  _unlockScroll();
+function closeModal(id, cb){
+  if(id==='m-proj-detail'){ closeProjDetail(cb); return; }
+  const el = document.getElementById(id);
+  if (!el.classList.contains('open')) { if(cb) cb(); return; }
+  el.classList.add('closing');
+  el.addEventListener('animationend', function onEnd() {
+    el.removeEventListener('animationend', onEnd);
+    el.classList.remove('open', 'closing');
+    _unlockScroll();
+    if(cb) cb();
+  }, { once: true });
+  // Fallback
+  setTimeout(() => {
+    if (el.classList.contains('closing')) {
+      el.classList.remove('open', 'closing');
+      _unlockScroll();
+      if(cb) cb();
+    }
+  }, 250);
 }
 document.querySelectorAll('.modal-bg').forEach(m=>m.addEventListener('click',e=>{
   if(e.target===m) closeModal(m.id);
@@ -2567,10 +2707,11 @@ function renderDaySheet(){
 }
 
 function openAddEventForDay(){
-  closeModal('m-day');
-  document.getElementById('ne-date').value=_daySheetDate||'';
-  document.getElementById('ne-end-date').value='';
-  openModal('m-event');
+  closeModal('m-day', () => {
+    document.getElementById('ne-date').value=_daySheetDate||'';
+    document.getElementById('ne-end-date').value='';
+    openModal('m-event');
+  });
 }
 
 function openEventDetail(id){
@@ -2580,8 +2721,7 @@ function openEventDetail(id){
 }
 
 function openEventDetailFromDay(id){
-  closeModal('m-day');
-  openEventDetail(id);
+  closeModal('m-day', () => { openEventDetail(id); });
 }
 
 function renderEventDetail(){
@@ -2612,6 +2752,7 @@ function renderEventDetail(){
     </div>`:'';
 }
 
+let _returnToEventDetail = false;
 function openEditEventModal(){
   const e=S.events.find(e=>e.id===_detailEventId);
   if(!e)return;
@@ -2621,8 +2762,8 @@ function openEditEventModal(){
   document.getElementById('ee-type').value=e.type;
   document.getElementById('ee-time').value=e.time||'';
   document.getElementById('ee-notes').value=e.notes||'';
-  closeModal('m-event-detail');
-  openModal('m-event-edit');
+  _returnToEventDetail = true;
+  closeModal('m-event-detail', () => { openModal('m-event-edit'); });
 }
 
 function saveEditEvent(){
@@ -2635,7 +2776,18 @@ function saveEditEvent(){
   const time=document.getElementById('ee-time').value||null;
   const notes=document.getElementById('ee-notes').value.trim()||null;
   ROOT.child('events').child(_detailEventId).update({name,date,endDate:endDate||null,type:document.getElementById('ee-type').value,time:time||null,notes:notes||null});
-  closeModal('m-event-edit');
+  const shouldReturn = _returnToEventDetail;
+  _returnToEventDetail = false;
+  closeModal('m-event-edit', () => {
+    if(shouldReturn && _detailEventId) openEventDetail(_detailEventId);
+  });
+}
+function cancelEditEvent(){
+  const shouldReturn = _returnToEventDetail;
+  _returnToEventDetail = false;
+  closeModal('m-event-edit', () => {
+    if(shouldReturn && _detailEventId) openEventDetail(_detailEventId);
+  });
 }
 
 function delEvent(){
@@ -2837,15 +2989,29 @@ function openProjDetail(id){
   });
 }
 
-function closeProjDetail(){
+function closeProjDetail(cb){
   clearTimeout(_canvasDebounce);
   if(_presenceRef){_presenceRef.onDisconnect().cancel();_presenceRef.remove();_presenceRef=null;}
   if(_presenceListenerRef&&_presenceListener){
     _presenceListenerRef.off('value',_presenceListener);
     _presenceListenerRef=null;_presenceListener=null;
   }
-  document.getElementById('m-proj-detail').classList.remove('open');
-  _unlockScroll();
+  const el = document.getElementById('m-proj-detail');
+  if (!el.classList.contains('open')) { if(cb) cb(); return; }
+  el.classList.add('closing');
+  el.addEventListener('animationend', function onEnd() {
+    el.removeEventListener('animationend', onEnd);
+    el.classList.remove('open', 'closing');
+    _unlockScroll();
+    if(cb) cb();
+  }, { once: true });
+  setTimeout(() => {
+    if (el.classList.contains('closing')) {
+      el.classList.remove('open', 'closing');
+      _unlockScroll();
+      if(cb) cb();
+    }
+  }, 250);
 }
 function renderProjDetail(){
   const p=S.projects.find(p=>p.id===_detailProjId);
@@ -2926,13 +3092,20 @@ function openEditProj(){
   document.getElementById('ep-name').value=p.name;
   document.getElementById('ep-desc').value=p.desc;
   document.getElementById('ep-status').value=p.status;
-  openModal('m-proj-edit');
+  closeProjDetail(() => { openModal('m-proj-edit'); });
 }
 function saveEditProj(){
   const name=document.getElementById('ep-name').value.trim();
   if(!name)return;
   ROOT.child('projects').child(_editingProjId).update({name,desc:document.getElementById('ep-desc').value,status:document.getElementById('ep-status').value});
-  closeModal('m-proj-edit');
+  closeModal('m-proj-edit', () => {
+    if(_editingProjId) openProjDetail(_editingProjId);
+  });
+}
+function cancelEditProj(){
+  closeModal('m-proj-edit', () => {
+    if(_editingProjId) openProjDetail(_editingProjId);
+  });
 }
 function delProj(){
   if(!_detailProjId)return;
@@ -3249,15 +3422,47 @@ function showToast(msg, undoFn){
   undoEl.style.display=undoFn?'':'none';
   _toastUndo=undoFn||null;
   clearTimeout(_toastTimer);
+  toast.style.transform=''; // reset any swipe offset
+  toast.classList.remove('swiping');
   toast.classList.add('show');
-  _toastTimer=setTimeout(()=>{ toast.classList.remove('show'); _toastUndo=null; },3500);
+  _toastTimer=setTimeout(()=>{ dismissToast(); },3500);
 }
-function undoToast(){
-  if(_toastUndo) _toastUndo();
-  document.getElementById('toast').classList.remove('show');
+function dismissToast(){
+  const toast=document.getElementById('toast');
+  toast.classList.remove('show','swiping');
+  toast.style.transform='';
   _toastUndo=null;
   clearTimeout(_toastTimer);
 }
+function undoToast(){
+  if(_toastUndo) _toastUndo();
+  dismissToast();
+}
+// Swipe-to-dismiss on toast
+(function(){
+  const toast=document.getElementById('toast');
+  let sy=0, ty=0, swiping=false;
+  toast.addEventListener('touchstart',e=>{
+    sy=e.touches[0].clientY; ty=0; swiping=true;
+    toast.classList.add('swiping');
+  },{passive:true});
+  toast.addEventListener('touchmove',e=>{
+    if(!swiping)return;
+    ty=e.touches[0].clientY-sy;
+    if(ty>0) ty=ty*0.3; // resist upward drag (toast is at bottom)
+    toast.style.transform=`translateX(-50%) translateY(${ty}px)`;
+  },{passive:true});
+  toast.addEventListener('touchend',()=>{
+    if(!swiping)return;
+    swiping=false;
+    toast.classList.remove('swiping');
+    if(ty<-30){ // swiped down (toast moves toward bottom edge)
+      dismissToast();
+    } else {
+      toast.style.transform='';
+    }
+  },{passive:true});
+})();
 
 // ====== CLEAR COMPLETED TODOS ======
 let _lastCleared=null;
@@ -3354,8 +3559,8 @@ function renderQuickNote(){
 // ====== SWIPE GESTURES (todo list) ======
 // Right swipe → complete, Left swipe → delete with undo
 (function(){
-  const THRESHOLD=80, CONFIRM_PX=8;
-  let item=null, startX=0, startY=0, dx=0, confirmed=false;
+  const THRESHOLD=60, CONFIRM_PX=8, VELOCITY_THRESHOLD=0.4;
+  let item=null, startX=0, startY=0, dx=0, confirmed=false, startTime=0;
 
   function cancel(){
     if(item){
@@ -3373,7 +3578,7 @@ function renderQuickNote(){
     const t=e.target.closest('.todo-item');
     if(!t)return;
     item=t; startX=e.touches[0].clientX; startY=e.touches[0].clientY;
-    dx=0; confirmed=false;
+    dx=0; confirmed=false; startTime=Date.now();
   },{passive:true});
 
   container.addEventListener('touchmove',e=>{
@@ -3396,10 +3601,13 @@ function renderQuickNote(){
 
   function onEnd(){
     if(!item||!confirmed){ item=null; return; }
-    if(dx>THRESHOLD){
+    const elapsed = Date.now() - startTime;
+    const velocity = Math.abs(dx) / (elapsed || 1); // px/ms
+    const triggered = Math.abs(dx) > THRESHOLD || (Math.abs(dx) > 30 && velocity > VELOCITY_THRESHOLD);
+    if(triggered && dx>0){
       const id=item.id.replace('ti-','');
       cancel(); toggleTodo(id);
-    } else if(dx<-THRESHOLD){
+    } else if(triggered && dx<0){
       const id=item.id.replace('ti-','');
       cancel(); delTodo(id);
     } else {
