@@ -274,6 +274,8 @@ body::after {
 .btn-sm { padding: 7px 16px; font-size: 12px; }
 .btn-danger { background: rgba(232,138,138,0.15); color: var(--rose); border: 1px solid rgba(232,138,138,0.2); }
 .btn-danger:hover { background: rgba(232,138,138,0.25); }
+.btn-sage { background: rgba(125,184,155,0.15); color: var(--sage-light); border: 1px solid rgba(125,184,155,0.25); }
+.btn-sage:hover { background: rgba(125,184,155,0.28); }
 
 .icon-btn {
   width: 34px; height: 34px; border-radius: 10px;
@@ -332,6 +334,7 @@ textarea.input { resize: vertical; min-height: 80px; }
 }
 .tab-btn.active { background: var(--surface2); color: var(--gold); }
 .tab-btn:hover:not(.active) { color: var(--text2); }
+#todo-member-tabs { display: contents; }
 
 /* ======== HOME ======== */
 .home-hero {
@@ -977,6 +980,27 @@ textarea.input { resize: vertical; min-height: 80px; }
 .proj-file-row:hover .proj-ci-del { opacity: 1; }
 @media (max-width: 900px) { .proj-file-row .proj-ci-del { opacity: 1; } }
 
+/* ======== PROJECT CANVAS ======== */
+.proj-canvas {
+  width: 100%; min-height: 100px; max-height: 240px;
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); color: var(--text);
+  font-family: 'Sora', sans-serif; font-size: 14px; line-height: 1.7;
+  padding: 12px 14px; resize: vertical; outline: none;
+  transition: border-color 0.2s; -webkit-overflow-scrolling: touch;
+}
+.proj-canvas:focus { border-color: var(--border2); }
+.proj-canvas::placeholder { color: var(--text3); }
+.canvas-presence {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 12px; color: var(--sage-light); margin-bottom: 8px;
+}
+.canvas-presence-dot {
+  width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+  background: var(--sage); animation: presencePulse 2s ease-in-out infinite;
+}
+@keyframes presencePulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
+
 /* ======== CAL DOTS ======== */
 .cal-dots { display: flex; gap: 2px; justify-content: center; margin-top: 2px; }
 .cal-dot { width: 4px; height: 4px; border-radius: 50%; flex-shrink: 0; }
@@ -1214,7 +1238,10 @@ textarea.input { resize: vertical; min-height: 80px; }
           <div class="tab-btn active" onclick="todoFilter('all',this)">All</div>
           <span id="todo-member-tabs"></span>
         </div>
-        <button class="btn btn-gold btn-sm" onclick="openAddTodo()">+ Add Task</button>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-ghost btn-sm" onclick="openTemplates()">Templates</button>
+          <button class="btn btn-gold btn-sm" onclick="openAddTodo()">+ Add Task</button>
+        </div>
       </div>
 
       <div id="todo-render"></div>
@@ -1295,7 +1322,7 @@ textarea.input { resize: vertical; min-height: 80px; }
         <div class="card-title" style="margin-bottom:16px">App Info</div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
           <span style="font-size:14px;color:var(--text2)">Version</span>
-          <span style="font-size:14px;font-weight:600;color:var(--gold)">v3.2.0</span>
+          <span style="font-size:14px;font-weight:600;color:var(--gold)">v3.3.0</span>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
           <span style="font-size:14px;color:var(--text2)">Household</span>
@@ -1464,6 +1491,10 @@ textarea.input { resize: vertical; min-height: 80px; }
       <input class="input" type="time" id="ne-time"></div>
     <div class="fg"><label class="fl">Notes (optional)</label>
       <textarea class="input" id="ne-notes" placeholder="Any details…" style="min-height:70px"></textarea></div>
+    <div class="fg" style="display:flex;align-items:center;gap:12px;padding:2px 0">
+      <input type="checkbox" id="ne-send-cal" style="width:18px;height:18px;accent-color:var(--gold);cursor:pointer;flex-shrink:0">
+      <label for="ne-send-cal" style="font-size:13px;color:var(--text2);cursor:pointer;line-height:1.4">Export .ics to add both calendars after saving</label>
+    </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('m-event')">Cancel</button>
       <button class="btn btn-gold" onclick="addEvent()">Add Event</button>
@@ -1503,6 +1534,22 @@ textarea.input { resize: vertical; min-height: 80px; }
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('m-todo-detail')">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- TEMPLATES MODAL -->
+<div class="modal-bg" id="m-templates">
+  <div class="modal">
+    <div class="modal-title">Templates</div>
+    <div id="tpl-list"></div>
+    <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
+      <div class="fg"><label class="fl">Save current active tasks as a template</label>
+        <input class="input" id="tpl-name" placeholder="e.g. Weekly Groceries, Pre-trip Checklist…"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('m-templates')">Close</button>
+      <button class="btn btn-gold" onclick="saveAsTemplate()">Save Template</button>
     </div>
   </div>
 </div>
@@ -1547,6 +1594,11 @@ textarea.input { resize: vertical; min-height: 80px; }
       </div>
     </div>
     <div id="pd-meta" style="margin-bottom:16px"></div>
+    <!-- CANVAS SECTION -->
+    <div style="margin-bottom:20px">
+      <div id="pd-canvas-presence" style="display:none"></div>
+      <textarea id="pd-canvas" class="proj-canvas" placeholder="Notes, links, ideas — just start writing…"></textarea>
+    </div>
     <div id="pd-progress" style="margin-bottom:18px"></div>
     <div id="pd-checklist"></div>
     <div style="display:flex;gap:10px;margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
@@ -1563,7 +1615,7 @@ textarea.input { resize: vertical; min-height: 80px; }
     </div>
     <input type="file" id="proj-file-input" style="display:none" onchange="handleFileSelected(this)">
     <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('m-proj-detail')">Done</button>
+      <button class="btn btn-ghost" onclick="closeProjDetail()">Done</button>
     </div>
   </div>
 </div>
@@ -1651,6 +1703,7 @@ textarea.input { resize: vertical; min-height: 80px; }
     <div class="modal-footer">
       <button class="btn btn-danger btn-sm" onclick="delEvent()">Delete</button>
       <div style="flex:1"></div>
+      <button class="btn btn-ghost btn-sm" onclick="sendEventToCalendar()">Export .ics</button>
       <button class="btn btn-ghost" onclick="closeModal('m-event-detail')">Close</button>
       <button class="btn btn-gold btn-sm" onclick="openEditEventModal()">Edit</button>
     </div>
@@ -1733,7 +1786,7 @@ let S = {
   myUid: null,
   partnerUid: null,
   members: {},
-  todos:[], events:[], projects:[], jarIdeas:[], checkins:[], wiki:[],
+  todos:[], events:[], projects:[], jarIdeas:[], checkins:[], wiki:[], todoTemplates:[],
   quickNote:{text:'',updatedAt:null}
 };
 
@@ -1841,6 +1894,7 @@ function attachRootListener() {
     S.jarIdeas = data.jarIdeas ? Object.values(data.jarIdeas) : [];
     S.checkins = data.checkins ? Object.values(data.checkins) : [];
     S.wiki = data.wiki ? Object.values(data.wiki).sort((a,b)=>(a.order||0)-(b.order||0)).map(s=>({...s,items:s.items?Object.values(s.items):[]})) : [];
+    S.todoTemplates = data.todoTemplates ? Object.values(data.todoTemplates).map(t=>({...t,items:t.items?Object.values(t.items):[]})) : [];
     hideLoading();
     renderHome();
     const active = document.querySelector('.page.active');
@@ -1853,6 +1907,7 @@ function attachRootListener() {
     if (_detailProjId && document.getElementById('m-proj-detail').classList.contains('open')) renderProjDetail();
     if (_detailEventId && document.getElementById('m-event-detail').classList.contains('open')) renderEventDetail();
     if (_daySheetDate && document.getElementById('m-day').classList.contains('open')) renderDaySheet();
+    if (document.getElementById('m-templates').classList.contains('open')) renderTemplateList();
   });
   // Quick note real-time sync — separate listener so both partners see edits live
   if (!_qnListenerAttached) {
@@ -2089,6 +2144,7 @@ function openModal(id){
   _lockScroll();
 }
 function closeModal(id){
+  if(id==='m-proj-detail'){ closeProjDetail(); return; }
   document.getElementById(id).classList.remove('open');
   _unlockScroll();
 }
@@ -2607,6 +2663,8 @@ function addEvent(){
   if(time) obj.time=time;
   if(notes) obj.notes=notes;
   ROOT.child('events').child(id).set(obj);
+  const calCb=document.getElementById('ne-send-cal');
+  if(calCb&&calCb.checked){ downloadICS(obj); calCb.checked=false; }
   closeModal('m-event');
   document.getElementById('ne-name').value='';
   document.getElementById('ne-end-date').value='';
@@ -2614,6 +2672,103 @@ function addEvent(){
   document.getElementById('ne-notes').value='';
 }
 
+// ====== TODO TEMPLATES ======
+function openTemplates(){
+  renderTemplateList();
+  openModal('m-templates');
+}
+function renderTemplateList(){
+  const list=document.getElementById('tpl-list');
+  if(!list)return;
+  if(!S.todoTemplates.length){
+    list.innerHTML='<p style="color:var(--text3);font-size:13px;padding:4px 0">No templates yet. Add tasks to your list, then save as a template.</p>';
+    return;
+  }
+  list.innerHTML=S.todoTemplates.map(t=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)">
+      <div>
+        <div style="font-size:14px;color:var(--text)">${t.name}</div>
+        <div style="font-size:12px;color:var(--text3)">${t.items.length} task${t.items.length!==1?'s':''}</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-sage btn-sm" onclick="loadTemplate('${t.id}')">Use</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteTemplate('${t.id}')">Delete</button>
+      </div>
+    </div>`).join('');
+}
+function saveAsTemplate(){
+  const name=document.getElementById('tpl-name').value.trim();
+  if(!name){showToast('Enter a template name');return;}
+  const pending=S.todos.filter(t=>!t.done);
+  if(!pending.length){showToast('No active tasks to save');return;}
+  const id=newId();
+  const items={};
+  pending.forEach(t=>{const iid=newId();items[iid]={id:iid,text:t.text};});
+  ROOT.child('todoTemplates').child(id).set({id,name,createdAt:Date.now(),items});
+  document.getElementById('tpl-name').value='';
+  showToast('Template saved');
+}
+function loadTemplate(templateId){
+  const tpl=S.todoTemplates.find(t=>t.id===templateId);
+  if(!tpl)return;
+  tpl.items.forEach(item=>{
+    const id=newId();
+    ROOT.child('todos').child(id).set({id,text:item.text,who:S.myUid||'both',done:false});
+  });
+  closeModal('m-templates');
+  showToast(`Loaded "${tpl.name}" — ${tpl.items.length} task${tpl.items.length!==1?'s':''} added`);
+}
+function deleteTemplate(templateId){
+  ROOT.child('todoTemplates').child(templateId).remove();
+  showToast('Template deleted');
+}
+// ====== ICS CALENDAR EXPORT ======
+function escICS(s){
+  return(s||'').replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\n/g,'\\n');
+}
+function addDays(dateStr,n){
+  const d=new Date(dateStr+'T00:00:00');
+  d.setDate(d.getDate()+n);
+  return d.toISOString().slice(0,10).replace(/-/g,'');
+}
+function generateICS(ev){
+  const uid=ev.id+'@cuppel.ihsan.build';
+  const dtStart=ev.date.replace(/-/g,'');
+  const dtEnd=ev.endDate&&ev.endDate!==ev.date?addDays(ev.endDate,1):addDays(ev.date,1);
+  const myEmail=(S.members[S.myUid]||{}).email||'';
+  const myName=S.myUid?((S.members[S.myUid]||{}).displayName||'').split(' ')[0]:'';
+  const partEmail=S.partnerUid?((S.members[S.partnerUid]||{}).email||''):'';
+  const partName=S.partnerUid?((S.members[S.partnerUid]||{}).displayName||'').split(' ')[0]:'';
+  let dtStartLine,dtEndLine;
+  if(ev.time){
+    const[h,m]=ev.time.split(':');
+    dtStartLine=`DTSTART:${dtStart}T${h}${m}00`;
+    dtEndLine=`DTEND:${dtStart}T${String(Number(h)+1).padStart(2,'0')}${m}00`;
+  } else {
+    dtStartLine=`DTSTART;VALUE=DATE:${dtStart}`;
+    dtEndLine=`DTEND;VALUE=DATE:${dtEnd}`;
+  }
+  const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Cuppel//EN','CALSCALE:GREGORIAN','METHOD:REQUEST','BEGIN:VEVENT',`UID:${uid}`,dtStartLine,dtEndLine,`SUMMARY:${escICS(ev.name)}`];
+  if(ev.notes) lines.push(`DESCRIPTION:${escICS(ev.notes)}`);
+  if(myEmail){lines.push(`ORGANIZER;CN="${myName}":mailto:${myEmail}`);lines.push(`ATTENDEE;RSVP=TRUE;CN="${myName}":mailto:${myEmail}`);}
+  if(partEmail) lines.push(`ATTENDEE;RSVP=TRUE;CN="${partName}":mailto:${partEmail}`);
+  lines.push('STATUS:CONFIRMED','END:VEVENT','END:VCALENDAR');
+  return lines.join('\r\n');
+}
+function downloadICS(ev){
+  const content=generateICS(ev);
+  const blob=new Blob([content],{type:'text/calendar;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=(ev.name||'event').replace(/[^a-z0-9]/gi,'_')+'.ics';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('Calendar file downloaded — open it to add to your calendars');
+}
+function sendEventToCalendar(){
+  const e=S.events.find(e=>e.id===_detailEventId);
+  if(e) downloadICS(e);
+}
 // ====== FINANCES ======
 // ====== PROJECTS ======
 function renderProj(){
@@ -2655,14 +2810,61 @@ function addProject(){
 
 // ====== PROJECT DETAIL ======
 let _detailProjId=null;
+let _canvasDebounce=null, _presenceRef=null, _presenceListenerRef=null, _presenceListener=null;
+
 function openProjDetail(id){
   _detailProjId=id;
   renderProjDetail();
   openModal('m-proj-detail');
+  // Canvas: pre-fill textarea
+  const canvasEl=document.getElementById('pd-canvas');
+  if(canvasEl){
+    const p=S.projects.find(p=>p.id===id);
+    canvasEl.value=p?(p.canvas||''):'';
+    canvasEl.oninput=()=>{
+      clearTimeout(_canvasDebounce);
+      _canvasDebounce=setTimeout(()=>{
+        ROOT.child('projects').child(_detailProjId).child('canvas').set(canvasEl.value);
+      },800);
+    };
+  }
+  // Presence: write mine, listen for partner
+  if(!S.myUid)return;
+  const myName=((S.members[S.myUid]||{}).displayName||'Me').split(' ')[0];
+  _presenceRef=ROOT.child('projects').child(id).child('presence').child(S.myUid);
+  _presenceRef.set({name:myName,at:Date.now()});
+  _presenceRef.onDisconnect().remove();
+  _presenceListenerRef=ROOT.child('projects').child(id).child('presence');
+  _presenceListener=_presenceListenerRef.on('value',snap=>{
+    const data=snap.val()||{};
+    const partnerPres=S.partnerUid?data[S.partnerUid]:null;
+    const el=document.getElementById('pd-canvas-presence');
+    if(!el)return;
+    if(partnerPres){
+      el.className='canvas-presence';
+      el.style.display='flex';
+      el.innerHTML=`<div class="canvas-presence-dot"></div>${partnerPres.name} is here`;
+    } else {
+      el.style.display='none';
+    }
+  });
+}
+
+function closeProjDetail(){
+  clearTimeout(_canvasDebounce);
+  if(_presenceRef){_presenceRef.onDisconnect().cancel();_presenceRef.remove();_presenceRef=null;}
+  if(_presenceListenerRef&&_presenceListener){
+    _presenceListenerRef.off('value',_presenceListener);
+    _presenceListenerRef=null;_presenceListener=null;
+  }
+  document.getElementById('m-proj-detail').classList.remove('open');
+  _unlockScroll();
 }
 function renderProjDetail(){
   const p=S.projects.find(p=>p.id===_detailProjId);
   if(!p)return;
+  const canvasEl=document.getElementById('pd-canvas');
+  if(canvasEl&&document.activeElement!==canvasEl) canvasEl.value=p.canvas||'';
   document.getElementById('pd-title').textContent=p.name;
   document.getElementById('pd-meta').innerHTML=`<span class="tag ${p.status==='active'?'tag-sage':'tag-gold'}">${p.status}</span><span style="font-size:13px;color:var(--text3);margin-left:10px">${p.desc}</span>`;
   const items=p.items||[];

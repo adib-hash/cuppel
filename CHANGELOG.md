@@ -1,5 +1,30 @@
 # Cuppel Changelog
 
+## v3.3.0 — 2026-03-28
+
+### Todo Filter Fix, Project Canvas, Todo Templates, Calendar Export
+
+**Todo filter tab layout fix:**
+- Fixed "Adib" and "Ummey" stacking inside a single pill. The `#todo-member-tabs` span wrapper now uses `display: contents`, making the member tab buttons direct flex children of the tab bar — they appear side-by-side with "All" at equal size.
+
+**Project canvas:**
+- Each project detail now opens with a free-form text canvas above the checklist and files.
+- Canvas text auto-saves to Firebase with an 800ms debounce — no save button needed.
+- Live presence indicator: if your partner has the same project open, a pulsing dot and their name appear above the canvas ("Ummey is here").
+- Presence is cleaned up automatically on modal close and on browser/tab disconnect via `onDisconnect().remove()`.
+- Root listener update guard prevents the canvas textarea from being overwritten while the user is actively typing.
+
+**Todo templates:**
+- New "Templates" button on the Todo page header.
+- Save the current active (not-done) task list as a named template.
+- Templates modal shows all saved templates with task count; "Use" loads all template tasks into the current list; "Delete" removes the template.
+- Template list auto-refreshes when the Firebase root listener fires (same pattern as other detail panels).
+
+**Calendar export (.ics):**
+- New "Export .ics to add both calendars after saving" checkbox in the Add Event modal — when checked, a `.ics` file downloads immediately after the event is saved.
+- New "Export .ics" button in the Event Detail footer — downloads a `.ics` for any existing event.
+- Generated file is RFC 5545-compliant with both household members as ATTENDEE entries (RSVP=TRUE), so opening it in Apple Calendar, Google Calendar, or Outlook prompts both people to accept. No backend or API keys required.
+
 ## v3.2.0 — 2026-03-28
 
 ### To-Do UX Overhaul
