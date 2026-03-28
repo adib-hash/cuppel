@@ -1,5 +1,46 @@
 # Cuppel Changelog
 
+## v3.4.0 — 2026-03-28
+
+### Mobile UX Polish — Buttery Smooth Animations, Performance, & Navigation
+
+**Page transitions:**
+- Pages now crossfade smoothly between each other instead of snapping. Old page fades out (150ms), new page fades up (280ms).
+- Pages auto-scroll to top on navigation.
+
+**Modal animations:**
+- All modals now animate out with a scale-down + fade (200ms) instead of snapping closed.
+- Modal chain back-navigation: editing an event from event detail returns to the event detail after save/cancel (same for projects).
+- Day sheet → event detail and day sheet → add event now chain smoothly through animated close → open.
+
+**Performance optimizations:**
+- Removed `backdrop-filter: blur(12px)` from all glass cards — saves GPU compositing on scroll, especially on older iPhones. Kept blur on nav bars and modals only.
+- Changed `transition: all` to explicit properties (`background-color, border-color, color, opacity, transform, box-shadow`) — browser no longer watches every animatable property.
+- Ambient background orbs changed from `position: fixed` to `position: absolute` to avoid creating unnecessary compositing layers on scroll.
+
+**Touch interaction:**
+- Checkbox tap now triggers a satisfying "pop" scale animation (1.0 → 1.25 → 1.0).
+- Todo swipe threshold lowered from 80px to 60px for snappier feel.
+- Added velocity-based swipe detection — a fast flick triggers the action even with less travel distance.
+- Toast notifications can now be swiped down to dismiss.
+
+**Navigation restructure:**
+- Bottom nav "More" tab replaced with "Inspire" — the most engagement-oriented feature is now one tap away.
+- Wiki and Settings remain accessible via the "More" page (tap the couple pill in the top nav, or gear icon for Settings directly).
+
+**Visual polish:**
+- Staggered fade-up animation on list items (todos, events, projects, cards) — each item delays 30ms after the previous for a cascading reveal.
+- Bottom nav active state now shows a glowing gold dot indicator below the active icon.
+- Home hero section tightened on mobile (less padding, smaller greeting text) to show more content above the fold.
+- Calendar cells enlarged on mobile with bigger text (14px) and minimum 44px tap targets.
+- Todo filter tabs now scroll horizontally if partner names are long — no more wrapping.
+- Event detail modal footer reorganized — primary actions (Edit, Google Cal, Close) grouped together, destructive "Delete" separated below with reduced prominence.
+- Project canvas max-height reduced on mobile for less scrolling in project detail.
+- Delete buttons always visible on mobile (no hover required).
+
+**Skeleton loading:**
+- Replaced plain "Loading your space..." text with a shimmer skeleton screen that mirrors the home page layout — hero, cards, and bottom nav pulse while data loads.
+
 ## v3.3.0 — 2026-03-28
 
 ### Todo Filter Fix, Project Canvas, Todo Templates, Calendar Export
