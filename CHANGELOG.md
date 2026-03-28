@@ -20,10 +20,10 @@
 - Templates modal shows all saved templates with task count; "Use" loads all template tasks into the current list; "Delete" removes the template.
 - Template list auto-refreshes when the Firebase root listener fires (same pattern as other detail panels).
 
-**Calendar export (.ics):**
-- New "Export .ics to add both calendars after saving" checkbox in the Add Event modal — when checked, a `.ics` file downloads immediately after the event is saved.
-- New "Export .ics" button in the Event Detail footer — downloads a `.ics` for any existing event.
-- Generated file is RFC 5545-compliant with both household members as ATTENDEE entries (RSVP=TRUE), so opening it in Apple Calendar, Google Calendar, or Outlook prompts both people to accept. No backend or API keys required.
+**Google Calendar integration:**
+- "Add to Google Calendar after saving" checkbox in the Add Event modal — when checked, opens Google Calendar in a new tab with the event pre-filled and both household members added as guests. Google sends each person a calendar invite email with Accept/Decline.
+- "+ Google Cal" button in the Event Detail footer — same flow for any existing event.
+- No API keys or backend required. Uses Google Calendar's public `calendar/render` URL with `action=TEMPLATE`. Both email addresses are passed as `add` parameters so Google handles the invite emails natively.
 
 ## v3.2.0 — 2026-03-28
 

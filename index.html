@@ -1493,7 +1493,7 @@ textarea.input { resize: vertical; min-height: 80px; }
       <textarea class="input" id="ne-notes" placeholder="Any details…" style="min-height:70px"></textarea></div>
     <div class="fg" style="display:flex;align-items:center;gap:12px;padding:2px 0">
       <input type="checkbox" id="ne-send-cal" style="width:18px;height:18px;accent-color:var(--gold);cursor:pointer;flex-shrink:0">
-      <label for="ne-send-cal" style="font-size:13px;color:var(--text2);cursor:pointer;line-height:1.4">Export .ics to add both calendars after saving</label>
+      <label for="ne-send-cal" style="font-size:13px;color:var(--text2);cursor:pointer;line-height:1.4">Add to Google Calendar after saving</label>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('m-event')">Cancel</button>
@@ -1703,7 +1703,7 @@ textarea.input { resize: vertical; min-height: 80px; }
     <div class="modal-footer">
       <button class="btn btn-danger btn-sm" onclick="delEvent()">Delete</button>
       <div style="flex:1"></div>
-      <button class="btn btn-ghost btn-sm" onclick="sendEventToCalendar()">Export .ics</button>
+      <button class="btn btn-ghost btn-sm" onclick="sendEventToCalendar()">+ Google Cal</button>
       <button class="btn btn-ghost" onclick="closeModal('m-event-detail')">Close</button>
       <button class="btn btn-gold btn-sm" onclick="openEditEventModal()">Edit</button>
     </div>
@@ -2664,7 +2664,7 @@ function addEvent(){
   if(notes) obj.notes=notes;
   ROOT.child('events').child(id).set(obj);
   const calCb=document.getElementById('ne-send-cal');
-  if(calCb&&calCb.checked){ downloadICS(obj); calCb.checked=false; }
+  if(calCb&&calCb.checked){ openGoogleCalendar(obj); calCb.checked=false; }
   closeModal('m-event');
   document.getElementById('ne-name').value='';
   document.getElementById('ne-end-date').value='';
@@ -2722,52 +2722,39 @@ function deleteTemplate(templateId){
   ROOT.child('todoTemplates').child(templateId).remove();
   showToast('Template deleted');
 }
-// ====== ICS CALENDAR EXPORT ======
-function escICS(s){
-  return(s||'').replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\n/g,'\\n');
-}
-function addDays(dateStr,n){
-  const d=new Date(dateStr+'T00:00:00');
-  d.setDate(d.getDate()+n);
-  return d.toISOString().slice(0,10).replace(/-/g,'');
-}
-function generateICS(ev){
-  const uid=ev.id+'@cuppel.ihsan.build';
-  const dtStart=ev.date.replace(/-/g,'');
-  const dtEnd=ev.endDate&&ev.endDate!==ev.date?addDays(ev.endDate,1):addDays(ev.date,1);
-  const myEmail=(S.members[S.myUid]||{}).email||'';
-  const myName=S.myUid?((S.members[S.myUid]||{}).displayName||'').split(' ')[0]:'';
-  const partEmail=S.partnerUid?((S.members[S.partnerUid]||{}).email||''):'';
-  const partName=S.partnerUid?((S.members[S.partnerUid]||{}).displayName||'').split(' ')[0]:'';
-  let dtStartLine,dtEndLine;
+// ====== GOOGLE CALENDAR EXPORT ======
+function gcalDate(ev){
+  // Returns dates/times formatted for Google Calendar URL
+  const start=ev.date.replace(/-/g,'');
   if(ev.time){
     const[h,m]=ev.time.split(':');
-    dtStartLine=`DTSTART:${dtStart}T${h}${m}00`;
-    dtEndLine=`DTEND:${dtStart}T${String(Number(h)+1).padStart(2,'0')}${m}00`;
-  } else {
-    dtStartLine=`DTSTART;VALUE=DATE:${dtStart}`;
-    dtEndLine=`DTEND;VALUE=DATE:${dtEnd}`;
+    const tStart=`${start}T${h}${m}00`;
+    const tEnd=`${start}T${String(Number(h)+1).padStart(2,'0')}${m}00`;
+    return`${tStart}/${tEnd}`;
   }
-  const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Cuppel//EN','CALSCALE:GREGORIAN','METHOD:REQUEST','BEGIN:VEVENT',`UID:${uid}`,dtStartLine,dtEndLine,`SUMMARY:${escICS(ev.name)}`];
-  if(ev.notes) lines.push(`DESCRIPTION:${escICS(ev.notes)}`);
-  if(myEmail){lines.push(`ORGANIZER;CN="${myName}":mailto:${myEmail}`);lines.push(`ATTENDEE;RSVP=TRUE;CN="${myName}":mailto:${myEmail}`);}
-  if(partEmail) lines.push(`ATTENDEE;RSVP=TRUE;CN="${partName}":mailto:${partEmail}`);
-  lines.push('STATUS:CONFIRMED','END:VEVENT','END:VCALENDAR');
-  return lines.join('\r\n');
+  // All-day: end date is exclusive in Google Calendar
+  let endDate=ev.endDate&&ev.endDate!==ev.date?ev.endDate:ev.date;
+  const d=new Date(endDate+'T00:00:00');
+  d.setDate(d.getDate()+1);
+  const end=d.toISOString().slice(0,10).replace(/-/g,'');
+  return`${start}/${end}`;
 }
-function downloadICS(ev){
-  const content=generateICS(ev);
-  const blob=new Blob([content],{type:'text/calendar;charset=utf-8'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  a.href=url;a.download=(ev.name||'event').replace(/[^a-z0-9]/gi,'_')+'.ics';
-  document.body.appendChild(a);a.click();document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-  showToast('Calendar file downloaded — open it to add to your calendars');
+function openGoogleCalendar(ev){
+  const params=new URLSearchParams();
+  params.set('action','TEMPLATE');
+  params.set('text',ev.name||'');
+  params.set('dates',gcalDate(ev));
+  if(ev.notes) params.set('details',ev.notes);
+  // Add both household members as guests
+  const emails=[];
+  if(S.myUid&&(S.members[S.myUid]||{}).email) emails.push(S.members[S.myUid].email);
+  if(S.partnerUid&&(S.members[S.partnerUid]||{}).email) emails.push(S.members[S.partnerUid].email);
+  if(emails.length) params.set('add',emails.join(','));
+  window.open('https://calendar.google.com/calendar/render?'+params.toString(),'_blank','noopener');
 }
 function sendEventToCalendar(){
   const e=S.events.find(e=>e.id===_detailEventId);
-  if(e) downloadICS(e);
+  if(e) openGoogleCalendar(e);
 }
 // ====== FINANCES ======
 // ====== PROJECTS ======
