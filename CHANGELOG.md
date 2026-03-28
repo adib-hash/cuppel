@@ -1,5 +1,27 @@
 # Cuppel Changelog
 
+## v3.2.0 — 2026-03-28
+
+### To-Do UX Overhaul
+
+**Categories removed:**
+- Removed the Category field from Add Task and Edit Task modals entirely
+- Removed the Chores and Shopping filter tabs — filter bar is now clean: All / [You] / [Partner]
+- Removed the category tag from todo rows and the task detail checklist view
+- Cleaned up the mobile CSS rule that was hiding `.tag.tag-dim` on small screens (no longer needed)
+
+**Modal scroll lock — depth-counter fix:**
+- Replaced the boolean `_lockScroll`/`_unlockScroll` pair with a reference-counted version (`_modalDepth`)
+- The body only gets physically locked/unlocked at the 0↔1 boundary — rapid modal transitions (e.g. close Day Sheet → open Event Detail) no longer cause a scroll-position jump because the body stays fixed throughout the transition
+- The backdrop-click handler now calls `closeModal(m.id)` instead of directly manipulating DOM + calling `_unlockScroll()`, so it correctly participates in the counter
+
+**Buttery modal scrolling:**
+- Added `-webkit-overflow-scrolling: touch` to `.modal` for native momentum scrolling on iOS inside tall modals
+- Added `overscroll-behavior: contain` to `.modal` to prevent scroll from chaining through the modal to the background page
+
+**Swipe gesture reliability:**
+- Added `touch-action: pan-y` to `#todo-render` — explicitly tells the browser that vertical touches on the list are for scrolling, not swipe. This removes the ambiguous startup lag and makes both scroll and swipe feel more intentional and immediate.
+
 ## v3.1.0 — 2026-03-28
 
 ### Multi-Day Events + Project File Attachments

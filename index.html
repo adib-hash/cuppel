@@ -681,6 +681,8 @@ textarea.input { resize: vertical; min-height: 80px; }
   border-radius: var(--radius); padding: 28px;
   width: 100%; max-width: 460px;
   max-height: 90dvh; overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
   animation: modalIn 0.25s cubic-bezier(0.4,0,0.2,1);
   box-shadow: 0 32px 80px rgba(0,0,0,0.6);
 }
@@ -743,8 +745,6 @@ textarea.input { resize: vertical; min-height: 80px; }
   .todo-edit, .todo-del { opacity: 1; }
   /* Always show jar chip actions on mobile */
   .jar-chip-del, .jar-chip-try { display: flex !important; }
-  /* Hide category tag from main todo row on mobile to reduce clutter */
-  .todo-main-row .tag.tag-dim { display: none; }
   /* Tighten todo row gap slightly on mobile */
   .todo-main-row { gap: 10px; }
 }
@@ -879,6 +879,7 @@ textarea.input { resize: vertical; min-height: 80px; }
 .offline-bar.show { transform: translateY(0); }
 
 /* ======== SWIPE GESTURES ======== */
+#todo-render { touch-action: pan-y; }
 .todo-item.swiping-right { background: rgba(125,184,155,0.2); border-color: rgba(125,184,155,0.3); }
 .todo-item.swiping-left  { background: rgba(232,138,138,0.2); border-color: rgba(232,138,138,0.3); }
 
@@ -1212,8 +1213,6 @@ textarea.input { resize: vertical; min-height: 80px; }
         <div class="tabs" id="todo-tabs">
           <div class="tab-btn active" onclick="todoFilter('all',this)">All</div>
           <span id="todo-member-tabs"></span>
-          <div class="tab-btn" onclick="todoFilter('chores',this)">Chores</div>
-          <div class="tab-btn" onclick="todoFilter('shopping',this)">Shopping</div>
         </div>
         <button class="btn btn-gold btn-sm" onclick="openAddTodo()">+ Add Task</button>
       </div>
@@ -1296,7 +1295,7 @@ textarea.input { resize: vertical; min-height: 80px; }
         <div class="card-title" style="margin-bottom:16px">App Info</div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
           <span style="font-size:14px;color:var(--text2)">Version</span>
-          <span style="font-size:14px;font-weight:600;color:var(--gold)">v3.1.0</span>
+          <span style="font-size:14px;font-weight:600;color:var(--gold)">v3.2.0</span>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
           <span style="font-size:14px;color:var(--text2)">Household</span>
@@ -1415,13 +1414,6 @@ textarea.input { resize: vertical; min-height: 80px; }
       <select class="input" id="nt-who">
         <option value="both">Both of us</option>
       </select></div>
-    <div class="fg"><label class="fl">Category</label>
-      <select class="input" id="nt-cat">
-        <option value="chores">Chores</option>
-        <option value="shopping">Shopping</option>
-        <option value="admin">Admin</option>
-        <option value="other">Other</option>
-      </select></div>
     <div class="fg"><label class="fl">Due Date (optional)</label>
       <input class="input" type="date" id="nt-due"></div>
     <div class="modal-footer">
@@ -1440,13 +1432,6 @@ textarea.input { resize: vertical; min-height: 80px; }
     <div class="fg"><label class="fl">Assign to</label>
       <select class="input" id="et-who">
         <option value="both">Both of us</option>
-      </select></div>
-    <div class="fg"><label class="fl">Category</label>
-      <select class="input" id="et-cat">
-        <option value="chores">Chores</option>
-        <option value="shopping">Shopping</option>
-        <option value="admin">Admin</option>
-        <option value="other">Other</option>
       </select></div>
     <div class="fg"><label class="fl">Due Date (optional)</label>
       <input class="input" type="date" id="et-due"></div>
@@ -2079,18 +2064,25 @@ function nav(id) {
 }
 
 // ====== MODAL ======
+let _modalDepth=0, _savedScrollY=0;
 function _lockScroll(){
-  const y=window.scrollY;
-  document.body.style.position='fixed';
-  document.body.style.top=`-${y}px`;
-  document.body.style.width='100%';
+  _modalDepth++;
+  if(_modalDepth===1){
+    _savedScrollY=window.scrollY;
+    document.body.style.position='fixed';
+    document.body.style.top=`-${_savedScrollY}px`;
+    document.body.style.width='100%';
+  }
 }
 function _unlockScroll(){
-  const y=Math.abs(parseInt(document.body.style.top||'0'));
-  document.body.style.position='';
-  document.body.style.top='';
-  document.body.style.width='';
-  window.scrollTo(0,y);
+  if(_modalDepth<=0)return;
+  _modalDepth--;
+  if(_modalDepth===0){
+    document.body.style.position='';
+    document.body.style.top='';
+    document.body.style.width='';
+    window.scrollTo(0,_savedScrollY);
+  }
 }
 function openModal(id){
   document.getElementById(id).classList.add('open');
@@ -2101,7 +2093,7 @@ function closeModal(id){
   _unlockScroll();
 }
 document.querySelectorAll('.modal-bg').forEach(m=>m.addEventListener('click',e=>{
-  if(e.target===m){ m.classList.remove('open'); _unlockScroll(); }
+  if(e.target===m) closeModal(m.id);
 }));
 
 // ====== HOME ======
@@ -2223,8 +2215,6 @@ function renderTodos(){
   let items = S.todos;
   if(S.myUid && activeFilter===S.myUid) items=items.filter(t=>t.who===S.myUid);
   else if(S.partnerUid && activeFilter===S.partnerUid) items=items.filter(t=>t.who===S.partnerUid);
-  else if(activeFilter==='chores') items=items.filter(t=>t.cat==='chores');
-  else if(activeFilter==='shopping') items=items.filter(t=>t.cat==='shopping');
 
   const pending=items.filter(t=>!t.done), done=items.filter(t=>t.done);
   const chevOpen=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;transform:rotate(90deg)"><polyline points="9 18 15 12 9 6"/></svg>`;
@@ -2281,7 +2271,6 @@ function todoHTML(t){
       ${dueDateTag(t.due,t.done)}
       ${expandBtn}
       <span class="todo-who ${whoClass}">${whoLabel}</span>
-      <span class="tag tag-dim" style="font-size:10px">${t.cat}</span>
       <span class="todo-edit" onclick="editTodo('${t.id}')">${IC.edit}</span>
       <span class="todo-del" onclick="delTodo('${t.id}')">${IC.trash}</span>
     </div>
@@ -2325,7 +2314,7 @@ function addTodo(){
   if(!text)return;
   const id=newId();
   const due=document.getElementById('nt-due').value||null;
-  const obj={id,text,who:document.getElementById('nt-who').value,cat:document.getElementById('nt-cat').value,done:false};
+  const obj={id,text,who:document.getElementById('nt-who').value,done:false};
   if(due) obj.due=due;
   ROOT.child('todos').child(id).set(obj);
   closeModal('m-todo');
@@ -2341,7 +2330,6 @@ function editTodo(id){
   populateWhoSelects();
   document.getElementById('et-text').value=t.text;
   document.getElementById('et-who').value=t.who;
-  document.getElementById('et-cat').value=t.cat;
   document.getElementById('et-due').value=t.due||'';
   openModal('m-todo-edit');
 }
@@ -2349,7 +2337,7 @@ function saveEditTodo(){
   const text=document.getElementById('et-text').value.trim();
   if(!text)return;
   const due=document.getElementById('et-due').value||null;
-  const upd={text,who:document.getElementById('et-who').value,cat:document.getElementById('et-cat').value,due:due||null};
+  const upd={text,who:document.getElementById('et-who').value,due:due||null};
   ROOT.child('todos').child(_editingTodoId).update(upd);
   closeModal('m-todo-edit');
 }
@@ -2382,7 +2370,7 @@ function renderTodoDetail(){
   const myNameD = S.myUid ? ((S.members[S.myUid]||{}).displayName||'Me').split(' ')[0] : 'Me';
   const partnerNameD = S.partnerUid ? ((S.members[S.partnerUid]||{}).displayName||'Partner').split(' ')[0] : 'Partner';
   const whoLabel=t.who===S.myUid?myNameD:t.who===S.partnerUid?partnerNameD:'Both';
-  document.getElementById('td-meta').innerHTML=`<span class="tag ${whoClass}">${whoLabel}</span><span class="tag tag-dim">${t.cat}</span>`;
+  document.getElementById('td-meta').innerHTML=`<span class="tag ${whoClass}">${whoLabel}</span>`;
   const items=t.items||[];
   document.getElementById('td-subitems').innerHTML=items.length?items.map(si=>`
     <div class="todo-subitem" style="padding:10px 0;border-bottom:1px solid var(--border)">
