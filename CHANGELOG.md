@@ -1,5 +1,26 @@
 # Cuppel Changelog
 
+## v3.5.0 — 2026-03-28
+
+### Save Todo as Template, Overflow Fix, Canvas Resize, Faster Nav
+
+**Save individual todo as template:**
+- Any todo with sub-items now shows a "Save as Template" button in its detail modal.
+- Saves the todo's name as the template name and copies all sub-items into the template.
+- Button is hidden when the todo has no sub-items yet.
+
+**Horizontal scroll fix:**
+- Added `overflow-x: hidden` on `html` to prevent left-right scrolling and blank space on all mobile pages.
+
+**Larger project canvas:**
+- Canvas `min-height` increased to 180px (desktop) / 150px (mobile), `max-height` raised to 50vh / 45vh.
+- Removed the previous 160px cap on mobile — the canvas now takes up meaningful screen real estate.
+
+**Faster page transitions:**
+- Page fade-in reduced from 280ms to 120ms, exit fade from 150ms to 80ms.
+- Removed the `translateY` shift — pages now crossfade with opacity only for a snappier, more instant feel.
+- Staggered list item animations also shortened (150ms).
+
 ## v3.4.0 — 2026-03-28
 
 ### Mobile UX Polish — Buttery Smooth Animations, Performance, & Navigation
