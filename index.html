@@ -16,6 +16,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 <style>
 :root {
   --bg: #0D0F14;
@@ -957,6 +958,24 @@ textarea.input { resize: vertical; min-height: 80px; }
 .proj-ci-edit-input.done { text-decoration: line-through; color: var(--text3); }
 .proj-ci-edit-input:focus { border-bottom-color: var(--gold); color: var(--text); }
 
+/* ======== PROJECT FILES ======== */
+.proj-file-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 0; border-bottom: 1px solid var(--border);
+}
+.proj-file-row:last-child { border-bottom: none; }
+.proj-file-icon { flex-shrink: 0; display: flex; align-items: center; color: var(--text3); }
+.proj-file-info { flex: 1; min-width: 0; }
+.proj-file-name {
+  display: block; font-size: 13px; color: var(--text2); text-decoration: none;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.proj-file-name:hover { color: var(--gold); }
+.proj-file-size { font-size: 11px; color: var(--text3); margin-top: 1px; }
+.proj-file-row .proj-ci-del { opacity: 0; }
+.proj-file-row:hover .proj-ci-del { opacity: 1; }
+@media (max-width: 900px) { .proj-file-row .proj-ci-del { opacity: 1; } }
+
 /* ======== CAL DOTS ======== */
 .cal-dots { display: flex; gap: 2px; justify-content: center; margin-top: 2px; }
 .cal-dot { width: 4px; height: 4px; border-radius: 50%; flex-shrink: 0; }
@@ -1277,7 +1296,7 @@ textarea.input { resize: vertical; min-height: 80px; }
         <div class="card-title" style="margin-bottom:16px">App Info</div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
           <span style="font-size:14px;color:var(--text2)">Version</span>
-          <span style="font-size:14px;font-weight:600;color:var(--gold)">v3.0.0</span>
+          <span style="font-size:14px;font-weight:600;color:var(--gold)">v3.1.0</span>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
           <span style="font-size:14px;color:var(--text2)">Household</span>
@@ -1444,8 +1463,10 @@ textarea.input { resize: vertical; min-height: 80px; }
     <div class="modal-title">Add Event</div>
     <div class="fg"><label class="fl">Event Name</label>
       <input class="input" id="ne-name" placeholder="What's the occasion?"></div>
-    <div class="fg"><label class="fl">Date</label>
+    <div class="fg"><label class="fl">Start Date</label>
       <input class="input" type="date" id="ne-date"></div>
+    <div class="fg"><label class="fl">End Date (optional — for multi-day events)</label>
+      <input class="input" type="date" id="ne-end-date"></div>
     <div class="fg"><label class="fl">Type</label>
       <select class="input" id="ne-type">
         <option value="date">Date Night</option>
@@ -1507,8 +1528,10 @@ textarea.input { resize: vertical; min-height: 80px; }
     <div class="modal-title">Edit Event</div>
     <div class="fg"><label class="fl">Event Name</label>
       <input class="input" id="ee-name" placeholder="What's the occasion?"></div>
-    <div class="fg"><label class="fl">Date</label>
+    <div class="fg"><label class="fl">Start Date</label>
       <input class="input" type="date" id="ee-date"></div>
+    <div class="fg"><label class="fl">End Date (optional — for multi-day events)</label>
+      <input class="input" type="date" id="ee-end-date"></div>
     <div class="fg"><label class="fl">Type</label>
       <select class="input" id="ee-type">
         <option value="date">Date Night</option>
@@ -1545,6 +1568,15 @@ textarea.input { resize: vertical; min-height: 80px; }
       <input class="input" id="pd-new-item" placeholder="Add a task…" onkeydown="if(event.key==='Enter')addProjItem()" style="flex:1">
       <button class="btn btn-gold btn-sm" onclick="addProjItem()" style="white-space:nowrap">+ Add</button>
     </div>
+    <!-- FILES SECTION -->
+    <div id="pd-files-section" style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div id="pd-files-header" style="font-size:13px;font-weight:600;color:var(--text2)">Files</div>
+        <button class="btn btn-ghost btn-sm" id="pd-upload-btn" onclick="triggerFileUpload()">+ Upload</button>
+      </div>
+      <div id="pd-files-list"></div>
+    </div>
+    <input type="file" id="proj-file-input" style="display:none" onchange="handleFileSelected(this)">
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('m-proj-detail')">Done</button>
     </div>
@@ -1687,6 +1719,7 @@ const FIREBASE_CONFIG = {
 firebase.initializeApp(FIREBASE_CONFIG);
 const db = firebase.database();
 const auth = firebase.auth();
+const storage = firebase.storage();
 const googleProvider = new firebase.auth.GoogleAuthProvider();
 let ROOT = null;
 let HOUSEHOLD_ID = null;
@@ -1819,7 +1852,7 @@ function attachRootListener() {
     }
     S.todos    = data.todos    ? Object.values(data.todos).map(t=>({...t,items:t.items?Object.values(t.items):[]})) : [];
     S.events   = data.events   ? Object.values(data.events)   : [];
-    S.projects = data.projects ? Object.values(data.projects).map(p=>({...p,items:p.items?Object.values(p.items):[]})) : [];
+    S.projects = data.projects ? Object.values(data.projects).map(p=>({...p,items:p.items?Object.values(p.items):[],files:p.files?Object.values(p.files):[]})) : [];
     S.jarIdeas = data.jarIdeas ? Object.values(data.jarIdeas) : [];
     S.checkins = data.checkins ? Object.values(data.checkins) : [];
     S.wiki = data.wiki ? Object.values(data.wiki).sort((a,b)=>(a.order||0)-(b.order||0)).map(s=>({...s,items:s.items?Object.values(s.items):[]})) : [];
@@ -2387,11 +2420,19 @@ function renderCal(){
   const days=['Su','Mo','Tu','We','Th','Fr','Sa'];
   document.getElementById('cal-dh').innerHTML=days.map(d=>`<div class="cal-dh">${d}</div>`).join('');
   const first=base.getDay(), daysInM=new Date(y,m+1,0).getDate(), prevDays=new Date(y,m,0).getDate();
-  // Build a map of date -> array of event type colors
+  // Build a map of date -> array of event type colors (handles multi-day ranges)
   const evByDate={};
   S.events.forEach(e=>{
-    if(!evByDate[e.date]) evByDate[e.date]=[];
-    evByDate[e.date].push(evColors[e.type]||'#999');
+    const col=evColors[e.type]||'#999';
+    const start=new Date(e.date+'T00:00:00');
+    const end=e.endDate?new Date(e.endDate+'T00:00:00'):start;
+    const cur=new Date(start);
+    while(cur<=end){
+      const ds=`${cur.getFullYear()}-${String(cur.getMonth()+1).padStart(2,'0')}-${String(cur.getDate()).padStart(2,'0')}`;
+      if(!evByDate[ds]) evByDate[ds]=[];
+      evByDate[ds].push(col);
+      cur.setDate(cur.getDate()+1);
+    }
   });
   let html='';
   for(let i=first-1;i>=0;i--) html+=`<div class="cal-cell other">${prevDays-i}</div>`;
@@ -2410,13 +2451,22 @@ function renderCal(){
     const d=new Date(e.date+'T00:00:00');
     const col=evColors[e.type]||'#999';
     const rel=evRelLabel(e.date);
-    const isPast=d<today;
+    const isPast=e.endDate?new Date(e.endDate+'T00:00:00')<today:d<today;
     const timeStr=e.time?` · ${fmt12(e.time)}`:'';
+    let dateLabel=d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    if(e.endDate&&e.endDate!==e.date){
+      const dEnd=new Date(e.endDate+'T00:00:00');
+      const sameYear=d.getFullYear()===dEnd.getFullYear();
+      const sameMonth=sameYear&&d.getMonth()===dEnd.getMonth();
+      const startFmt=d.toLocaleDateString('en-US',{month:'short',day:'numeric',...(!sameYear?{year:'numeric'}:{})});
+      const endFmt=dEnd.toLocaleDateString('en-US',{month:sameMonth?undefined:'short',day:'numeric',year:'numeric'});
+      dateLabel=`${startFmt} – ${endFmt}`;
+    }
     return `<div class="ev-item ${isPast?'ev-past':''}" onclick="openEventDetail('${e.id}')">
       <div class="ev-dot" style="background:${col};box-shadow:0 0 6px ${col}66"></div>
       <div class="ev-info">
         <div class="ev-name">${e.name}</div>
-        <div class="ev-date">${d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}${timeStr}</div>
+        <div class="ev-date">${dateLabel}${timeStr}</div>
       </div>
       <span class="ev-rel ${rel.cls}">${rel.text}</span>
     </div>`;
@@ -2455,7 +2505,10 @@ function openDay(dateStr){
 }
 
 function renderDaySheet(){
-  const evs=S.events.filter(e=>e.date===_daySheetDate).sort((a,b)=>(a.time||'').localeCompare(b.time||''));
+  const evs=S.events.filter(e=>{
+    if(!e.endDate||e.endDate===e.date) return e.date===_daySheetDate;
+    return e.date<=_daySheetDate&&_daySheetDate<=e.endDate;
+  }).sort((a,b)=>(a.time||'').localeCompare(b.time||''));
   document.getElementById('day-ev-list').innerHTML=evs.length ? evs.map(e=>{
     const c=evColors[e.type]||'#999';
     return `<div class="ds-ev-row" onclick="openEventDetailFromDay('${e.id}')">
@@ -2472,6 +2525,7 @@ function renderDaySheet(){
 function openAddEventForDay(){
   closeModal('m-day');
   document.getElementById('ne-date').value=_daySheetDate||'';
+  document.getElementById('ne-end-date').value='';
   openModal('m-event');
 }
 
@@ -2492,7 +2546,15 @@ function renderEventDetail(){
   document.getElementById('ed-name').textContent=e.name;
   const col=evColors[e.type]||'#999';
   const d=new Date(e.date+'T00:00:00');
-  const dateStr=d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+  let dateStr;
+  if(e.endDate&&e.endDate!==e.date){
+    const dEnd=new Date(e.endDate+'T00:00:00');
+    const startFmt=d.toLocaleDateString('en-US',{month:'long',day:'numeric'});
+    const endFmt=dEnd.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+    dateStr=`${startFmt} – ${endFmt}`;
+  } else {
+    dateStr=d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+  }
   const rel=evRelLabel(e.date);
   document.getElementById('ed-meta').innerHTML=`
     <span class="ev-type-badge" style="background:${col}22;color:${col};border:1px solid ${col}44">${e.type}</span>
@@ -2511,6 +2573,7 @@ function openEditEventModal(){
   if(!e)return;
   document.getElementById('ee-name').value=e.name;
   document.getElementById('ee-date').value=e.date;
+  document.getElementById('ee-end-date').value=e.endDate||'';
   document.getElementById('ee-type').value=e.type;
   document.getElementById('ee-time').value=e.time||'';
   document.getElementById('ee-notes').value=e.notes||'';
@@ -2522,9 +2585,12 @@ function saveEditEvent(){
   const name=document.getElementById('ee-name').value.trim();
   const date=document.getElementById('ee-date').value;
   if(!name||!date||!_detailEventId)return;
+  const endDateRaw=document.getElementById('ee-end-date').value||null;
+  if(endDateRaw&&endDateRaw<date){showToast('End date must be on or after start date');return;}
+  const endDate=(endDateRaw&&endDateRaw!==date)?endDateRaw:null;
   const time=document.getElementById('ee-time').value||null;
   const notes=document.getElementById('ee-notes').value.trim()||null;
-  ROOT.child('events').child(_detailEventId).update({name,date,type:document.getElementById('ee-type').value,time:time||null,notes:notes||null});
+  ROOT.child('events').child(_detailEventId).update({name,date,endDate:endDate||null,type:document.getElementById('ee-type').value,time:time||null,notes:notes||null});
   closeModal('m-event-edit');
 }
 
@@ -2543,15 +2609,19 @@ function addEvent(){
   const name=document.getElementById('ne-name').value.trim();
   const date=document.getElementById('ne-date').value;
   if(!name||!date)return;
+  const endDate=document.getElementById('ne-end-date').value||null;
+  if(endDate&&endDate<date){showToast('End date must be on or after start date');return;}
   const id=newId();
   const time=document.getElementById('ne-time').value||null;
   const notes=document.getElementById('ne-notes').value.trim()||null;
   const obj={id,name,date,type:document.getElementById('ne-type').value};
+  if(endDate&&endDate!==date) obj.endDate=endDate;
   if(time) obj.time=time;
   if(notes) obj.notes=notes;
   ROOT.child('events').child(id).set(obj);
   closeModal('m-event');
   document.getElementById('ne-name').value='';
+  document.getElementById('ne-end-date').value='';
   document.getElementById('ne-time').value='';
   document.getElementById('ne-notes').value='';
 }
@@ -2624,6 +2694,30 @@ function renderProjDetail(){
       <span class="proj-ci-del" onclick="event.stopPropagation();delProjItem('${item.id}')">${IC.close}</span>
     </div>`).join(''):
     `<p style="color:var(--text3);font-size:13px;padding:8px 0">No tasks yet. Add one below.</p>`;
+  // Files section
+  const files=p.files||[];
+  const headerEl=document.getElementById('pd-files-header');
+  const listEl=document.getElementById('pd-files-list');
+  const uploadBtn=document.getElementById('pd-upload-btn');
+  if(headerEl) headerEl.innerHTML=`Files${files.length?` <span style="color:var(--text3);font-weight:400">(${files.length}/10)</span>`:''}`;
+  if(uploadBtn) uploadBtn.disabled=_uploading;
+  if(listEl) listEl.innerHTML=files.length?files.map(f=>{
+    const isImg=f.type&&f.type.startsWith('image/');
+    const isPdf=f.type==='application/pdf';
+    const fileIcon=isImg
+      ?`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`
+      :isPdf
+      ?`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/></svg>`
+      :`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`;
+    return `<div class="proj-file-row">
+      <span class="proj-file-icon" style="color:var(--text2)">${fileIcon}</span>
+      <div class="proj-file-info">
+        <a class="proj-file-name" href="${f.url}" target="_blank" rel="noopener">${f.name}</a>
+        <div class="proj-file-size">${fmtFileSize(f.size)}</div>
+      </div>
+      <span class="proj-ci-del" onclick="deleteProjFile('${p.id}','${f.id}','${f.path}')">${IC.close}</span>
+    </div>`;
+  }).join(''):`<p style="color:var(--text3);font-size:13px;padding:4px 0">No files yet. Upload a receipt, PDF, or photo.</p>`;
 }
 function toggleProjItem(itemId){
   const p=S.projects.find(p=>p.id===_detailProjId);
@@ -2668,11 +2762,76 @@ function delProj(){
   const p=S.projects.find(p=>p.id===_detailProjId);
   const snap=p?{...p}:null;
   const pid=_detailProjId;
+  // Delete Storage files for this project
+  if(p&&p.files&&p.files.length){
+    p.files.forEach(f=>{ if(f.path) storage.ref(f.path).delete().catch(()=>{}); });
+  }
   ROOT.child('projects').child(pid).remove();
   closeModal('m-proj-detail');
   _detailProjId=null;
   if(snap) showToast('Project deleted',()=>{ ROOT.child('projects').child(pid).set(snap); });
 }
+
+// ====== PROJECT FILE UPLOAD ======
+let _uploading=false;
+
+function fmtFileSize(bytes){
+  if(bytes<1024) return bytes+' B';
+  if(bytes<1024*1024) return Math.round(bytes/1024)+' KB';
+  return (bytes/(1024*1024)).toFixed(1)+' MB';
+}
+
+function triggerFileUpload(){
+  if(!_detailProjId)return;
+  const p=S.projects.find(p=>p.id===_detailProjId);
+  if(!p)return;
+  const files=p.files||[];
+  if(files.length>=10){showToast('File limit reached (10 max)');return;}
+  document.getElementById('proj-file-input').value='';
+  document.getElementById('proj-file-input').click();
+}
+
+function handleFileSelected(input){
+  const file=input.files[0];
+  if(!file)return;
+  if(file.size>10*1024*1024){showToast('File too large — 10 MB max');return;}
+  uploadProjFile(file);
+}
+
+function uploadProjFile(file){
+  if(!_detailProjId||!HOUSEHOLD_ID)return;
+  _uploading=true;
+  const btn=document.getElementById('pd-upload-btn');
+  if(btn){btn.disabled=true;btn.textContent='Uploading…';}
+  const fileId=newId();
+  const safeName=file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+  const path=`households/${HOUSEHOLD_ID}/projects/${_detailProjId}/${fileId}_${safeName}`;
+  const ref=storage.ref(path);
+  const task=ref.put(file);
+  task.on('state_changed',
+    null,
+    ()=>{
+      _uploading=false;
+      if(btn){btn.disabled=false;btn.textContent='+ Upload';}
+      showToast('Upload failed — please try again');
+    },
+    async ()=>{
+      const url=await task.snapshot.ref.getDownloadURL();
+      const meta={id:fileId,name:file.name,size:file.size,type:file.type,url,path,uploadedAt:Date.now()};
+      ROOT.child('projects').child(_detailProjId).child('files').child(fileId).set(meta);
+      _uploading=false;
+      if(btn){btn.disabled=false;btn.textContent='+ Upload';}
+      showToast('File uploaded');
+    }
+  );
+}
+
+function deleteProjFile(projectId,fileId,path){
+  ROOT.child('projects').child(projectId).child('files').child(fileId).remove();
+  if(path) storage.ref(path).delete().catch(()=>{});
+  showToast('File removed');
+}
+
 function resetToSeed(){
   if(!ROOT){alert('Not connected to a household.');return;}
   if(!confirm('Clear all household data? This permanently deletes all todos, events, projects, jar ideas, and wiki entries. This cannot be undone.'))return;

@@ -1,5 +1,31 @@
 # Cuppel Changelog
 
+## v3.1.0 — 2026-03-28
+
+### Multi-Day Events + Project File Attachments
+
+**Multi-day calendar events:**
+- Events now support an optional End Date field. A trip from Jan 1–3 shows dots on all three calendar days, not just the first.
+- The "Start Date" label replaces "Date" in both the Add and Edit event modals. An "End Date (optional)" field appears below it.
+- The calendar grid builds date-coverage sets for each event, so every day in a multi-day range gets a colored dot (matching event type).
+- The Day Sheet modal now includes any event whose range overlaps the selected day — not just events starting on that day.
+- Event Detail shows a compact date range ("January 1 – January 3, 2026") when an end date is set. Single-day events display as before.
+- The upcoming events list shows "Jan 1 – 3" or "Jan 31 – Feb 2" for range events.
+- End date is validated client-side: must be on or after the start date.
+
+**Project file attachments:**
+- Files can now be attached to any project — receipts, PDFs, photos, or any document.
+- A "Files" section appears in the project detail modal below the task checklist.
+- "+ Upload" button opens the native file picker. Files upload to Firebase Storage under `/households/{id}/projects/{id}/`.
+- Per-file limit: 10 MB (validated client-side and enforced in `storage.rules`). Per-project limit: 10 files.
+- Each file row shows a type-appropriate icon (image / PDF / generic), filename, size, and a download link. Clicking the filename opens the file in a new tab.
+- Deleting a file removes both the Storage object and the metadata from Realtime Database.
+- Deleting a project also cleans up all its Storage files.
+- Firebase Storage compat SDK (v9.23.0) added. `storage.rules` file added for deploy reference.
+
+**One-time Firebase setup required:**
+1. Firebase Console → Storage → Rules → paste contents of `storage.rules`
+
 ## v3.0.0 — 2026-03-27
 
 ### Google Auth + Household Security

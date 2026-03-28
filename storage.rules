@@ -1,0 +1,14 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /households/{householdId}/projects/{projectId}/{allPaths=**} {
+      // Any authenticated user can read files
+      allow read: if request.auth != null;
+      // Writes (upload) — require auth and enforce 10 MB file size limit
+      allow write: if request.auth != null
+        && request.resource.size <= 10 * 1024 * 1024;
+      // Deletes — require auth
+      allow delete: if request.auth != null;
+    }
+  }
+}
