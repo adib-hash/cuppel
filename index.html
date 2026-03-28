@@ -46,7 +46,7 @@
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-html { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+html { -webkit-tap-highlight-color: transparent; touch-action: manipulation; overflow-x: hidden; }
 
 body {
   font-family: 'Sora', sans-serif;
@@ -202,18 +202,18 @@ body::after {
 /* ======== PAGES ======== */
 .page {
   display: none;
-  animation: fadeUp 0.28s cubic-bezier(0.4,0,0.2,1);
+  animation: fadeIn 0.12s ease-out;
 }
 .page.active { display: block; }
 .page.page-exit {
   display: block;
-  animation: fadeOut 0.15s cubic-bezier(0.4,0,0.2,1) forwards;
+  animation: fadeOut 0.08s ease-out forwards;
   pointer-events: none;
 }
 
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 @keyframes fadeOut {
   from { opacity: 1; }
@@ -796,8 +796,8 @@ textarea.input { resize: vertical; min-height: 80px; }
   .home-date { margin-bottom: 14px; }
   /* Nudge tighter */
   .nudge { margin-bottom: 16px; padding: 12px 14px; }
-  /* Project detail modal less cramped */
-  .proj-canvas { max-height: 160px; }
+  /* Project canvas: generous on mobile */
+  .proj-canvas { min-height: 150px; max-height: 45vh; }
   /* Delete buttons always visible on mobile */
   .proj-ci-del, .sub-del { opacity: 1 !important; }
 }
@@ -809,7 +809,7 @@ textarea.input { resize: vertical; min-height: 80px; }
 
 /* ======== STAGGERED LIST ITEMS ======== */
 .todo-item, .ev-item, .proj-card, .wiki-tile, .hq-card, .more-tile, .checkin-card, .jar-chip-wrap {
-  animation: fadeUp 0.28s cubic-bezier(0.4,0,0.2,1) both;
+  animation: fadeIn 0.15s ease-out both;
 }
 .todo-item:nth-child(1), .ev-item:nth-child(1), .proj-card:nth-child(1), .hq-card:nth-child(1), .more-tile:nth-child(1) { animation-delay: 0s; }
 .todo-item:nth-child(2), .ev-item:nth-child(2), .proj-card:nth-child(2), .hq-card:nth-child(2), .more-tile:nth-child(2) { animation-delay: 0.03s; }
@@ -1047,11 +1047,11 @@ textarea.input { resize: vertical; min-height: 80px; }
 
 /* ======== PROJECT CANVAS ======== */
 .proj-canvas {
-  width: 100%; min-height: 100px; max-height: 240px;
+  width: 100%; min-height: 180px; max-height: 50vh;
   background: var(--bg3); border: 1px solid var(--border);
   border-radius: var(--radius-sm); color: var(--text);
   font-family: 'Sora', sans-serif; font-size: 14px; line-height: 1.7;
-  padding: 12px 14px; resize: vertical; outline: none;
+  padding: 14px 16px; resize: vertical; outline: none;
   transition: border-color 0.2s; -webkit-overflow-scrolling: touch;
 }
 .proj-canvas:focus { border-color: var(--border2); }
@@ -1387,7 +1387,7 @@ textarea.input { resize: vertical; min-height: 80px; }
         <div class="card-title" style="margin-bottom:16px">App Info</div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
           <span style="font-size:14px;color:var(--text2)">Version</span>
-          <span style="font-size:14px;font-weight:600;color:var(--gold)">v3.4.0</span>
+          <span style="font-size:14px;font-weight:600;color:var(--gold)">v3.5.0</span>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
           <span style="font-size:14px;color:var(--text2)">Household</span>
@@ -1598,6 +1598,7 @@ textarea.input { resize: vertical; min-height: 80px; }
       <button class="btn btn-gold btn-sm" onclick="addSubitemFromModal()" style="white-space:nowrap">+ Add</button>
     </div>
     <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" id="td-save-tpl" onclick="saveDetailAsTemplate()" style="margin-right:auto;font-size:11px;padding:6px 14px">Save as Template</button>
       <button class="btn btn-ghost" onclick="closeModal('m-todo-detail')">Done</button>
     </div>
   </div>
@@ -2230,7 +2231,7 @@ function nav(id) {
         target.classList.add('active');
         _navTransitioning = false;
       }
-    }, 200);
+    }, 120);
   } else {
     target.classList.add('active');
   }
@@ -2579,6 +2580,9 @@ function renderTodoDetail(){
       <span class="sub-del" style="opacity:1" onclick="delSubitem('${t.id}','${si.id}')">${IC.close}</span>
     </div>`).join('')
   :`<p style="color:var(--text3);font-size:13px;padding:8px 0">No items yet. Add one below.</p>`;
+  // Show/hide save-as-template button
+  const tplBtn=document.getElementById('td-save-tpl');
+  if(tplBtn) tplBtn.style.display=items.length?'':'none';
 }
 function addSubitemFromModal(){
   const input=document.getElementById('td-new-item');
@@ -2587,6 +2591,17 @@ function addSubitemFromModal(){
   const id=newId();
   ROOT.child('todos').child(_detailTodoId).child('items').child(id).set({id,text,done:false});
   input.value='';
+}
+function saveDetailAsTemplate(){
+  const t=S.todos.find(t=>t.id===_detailTodoId);
+  if(!t)return;
+  const allItems=(t.items||[]);
+  if(!allItems.length){showToast('Add sub-items first');return;}
+  const id=newId();
+  const items={};
+  allItems.forEach(si=>{const iid=newId();items[iid]={id:iid,text:si.text};});
+  ROOT.child('todoTemplates').child(id).set({id,name:t.text,createdAt:Date.now(),items});
+  showToast(`"${t.text}" saved as template`);
 }
 
 // ====== CALENDAR ======
