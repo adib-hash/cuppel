@@ -1,5 +1,20 @@
 # Cuppel Changelog
 
+## v3.5.2 — 2026-03-30
+
+### Template Sub-items, Modal Input Overflow, Mobile Horizontal Scroll
+
+**Template sub-item preservation:**
+- Templates created from "Save as Template" on a todo detail now load correctly as a single parent todo with all sub-items nested inside, instead of creating separate top-level items for each sub-item.
+
+**Modal input field overflow fix:**
+- Date and time inputs no longer bleed off the edge of modals on mobile. Added appearance reset and max-width constraint to date/time inputs, overflow hidden on form groups and modals.
+
+**Mobile horizontal scroll fix:**
+- Changed ambient background orbs from `position: absolute` to `position: fixed` so they no longer expand document dimensions beyond the viewport.
+- Switched `overflow-x: hidden` to `overflow-x: clip` on html and body for more reliable iOS scroll prevention.
+- Added `max-width: 100%` and `overflow-x: clip` to `.main` content area to box in content on all pages.
+
 ## v3.5.1 — 2026-03-30
 
 ### QA: Text Size & Spacing Fixes

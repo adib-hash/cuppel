@@ -46,7 +46,7 @@
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-html { -webkit-tap-highlight-color: transparent; touch-action: manipulation; overflow-x: hidden; }
+html { -webkit-tap-highlight-color: transparent; touch-action: manipulation; overflow-x: clip; }
 
 body {
   font-family: 'Sora', sans-serif;
@@ -55,13 +55,13 @@ body {
   min-height: 100vh;
   min-height: 100dvh;
   font-size: 14px;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
-/* Ambient background orbs — absolute to avoid compositing layer on scroll */
+/* Ambient background orbs — fixed so they don't expand document dimensions */
 body::before {
   content: '';
-  position: absolute;
+  position: fixed;
   top: -200px; left: -200px;
   width: 600px; height: 600px;
   background: radial-gradient(circle, rgba(232,184,109,0.07) 0%, transparent 70%);
@@ -70,7 +70,7 @@ body::before {
 }
 body::after {
   content: '';
-  position: absolute;
+  position: fixed;
   bottom: -150px; right: -150px;
   width: 500px; height: 500px;
   background: radial-gradient(circle, rgba(232,138,138,0.06) 0%, transparent 70%);
@@ -197,6 +197,8 @@ body::after {
   min-height: calc(100dvh - var(--nav-h));
   position: relative;
   z-index: 1;
+  max-width: 100%;
+  overflow-x: clip;
 }
 
 /* ======== PAGES ======== */
@@ -308,8 +310,9 @@ body::after {
 .input::placeholder { color: var(--text3); }
 select.input { cursor: pointer; }
 textarea.input { resize: vertical; min-height: 80px; }
+.input[type="date"], .input[type="time"] { -webkit-appearance: none; appearance: none; min-width: 0; max-width: 100%; }
 
-.fg { margin-bottom: 14px; }
+.fg { margin-bottom: 14px; overflow: hidden; }
 .fl { font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text3); margin-bottom: 6px; display: block; }
 
 /* ======== TAGS ======== */
@@ -700,7 +703,7 @@ textarea.input { resize: vertical; min-height: 80px; }
   background: var(--bg2); border: 1px solid var(--border2);
   border-radius: var(--radius); padding: 28px;
   width: 100%; max-width: 460px;
-  max-height: 90dvh; overflow-y: auto;
+  max-height: 90dvh; overflow-y: auto; overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
   animation: modalIn 0.22s cubic-bezier(0.4,0,0.2,1);
@@ -1388,7 +1391,7 @@ textarea.input { resize: vertical; min-height: 80px; }
         <div class="card-title" style="margin-bottom:16px">App Info</div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
           <span style="font-size:14px;color:var(--text2)">Version</span>
-          <span style="font-size:14px;font-weight:600;color:var(--gold)">v3.5.1</span>
+          <span style="font-size:14px;font-weight:600;color:var(--gold)">v3.5.2</span>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
           <span style="font-size:14px;color:var(--text2)">Household</span>
@@ -2601,7 +2604,7 @@ function saveDetailAsTemplate(){
   const id=newId();
   const items={};
   allItems.forEach(si=>{const iid=newId();items[iid]={id:iid,text:si.text};});
-  ROOT.child('todoTemplates').child(id).set({id,name:t.text,createdAt:Date.now(),items});
+  ROOT.child('todoTemplates').child(id).set({id,name:t.text,createdAt:Date.now(),items,singleItem:true});
   showToast(`"${t.text}" saved as template`);
 }
 
@@ -2879,12 +2882,25 @@ function saveAsTemplate(){
 function loadTemplate(templateId){
   const tpl=S.todoTemplates.find(t=>t.id===templateId);
   if(!tpl)return;
-  tpl.items.forEach(item=>{
-    const id=newId();
-    ROOT.child('todos').child(id).set({id,text:item.text,who:S.myUid||'both',done:false});
-  });
-  closeModal('m-templates');
-  showToast(`Loaded "${tpl.name}" — ${tpl.items.length} task${tpl.items.length!==1?'s':''} added`);
+  if(tpl.singleItem){
+    // Create a single parent todo with all template items as sub-items
+    const todoId=newId();
+    const subItems={};
+    tpl.items.forEach(item=>{
+      const sid=newId();
+      subItems[sid]={id:sid,text:item.text,done:false};
+    });
+    ROOT.child('todos').child(todoId).set({id:todoId,text:tpl.name,who:S.myUid||'both',done:false,items:subItems});
+    closeModal('m-templates');
+    showToast(`Loaded "${tpl.name}" — 1 task with ${tpl.items.length} sub-item${tpl.items.length!==1?'s':''}`);
+  } else {
+    tpl.items.forEach(item=>{
+      const id=newId();
+      ROOT.child('todos').child(id).set({id,text:item.text,who:S.myUid||'both',done:false});
+    });
+    closeModal('m-templates');
+    showToast(`Loaded "${tpl.name}" — ${tpl.items.length} task${tpl.items.length!==1?'s':''} added`);
+  }
 }
 function deleteTemplate(templateId){
   ROOT.child('todoTemplates').child(templateId).remove();
