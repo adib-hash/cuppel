@@ -1,5 +1,16 @@
 # Cuppel Changelog
 
+## v3.5.3 — 2026-03-30
+
+### Long-press Action Sheet for To-Do Items
+
+**Long-press to-do items:**
+- Long-press (hold 500ms) any to-do item to open a native-feeling action sheet with options: Edit, Sub-items, Save as Template, Delete.
+- "Save as Template" directly from the action sheet saves the to-do and its sub-items as a single-item template (requires sub-items to exist).
+- Action sheet uses slide-up animation, backdrop blur, and safe-area-inset padding for iOS.
+- Long-press is cancelled if the finger moves more than 10px (avoids conflicts with scrolling and swipe gestures).
+- Swipe gestures are disabled while the action sheet is open.
+
 ## v3.5.2 — 2026-03-30
 
 ### Template Sub-items, Modal Input Overflow, Mobile Horizontal Scroll

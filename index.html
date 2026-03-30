@@ -955,6 +955,61 @@ textarea.input { resize: vertical; min-height: 80px; }
 .todo-item.swiping-right { background: rgba(125,184,155,0.2); border-color: rgba(125,184,155,0.3); }
 .todo-item.swiping-left  { background: rgba(232,138,138,0.2); border-color: rgba(232,138,138,0.3); }
 
+/* ======== TODO ACTION SHEET (long-press) ======== */
+.action-sheet-bg {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 600; align-items: flex-end; justify-content: center;
+}
+.action-sheet-bg.open { display: flex; }
+.action-sheet {
+  background: var(--bg2); border: 1px solid var(--border2);
+  border-radius: var(--radius) var(--radius) 0 0;
+  width: 100%; max-width: 460px;
+  padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
+  animation: sheetIn 0.22s cubic-bezier(0.4,0,0.2,1);
+}
+.action-sheet-title {
+  padding: 16px 20px 12px;
+  font-size: 14px; font-weight: 600; color: var(--text2);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.action-sheet-btn {
+  display: flex; align-items: center; gap: 14px;
+  width: 100%; padding: 15px 20px;
+  font-family: 'Sora', sans-serif;
+  font-size: 16px; font-weight: 500; color: var(--text);
+  background: none; border: none; cursor: pointer;
+  transition: background 0.15s ease;
+}
+.action-sheet-btn:active { background: var(--surface2); }
+.action-sheet-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+.action-sheet-btn.danger { color: var(--rose); }
+.action-sheet-cancel {
+  display: flex; align-items: center; justify-content: center;
+  width: calc(100% - 16px); margin: 8px auto 0;
+  padding: 14px 20px;
+  font-family: 'Sora', sans-serif;
+  font-size: 16px; font-weight: 600; color: var(--text2);
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); cursor: pointer;
+  transition: background 0.15s ease;
+}
+.action-sheet-cancel:active { background: var(--surface2); }
+@keyframes sheetIn {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+@keyframes sheetOut {
+  from { transform: translateY(0); }
+  to { transform: translateY(100%); }
+}
+.action-sheet-bg.closing .action-sheet { animation: sheetOut 0.18s cubic-bezier(0.4,0,0.2,1) forwards; }
+.action-sheet-bg.closing { animation: backdropOut 0.18s cubic-bezier(0.4,0,0.2,1) forwards; }
+
 /* ======== CHECKIN PERSISTENCE ======== */
 .checkin-submitted {
   display: flex; align-items: center; gap: 10px;
@@ -1391,7 +1446,7 @@ textarea.input { resize: vertical; min-height: 80px; }
         <div class="card-title" style="margin-bottom:16px">App Info</div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
           <span style="font-size:14px;color:var(--text2)">Version</span>
-          <span style="font-size:14px;font-weight:600;color:var(--gold)">v3.5.2</span>
+          <span style="font-size:14px;font-weight:600;color:var(--gold)">v3.5.3</span>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
           <span style="font-size:14px;color:var(--text2)">Household</span>
@@ -1785,6 +1840,30 @@ textarea.input { resize: vertical; min-height: 80px; }
 <div id="offline-bar" class="offline-bar">
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0119 12.55M5 12.55a10.94 10.94 0 015.17-2.39M10.71 5.05A16 16 0 0122.56 9M1.42 9a15.91 15.91 0 014.7-2.88M8.53 16.11a6 6 0 016.95 0M12 20h.01"/></svg>
   No internet connection
+</div>
+
+<!-- TODO ACTION SHEET -->
+<div class="action-sheet-bg" id="todo-action-sheet" onclick="if(event.target===this)closeTodoActionSheet()">
+  <div class="action-sheet">
+    <div class="action-sheet-title" id="tas-title"></div>
+    <button class="action-sheet-btn" onclick="tasEdit()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      Edit
+    </button>
+    <button class="action-sheet-btn" onclick="tasSubitems()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      Sub-items
+    </button>
+    <button class="action-sheet-btn" onclick="tasSaveTemplate()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+      Save as Template
+    </button>
+    <button class="action-sheet-btn danger" onclick="tasDelete()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+      Delete
+    </button>
+    <button class="action-sheet-cancel" onclick="closeTodoActionSheet()">Cancel</button>
+  </div>
 </div>
 
 <!-- TOAST -->
@@ -3588,6 +3667,104 @@ function renderQuickNote(){
 }
 // Real-time sync for quick note is attached in attachRootListener() after household is ready
 
+// ====== TODO ACTION SHEET (long-press) ======
+let _actionSheetTodoId=null;
+
+function openTodoActionSheet(todoId){
+  const t=S.todos.find(t=>t.id===todoId);
+  if(!t)return;
+  _actionSheetTodoId=todoId;
+  document.getElementById('tas-title').textContent=t.text;
+  const sheet=document.getElementById('todo-action-sheet');
+  sheet.classList.remove('closing');
+  sheet.classList.add('open');
+  _lockScroll();
+}
+function closeTodoActionSheet(){
+  const sheet=document.getElementById('todo-action-sheet');
+  sheet.classList.add('closing');
+  setTimeout(()=>{
+    sheet.classList.remove('open','closing');
+    _unlockScroll();
+  },180);
+  _actionSheetTodoId=null;
+}
+function tasEdit(){
+  const id=_actionSheetTodoId;
+  closeTodoActionSheet();
+  setTimeout(()=>editTodo(id),200);
+}
+function tasSubitems(){
+  const id=_actionSheetTodoId;
+  closeTodoActionSheet();
+  setTimeout(()=>openTodoDetail(id),200);
+}
+function tasSaveTemplate(){
+  const t=S.todos.find(t=>t.id===_actionSheetTodoId);
+  if(!t)return;
+  const items=(t.items||[]);
+  if(!items.length){
+    closeTodoActionSheet();
+    showToast('Add sub-items first, then save as template');
+    return;
+  }
+  const id=newId();
+  const tplItems={};
+  items.forEach(si=>{const iid=newId();tplItems[iid]={id:iid,text:si.text};});
+  ROOT.child('todoTemplates').child(id).set({id,name:t.text,createdAt:Date.now(),items:tplItems,singleItem:true});
+  closeTodoActionSheet();
+  showToast(`"${t.text}" saved as template`);
+}
+function tasDelete(){
+  const id=_actionSheetTodoId;
+  closeTodoActionSheet();
+  setTimeout(()=>delTodo(id),200);
+}
+
+// Long-press detection for todo items
+(function(){
+  const HOLD_MS=500;
+  let timer=null, held=false, startX=0, startY=0;
+
+  const container=document.getElementById('todo-render');
+
+  container.addEventListener('touchstart',e=>{
+    const t=e.target.closest('.todo-item');
+    if(!t)return;
+    held=false;
+    startX=e.touches[0].clientX;
+    startY=e.touches[0].clientY;
+    const id=t.id.replace('ti-','');
+    timer=setTimeout(()=>{
+      held=true;
+      // Haptic feedback if available
+      if(navigator.vibrate) navigator.vibrate(20);
+      openTodoActionSheet(id);
+    },HOLD_MS);
+  },{passive:true});
+
+  container.addEventListener('touchmove',e=>{
+    if(!timer)return;
+    const cx=e.touches[0].clientX, cy=e.touches[0].clientY;
+    if(Math.abs(cx-startX)>10||Math.abs(cy-startY)>10){
+      clearTimeout(timer); timer=null;
+    }
+  },{passive:true});
+
+  container.addEventListener('touchend',()=>{
+    clearTimeout(timer); timer=null;
+  },{passive:true});
+
+  container.addEventListener('touchcancel',()=>{
+    clearTimeout(timer); timer=null;
+  },{passive:true});
+
+  // Prevent default context menu on long-press
+  container.addEventListener('contextmenu',e=>{
+    if(held){ e.preventDefault(); held=false; }
+  });
+})();
+
 // ====== SWIPE GESTURES (todo list) ======
 // Right swipe → complete, Left swipe → delete with undo
 (function(){
@@ -3607,6 +3784,7 @@ function renderQuickNote(){
 
   const container=document.getElementById('todo-render');
   container.addEventListener('touchstart',e=>{
+    if(_actionSheetTodoId)return; // long-press active, skip swipe
     const t=e.target.closest('.todo-item');
     if(!t)return;
     item=t; startX=e.touches[0].clientX; startY=e.touches[0].clientY;
