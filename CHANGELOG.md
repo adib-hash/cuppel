@@ -1,5 +1,19 @@
 # Cuppel Changelog
 
+## v3.5.1 — 2026-03-30
+
+### QA: Text Size & Spacing Fixes
+
+**Text size audit (mobile readability):**
+- Bumped all body/content text at 13px → 14px: date string, nudge description, HQ subtitle, event dates, jar chips, checkin feedback, wiki tile values, inspire descriptions, project checklist items, file names, toast messages, modal body text, empty state messages.
+- Bumped button text to 14px: `.btn` base, `.btn-sm`, tab buttons, checkin prompt.
+- Bumped small labels to 12px: tags/pills, `.todo-who`, `.todo-expand`, `.fl` form labels, calendar day headers, event type badges, checkin history title, event notes label.
+- Bumped decorative uppercase labels to 11px: `.hq-label`, `.sidebar-label`, `.quick-note-label`, `.wiki-tile-label`, `.bn-label`, `.sb-badge`.
+- Removed inline `font-size:11px` override on Shuffle button (now inherits correct `.btn-sm` size).
+
+**HQ card spacing consistency:**
+- Added `min-height: 130px` to `.hq-card` so all four home quick-stat cards hold the same minimum height regardless of content.
+
 ## v3.5.0 — 2026-03-28
 
 ### Save Todo as Template, Overflow Fix, Canvas Resize, Faster Nav
