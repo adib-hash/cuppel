@@ -671,21 +671,6 @@ textarea.input { resize: vertical; min-height: 80px; }
 .inspire-name { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
 .inspire-desc { font-size: 14px; color: var(--text2); line-height: 1.5; }
 
-.checkin-card {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 20px; margin-bottom: 12px;
-}
-.checkin-q { font-size: 16px; font-weight: 500; margin-bottom: 14px; line-height: 1.5; }
-.scale-row { display: flex; gap: 6px; flex-wrap: wrap; }
-.scale-n {
-  width: 38px; height: 38px; border-radius: 10px;
-  border: 1px solid var(--border2); background: var(--bg3);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 14px; font-weight: 600; cursor: pointer;
-  transition: var(--transition); color: var(--text2);
-}
-.scale-n:hover { border-color: var(--gold); color: var(--gold); }
-.scale-n.sel { background: var(--gold-glow); border-color: var(--gold); color: var(--gold2); }
 
 /* ======== MODAL ======== */
 .modal-bg {
@@ -780,7 +765,7 @@ textarea.input { resize: vertical; min-height: 80px; }
   .ph-title { font-size: 26px; }
   .ph-sub { font-size: 14px; }
   .todo-text { font-size: 16px; }
-  .checkin-q { font-size: 16px; }
+
   .input, .sub-add-input, .sub-edit-input { font-size: 16px; }
   /* Always show action buttons on mobile — no hover state on touch */
   .todo-edit, .todo-del { opacity: 1; }
@@ -813,7 +798,7 @@ textarea.input { resize: vertical; min-height: 80px; }
 }
 
 /* ======== STAGGERED LIST ITEMS ======== */
-.todo-item, .ev-item, .proj-card, .wiki-tile, .hq-card, .more-tile, .checkin-card, .jar-chip-wrap {
+.todo-item, .ev-item, .proj-card, .wiki-tile, .hq-card, .more-tile, .jar-chip-wrap {
   animation: fadeIn 0.15s ease-out both;
 }
 .todo-item:nth-child(1), .ev-item:nth-child(1), .proj-card:nth-child(1), .hq-card:nth-child(1), .more-tile:nth-child(1) { animation-delay: 0s; }
@@ -1011,21 +996,6 @@ textarea.input { resize: vertical; min-height: 80px; }
 .action-sheet-bg.closing .action-sheet { animation: sheetOut 0.18s cubic-bezier(0.4,0,0.2,1) forwards; }
 .action-sheet-bg.closing { animation: backdropOut 0.18s cubic-bezier(0.4,0,0.2,1) forwards; }
 
-/* ======== CHECKIN PERSISTENCE ======== */
-.checkin-submitted {
-  display: flex; align-items: center; gap: 10px;
-  background: rgba(125,184,155,0.1); border: 1px solid rgba(125,184,155,0.2);
-  border-radius: var(--radius-sm); padding: 14px 18px; margin-top: 4px;
-  font-size: 14px; color: var(--sage-light);
-}
-.checkin-submitted svg { width: 16px; height: 16px; flex-shrink: 0; }
-.checkin-history { margin-top: 28px; }
-.checkin-history-title { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text3); margin-bottom: 12px; }
-.checkin-week { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px 16px; margin-bottom: 8px; }
-.checkin-week-label { font-size: 12px; font-weight: 600; color: var(--text2); margin-bottom: 8px; }
-.checkin-response-row { font-size: 12px; color: var(--text3); line-height: 1.8; }
-.checkin-response-row strong { color: var(--text2); font-weight: 500; }
-
 
 /* ======== WIKI EDIT ======== */
 .wiki-sec-hd { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
@@ -1155,14 +1125,6 @@ textarea.input { resize: vertical; min-height: 80px; }
 .quick-note-chars { font-size: 12px; color: var(--text3); }
 
 /* ======== CHECK-IN PROMPT ======== */
-.checkin-prompt {
-  display: inline-flex; align-items: center; gap: 7px;
-  font-size: 14px; color: var(--gold2); cursor: pointer;
-  padding: 8px 12px; border-radius: var(--radius-sm);
-  background: var(--gold-glow); border: 1px solid rgba(232,184,109,0.2);
-  margin-top: 10px; transition: var(--transition);
-}
-.checkin-prompt:hover { background: rgba(232,184,109,0.2); }
 
 /* ======== AUTH SCREENS ======== */
 .full-screen-overlay {
@@ -1222,9 +1184,17 @@ textarea.input { resize: vertical; min-height: 80px; }
   font-size: 14px; font-weight: 600; flex-shrink: 0;
 }
 
+/* ======== COUNTDOWN CAROUSEL ======== */
+.countdown-card { overflow: hidden; position: relative; padding-bottom: 8px !important; }
+.countdown-track { display: flex; transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); touch-action: pan-y; }
+.countdown-slide { min-width: 100%; flex-shrink: 0; cursor: pointer; }
+.countdown-dots { display: flex; justify-content: center; gap: 6px; padding-top: 8px; }
+.countdown-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border2); transition: background 0.2s; }
+.countdown-dot.active { background: var(--gold); }
+
 /* ======== PERFORMANCE ======== */
 .modal-bg, .action-sheet-bg, .toast, .page { will-change: opacity, transform; }
-.card, .hq-card, .proj-card, .wiki-tile, .more-tile, .checkin-card { contain: content; }
+.card, .hq-card, .proj-card, .wiki-tile, .more-tile { contain: content; }
 .main { overscroll-behavior-y: contain; }
 
 /* ======== CAPACITOR iOS OVERRIDES ======== */
@@ -1323,11 +1293,6 @@ body.capacitor-ios * {
           <div class="home-greeting" id="home-greeting">Good evening, Adib ✦</div>
           <div class="home-date" id="home-date-str"></div>
           <div class="streak-row" id="streak-row"></div>
-          <div id="checkin-prompt" class="checkin-prompt" style="display:none" onclick="nav('inspire')">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z"/></svg>
-            Weekly check-in — last done <span class="checkin-prompt-days"></span>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-          </div>
         </div>
       </div>
 
@@ -1349,10 +1314,10 @@ body.capacitor-ios * {
           <div class="hq-sub">things to do</div>
           <div class="hq-badge" id="hq-badge-who"></div>
         </div>
-        <div class="hq-card" onclick="nav('calendar')">
+        <div class="hq-card countdown-card" id="countdown-card">
           <div class="hq-label">Countdown</div>
-          <div class="hq-value" id="hq-countdown-val">—</div>
-          <div class="hq-sub" id="hq-countdown-sub">loading…</div>
+          <div class="countdown-track" id="countdown-track"></div>
+          <div class="countdown-dots" id="countdown-dots"></div>
         </div>
       </div>
 
@@ -1527,13 +1492,6 @@ body.capacitor-ios * {
         </div>
       </div>
 
-      <div class="card-title" style="margin-bottom:14px">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-        Relationship Check-In
-      </div>
-      <div id="checkin-render"></div>
-      <div id="checkin-hist-render"></div>
-
       <hr class="divider">
 
       <div class="card-title" style="margin-bottom:14px">
@@ -1635,7 +1593,7 @@ body.capacitor-ios * {
     <div class="fg"><label class="fl">End Date (optional — for multi-day events)</label>
       <input class="input" type="date" id="ne-end-date"></div>
     <div class="fg"><label class="fl">Type</label>
-      <select class="input" id="ne-type">
+      <select class="input" id="ne-type" onchange="document.getElementById('ne-countdown').checked=this.value==='birthday'||this.value==='anniversary'">
         <option value="date">Date Night</option>
         <option value="birthday">Birthday</option>
         <option value="anniversary">Anniversary</option>
@@ -1646,6 +1604,10 @@ body.capacitor-ios * {
       <input class="input" type="time" id="ne-time"></div>
     <div class="fg"><label class="fl">Notes (optional)</label>
       <textarea class="input" id="ne-notes" placeholder="Any details…" style="min-height:70px"></textarea></div>
+    <div class="fg" style="display:flex;align-items:center;gap:12px;padding:2px 0">
+      <input type="checkbox" id="ne-countdown" style="width:18px;height:18px;accent-color:var(--gold);cursor:pointer;flex-shrink:0">
+      <label for="ne-countdown" style="font-size:14px;color:var(--text2);cursor:pointer;line-height:1.4">Include in Countdown</label>
+    </div>
     <div class="fg" style="display:flex;align-items:center;gap:12px;padding:2px 0">
       <input type="checkbox" id="ne-send-cal" style="width:18px;height:18px;accent-color:var(--gold);cursor:pointer;flex-shrink:0">
       <label for="ne-send-cal" style="font-size:14px;color:var(--text2);cursor:pointer;line-height:1.4">Add to Google Calendar after saving</label>
@@ -1732,6 +1694,10 @@ body.capacitor-ios * {
       <input class="input" type="time" id="ee-time"></div>
     <div class="fg"><label class="fl">Notes (optional)</label>
       <textarea class="input" id="ee-notes" placeholder="Any details…" style="min-height:70px"></textarea></div>
+    <div class="fg" style="display:flex;align-items:center;gap:12px;padding:2px 0">
+      <input type="checkbox" id="ee-countdown" style="width:18px;height:18px;accent-color:var(--gold);cursor:pointer;flex-shrink:0">
+      <label for="ee-countdown" style="font-size:14px;color:var(--text2);cursor:pointer;line-height:1.4">Include in Countdown</label>
+    </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="cancelEditEvent()">Cancel</button>
       <button class="btn btn-gold" onclick="saveEditEvent()">Save Changes</button>
@@ -2430,42 +2396,7 @@ function renderHome(){
 
   const todayStart = new Date(); todayStart.setHours(0,0,0,0);
 
-  // Countdown to next birthday / anniversary — with "just happened" awareness
-  const specials = S.events
-    .filter(e=>e.type==='birthday'||e.type==='anniversary')
-    .map(e=>{
-      const d=new Date(e.date+'T00:00:00');
-      const thisYear=new Date(todayStart.getFullYear(),d.getMonth(),d.getDate());
-      const daysSince=Math.round((todayStart-thisYear)/86400000);
-      const candidate=thisYear>=todayStart?thisYear:new Date(todayStart.getFullYear()+1,d.getMonth(),d.getDate());
-      const daysUntil=Math.round((candidate-todayStart)/86400000);
-      return{name:e.name,daysUntil,daysSince};
-    });
-  // Check if any special event happened in the last 3 days
-  const recent=specials.filter(s=>s.daysSince>=0&&s.daysSince<=3).sort((a,b)=>a.daysSince-b.daysSince)[0];
-  const upcoming=specials.filter(s=>s.daysUntil>=0).sort((a,b)=>a.daysUntil-b.daysUntil)[0];
-  const cdVal=document.getElementById('hq-countdown-val');
-  const cdSub=document.getElementById('hq-countdown-sub');
-  if(recent){
-    cdVal.textContent=recent.daysSince===0?'Today!':recent.daysSince===1?'Yesterday':`${recent.daysSince}d ago`;
-    cdSub.textContent=recent.name;
-  } else if(upcoming){
-    cdVal.textContent=upcoming.daysUntil+'d';
-    cdSub.textContent=upcoming.name;
-  } else {
-    cdVal.textContent='—';
-    cdSub.textContent='No birthdays or anniversaries';
-  }
-
-  // Check-in freshness prompt
-  const lastCheckin=S.checkins.length?[...S.checkins].sort((a,b)=>b.week.localeCompare(a.week))[0]:null;
-  const daysSinceCheckin=lastCheckin?Math.round((Date.now()-new Date(lastCheckin.week+'T00:00:00'))/86400000):999;
-  const checkinPrompt=document.getElementById('checkin-prompt');
-  if(checkinPrompt){
-    checkinPrompt.style.display=daysSinceCheckin>=7?'':'none';
-    const daysEl=checkinPrompt.querySelector('.checkin-prompt-days');
-    if(daysEl) daysEl.textContent=lastCheckin?daysSinceCheckin+'d ago':'never';
-  }
+  renderCountdown(todayStart);
 
   const sorted = [...S.events].sort((a,b)=>new Date(a.date)-new Date(b.date));
   const next = sorted.find(e=>new Date(e.date+'T00:00:00')>=todayStart);
@@ -2526,6 +2457,79 @@ function renderHome(){
   pickIdea();
   renderQuickNote();
 }
+
+// ====== COUNTDOWN CAROUSEL ======
+let _countdownIndex=0;
+let _countdownItems=[];
+function renderCountdown(todayStart){
+  // Collect countdown events: explicitly flagged OR birthday/anniversary (backwards compat)
+  const cdEvents = S.events.filter(e=>e.countdown||e.type==='birthday'||e.type==='anniversary');
+  _countdownItems = cdEvents.map(e=>{
+    const d=new Date(e.date+'T00:00:00');
+    const isRecurring=e.type==='birthday'||e.type==='anniversary';
+    let daysUntil, label;
+    if(isRecurring){
+      const thisYear=new Date(todayStart.getFullYear(),d.getMonth(),d.getDate());
+      const daysSince=Math.round((todayStart-thisYear)/86400000);
+      const candidate=thisYear>=todayStart?thisYear:new Date(todayStart.getFullYear()+1,d.getMonth(),d.getDate());
+      daysUntil=Math.round((candidate-todayStart)/86400000);
+      if(daysSince>=0&&daysSince<=3){
+        label=daysSince===0?'Today!':daysSince===1?'Yesterday':`${daysSince}d ago`;
+      } else {
+        label=daysUntil+'d';
+      }
+    } else {
+      daysUntil=Math.round((d-todayStart)/86400000);
+      if(daysUntil<0) label=Math.abs(daysUntil)+'d ago';
+      else if(daysUntil===0) label='Today!';
+      else label=daysUntil+'d';
+    }
+    return{id:e.id,name:e.name,label,daysUntil,isRecurring};
+  }).sort((a,b)=>a.daysUntil-b.daysUntil).slice(0,4);
+
+  const track=document.getElementById('countdown-track');
+  const dots=document.getElementById('countdown-dots');
+  if(!track)return;
+
+  if(!_countdownItems.length){
+    track.innerHTML=`<div class="countdown-slide"><div class="hq-value">—</div><div class="hq-sub">No countdowns set</div></div>`;
+    dots.innerHTML='';
+    return;
+  }
+  if(_countdownIndex>=_countdownItems.length) _countdownIndex=0;
+
+  track.innerHTML=_countdownItems.map(item=>`
+    <div class="countdown-slide" onclick="openEventDetail('${item.id}')">
+      <div class="hq-value">${item.label}</div>
+      <div class="hq-sub">${item.name}</div>
+    </div>`).join('');
+  track.style.transform=`translateX(-${_countdownIndex*100}%)`;
+
+  dots.innerHTML=_countdownItems.length>1?_countdownItems.map((_,i)=>`<div class="countdown-dot${i===_countdownIndex?' active':''}"></div>`).join(''):'';
+}
+
+// Swipe handling for countdown carousel
+(function(){
+  let sx=0,moving=false;
+  const track=()=>document.getElementById('countdown-track');
+  document.addEventListener('touchstart',e=>{
+    const t=track(); if(!t||!t.contains(e.target))return;
+    sx=e.touches[0].clientX; moving=true;
+  },{passive:true});
+  document.addEventListener('touchend',e=>{
+    if(!moving)return; moving=false;
+    const dx=e.changedTouches[0].clientX-sx;
+    if(Math.abs(dx)<30)return;
+    if(dx<0&&_countdownIndex<_countdownItems.length-1) _countdownIndex++;
+    else if(dx>0&&_countdownIndex>0) _countdownIndex--;
+    else return;
+    _haptic.light();
+    const t=track();
+    if(t) t.style.transform=`translateX(-${_countdownIndex*100}%)`;
+    const dots=document.getElementById('countdown-dots');
+    if(dots) dots.querySelectorAll('.countdown-dot').forEach((d,i)=>d.classList.toggle('active',i===_countdownIndex));
+  },{passive:true});
+})();
 
 function pickIdea(){
   _haptic.medium();
@@ -2829,7 +2833,7 @@ function renderCal(){
   }
   if(restEvents.length){
     const chevron=_calRestExpanded?'▾':'▸';
-    listHtml+=`<div class="ev-section-toggle" onclick="_calRestExpanded=!_calRestExpanded;renderCalendar()" style="font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);padding:16px 0 6px;cursor:pointer;display:flex;align-items:center;gap:6px"><span>${chevron}</span>Later This Year (${restEvents.length})</div>`;
+    listHtml+=`<div class="ev-section-toggle" onclick="_calRestExpanded=!_calRestExpanded;renderCal()" style="font-size:14px;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;color:var(--text2);padding:14px 16px;margin:8px -16px 0;cursor:pointer;display:flex;align-items:center;gap:8px;border-radius:var(--radius-sm);background:var(--surface);min-height:44px"><span style="font-size:12px">${chevron}</span>Later This Year (${restEvents.length})</div>`;
     if(_calRestExpanded){
       listHtml+=restEvents.map(evItemHtml).join('');
     }
@@ -2944,6 +2948,7 @@ function openEditEventModal(){
   document.getElementById('ee-type').value=e.type;
   document.getElementById('ee-time').value=e.time||'';
   document.getElementById('ee-notes').value=e.notes||'';
+  document.getElementById('ee-countdown').checked=!!e.countdown;
   _returnToEventDetail = true;
   closeModal('m-event-detail', () => { openModal('m-event-edit'); });
 }
@@ -2957,7 +2962,8 @@ function saveEditEvent(){
   const endDate=(endDateRaw&&endDateRaw!==date)?endDateRaw:null;
   const time=document.getElementById('ee-time').value||null;
   const notes=document.getElementById('ee-notes').value.trim()||null;
-  ROOT.child('events').child(_detailEventId).update({name,date,endDate:endDate||null,type:document.getElementById('ee-type').value,time:time||null,notes:notes||null});
+  const countdown=document.getElementById('ee-countdown').checked||false;
+  ROOT.child('events').child(_detailEventId).update({name,date,endDate:endDate||null,type:document.getElementById('ee-type').value,time:time||null,notes:notes||null,countdown});
   const shouldReturn = _returnToEventDetail;
   _returnToEventDetail = false;
   closeModal('m-event-edit', () => {
@@ -2992,7 +2998,9 @@ function addEvent(){
   const id=newId();
   const time=document.getElementById('ne-time').value||null;
   const notes=document.getElementById('ne-notes').value.trim()||null;
-  const obj={id,name,date,type:document.getElementById('ne-type').value};
+  const type=document.getElementById('ne-type').value;
+  const countdown=document.getElementById('ne-countdown').checked||false;
+  const obj={id,name,date,type,countdown};
   if(endDate&&endDate!==date) obj.endDate=endDate;
   if(time) obj.time=time;
   if(notes) obj.notes=notes;
@@ -3489,12 +3497,6 @@ const inspireData=[
   {g:'linear-gradient(135deg,#3D1A2B,#6B1E4A)',n:'Bake-Off',d:'Each pick a recipe, blind taste-test at the end'},
   {g:'linear-gradient(135deg,#1A3A3D,#1E5A5C)',n:'Bike Explore',d:'Rent bikes and discover a new neighborhood'},
 ];
-const checkinQs=[
-  {q:'How connected have you felt to each other this week?',scale:true},
-  {q:'How well did you handle stress as a team?',scale:true},
-  {q:'What\'s one thing your partner did this week that you loved?',scale:false},
-];
-
 let _triedExpanded=false;
 function renderInspire(){
   const active=S.jarIdeas.filter(j=>!j.tried);
@@ -3525,34 +3527,6 @@ function renderInspire(){
         </div>`;}).join('')}
     </div>` : '';
 
-  const wk=getWeekKey();
-  const thisWeek=S.checkins.find(c=>c.week===wk);
-  if(thisWeek){
-    document.getElementById('checkin-render').innerHTML=`<div class="checkin-submitted">${IC.check} Check-in submitted for this week.</div>`;
-  } else {
-    document.getElementById('checkin-render').innerHTML=checkinQs.map((q,i)=>`
-      <div class="checkin-card">
-        <div class="checkin-q">${q.q}</div>
-        ${q.scale?`<div class="scale-row">${[1,2,3,4,5,6,7,8,9,10].map(n=>`<div class="scale-n" onclick="selScale(this,${i})">${n}</div>`).join('')}</div>`
-        :`<input class="input checkin-text-input" data-qi="${i}" placeholder="Your answer…" style="margin-top:4px">`}
-      </div>`).join('')+
-      `<div style="display:flex;justify-content:flex-end;margin-top:14px">
-        <button class="btn btn-gold btn-sm" onclick="submitCheckin()">Submit Check-In</button>
-      </div>`;
-  }
-  const recent=[...S.checkins].sort((a,b)=>b.week.localeCompare(a.week));
-  document.getElementById('checkin-hist-render').innerHTML=recent.length?`
-    <div class="checkin-history">
-      <div class="checkin-history-title">Check-in History (${recent.length})</div>
-      ${recent.map(c=>`
-        <div class="checkin-week">
-          <div class="checkin-week-label">Week of ${new Date(c.week+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</div>
-          <div class="checkin-response-row">
-            ${Object.entries(c.answers||{}).map(([qi,ans])=>`<div><strong>Q${parseInt(qi)+1}:</strong> ${ans}</div>`).join('')}
-          </div>
-        </div>`).join('')}
-    </div>`:'';
-
   document.getElementById('inspire-render').innerHTML=inspireData.map(c=>`
     <div class="inspire-tile">
       <div class="inspire-img" style="background:${c.g}">
@@ -3565,26 +3539,6 @@ function renderInspire(){
     </div>`).join('');
 }
 
-let _checkinAnswers={};
-function selScale(el,qi){
-  const row=el.closest('.scale-row');
-  row.querySelectorAll('.scale-n').forEach(n=>n.classList.remove('sel'));
-  el.classList.add('sel');
-  _checkinAnswers[qi]=parseInt(el.textContent);
-}
-function getWeekKey(){
-  const d=new Date(); d.setDate(d.getDate()-d.getDay());
-  return d.toISOString().slice(0,10);
-}
-function submitCheckin(){
-  document.querySelectorAll('.checkin-text-input').forEach(el=>{
-    if(el.value.trim()) _checkinAnswers[el.dataset.qi]=el.value.trim();
-  });
-  if(!Object.keys(_checkinAnswers).length)return;
-  const wk=getWeekKey();
-  ROOT.child('checkins').child(wk).set({week:wk,submittedAt:new Date().toISOString(),answers:{..._checkinAnswers}});
-  _checkinAnswers={};
-}
 
 function addJar(){
   const val=document.getElementById('jar-input').value.trim();
