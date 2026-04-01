@@ -12,6 +12,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Cuppel">
 <link rel="apple-touch-icon" href="icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cuppel-2beff-default-rtdb.firebaseio.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -1220,6 +1224,36 @@ textarea.input { resize: vertical; min-height: 80px; }
   display: flex; align-items: center; justify-content: center;
   font-size: 14px; font-weight: 600; flex-shrink: 0;
 }
+
+/* ======== PERFORMANCE ======== */
+.modal-bg, .action-sheet-bg, .toast, .page { will-change: opacity, transform; }
+.card, .hq-card, .proj-card, .wiki-tile, .more-tile, .checkin-card { contain: content; }
+.main { overscroll-behavior-y: contain; }
+
+/* ======== CAPACITOR iOS OVERRIDES ======== */
+body.capacitor-ios .top-nav {
+  padding-top: env(safe-area-inset-top);
+  height: calc(var(--nav-h) + env(safe-area-inset-top));
+}
+body.capacitor-ios .app-layout {
+  padding-top: calc(var(--nav-h) + env(safe-area-inset-top));
+}
+body.capacitor-ios .sidebar {
+  top: calc(var(--nav-h) + env(safe-area-inset-top));
+}
+body.capacitor-ios .bottom-nav {
+  padding-bottom: env(safe-area-inset-bottom);
+  height: calc(var(--bottom-h) + env(safe-area-inset-bottom));
+}
+@media (max-width: 900px) {
+  body.capacitor-ios .main {
+    padding-bottom: calc(var(--bottom-h) + env(safe-area-inset-bottom) + 24px);
+  }
+}
+/* Snappier transitions on native */
+body.capacitor-ios * {
+  --transition: background-color 0.2s cubic-bezier(0.4,0,0.2,1), border-color 0.2s cubic-bezier(0.4,0,0.2,1), color 0.2s cubic-bezier(0.4,0,0.2,1), opacity 0.2s cubic-bezier(0.4,0,0.2,1), transform 0.2s cubic-bezier(0.4,0,0.2,1), box-shadow 0.2s cubic-bezier(0.4,0,0.2,1);
+}
 </style>
 </head>
 <body>
@@ -1906,6 +1940,19 @@ textarea.input { resize: vertical; min-height: 80px; }
 </div>
 
 <script>
+// ====== CAPACITOR PLATFORM DETECTION ======
+if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+  document.body.classList.add('capacitor-ios');
+}
+
+// ====== HAPTICS ======
+const _haptic = {
+  light() { if (window.Capacitor?.isNativePlatform()) try { Capacitor.Plugins.Haptics.impact({ style: 'Light' }); } catch(e){} },
+  medium() { if (window.Capacitor?.isNativePlatform()) try { Capacitor.Plugins.Haptics.impact({ style: 'Medium' }); } catch(e){} },
+  success() { if (window.Capacitor?.isNativePlatform()) try { Capacitor.Plugins.Haptics.notification({ type: 'Success' }); } catch(e){} },
+  warning() { if (window.Capacitor?.isNativePlatform()) try { Capacitor.Plugins.Haptics.notification({ type: 'Warning' }); } catch(e){} },
+};
+
 // ====== SVG ICONS ======
 const IC = {
   edit: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`,
@@ -2298,6 +2345,7 @@ function nav(id) {
   const current = document.querySelector('.page.active');
   const target = document.getElementById('page-'+id);
   if (!target || target === current || _navTransitioning) return;
+  _haptic.light();
 
   // Update sidebar + bottom nav immediately
   document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
@@ -2358,6 +2406,7 @@ function _unlockScroll(){
   }
 }
 function openModal(id){
+  _haptic.medium();
   const el = document.getElementById(id);
   el.classList.remove('closing');
   el.classList.add('open');
@@ -2486,6 +2535,7 @@ function renderHome(){
 }
 
 function pickIdea(){
+  _haptic.medium();
   const el = document.getElementById('hq-date-idea');
   if(!el) return;
   const active = S.jarIdeas.filter(j=>!j.tried);
@@ -2572,6 +2622,7 @@ function toggleTodo(id){
   const t=S.todos.find(t=>t.id===id);
   if(!t)return;
   const newDone=!t.done;
+  if(newDone) _haptic.success(); else _haptic.light();
   // Optimistic DOM update
   const el=document.getElementById('ti-'+id);
   if(el){
@@ -2590,6 +2641,7 @@ function toggleTodo(id){
 function delTodo(id){
   const t=S.todos.find(t=>t.id===id);
   if(!t)return;
+  _haptic.warning();
   const snap={...t};
   ROOT.child('todos').child(id).remove();
   showToast('Task deleted',()=>{ ROOT.child('todos').child(id).set(snap); });
@@ -2608,6 +2660,7 @@ function addTodo(){
   const obj={id,text,who:document.getElementById('nt-who').value,done:false};
   if(due) obj.due=due;
   ROOT.child('todos').child(id).set(obj);
+  _haptic.success();
   closeModal('m-todo');
   document.getElementById('nt-text').value='';
   document.getElementById('nt-due').value='';
@@ -2924,6 +2977,7 @@ function addEvent(){
   if(time) obj.time=time;
   if(notes) obj.notes=notes;
   ROOT.child('events').child(id).set(obj);
+  _haptic.success();
   const calCb=document.getElementById('ne-send-cal');
   if(calCb&&calCb.checked){ openGoogleCalendar(obj); calCb.checked=false; }
   closeModal('m-event');
@@ -3557,6 +3611,7 @@ function dismissToast(){
   clearTimeout(_toastTimer);
 }
 function undoToast(){
+  _haptic.light();
   if(_toastUndo) _toastUndo();
   dismissToast();
 }
@@ -3684,6 +3739,7 @@ let _actionSheetTodoId=null;
 function openTodoActionSheet(todoId){
   const t=S.todos.find(t=>t.id===todoId);
   if(!t)return;
+  _haptic.medium();
   _actionSheetTodoId=todoId;
   document.getElementById('tas-title').textContent=t.text;
   const sheet=document.getElementById('todo-action-sheet');
