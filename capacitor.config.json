@@ -1,0 +1,9 @@
+{
+  "appId": "com.cuppel.app",
+  "appName": "Cuppel",
+  "webDir": "www",
+  "ios": {
+    "limitsNavigationsToAppBoundDomains": true,
+    "scrollEnabled": true
+  }
+}
