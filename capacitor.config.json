@@ -3,7 +3,7 @@
   "appName": "Cuppel",
   "webDir": "www",
   "ios": {
-    "limitsNavigationsToAppBoundDomains": true,
+    "limitsNavigationsToAppBoundDomains": false,
     "scrollEnabled": true
   }
 }
