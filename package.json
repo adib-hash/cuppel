@@ -4,7 +4,7 @@
   "description": "",
   "main": "sw.js",
   "scripts": {
-    "build": "mkdir -p www && cp index.html manifest.json sw.js icon.svg icon-maskable.svg www/",
+    "build": "mkdir -p www/vendor && cp index.html manifest.json sw.js icon.svg icon-maskable.svg www/ && cp vendor/*.js www/vendor/",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
