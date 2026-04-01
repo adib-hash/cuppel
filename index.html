@@ -1936,6 +1936,8 @@ const db = firebase.database();
 const auth = firebase.auth();
 const storage = firebase.storage();
 const googleProvider = new firebase.auth.GoogleAuthProvider();
+// Handle redirect result for Capacitor (signInWithRedirect flow)
+auth.getRedirectResult().catch(e => console.error('Redirect auth error:', e));
 let ROOT = null;
 let HOUSEHOLD_ID = null;
 
@@ -2100,7 +2102,14 @@ function attachRootListener() {
 async function signInWithGoogle() {
   const btn = document.getElementById('btn-google-signin');
   if (btn) { btn.disabled = true; btn.textContent = 'Signing in…'; }
-  try { await auth.signInWithPopup(googleProvider); }
+  try {
+    const isCapacitor = window.Capacitor && window.Capacitor.isNativePlatform();
+    if (isCapacitor) {
+      await auth.signInWithRedirect(googleProvider);
+    } else {
+      await auth.signInWithPopup(googleProvider);
+    }
+  }
   catch(e) {
     console.error(e);
     if (btn) { btn.disabled = false; btn.innerHTML = googleSignInBtnContent(); }
