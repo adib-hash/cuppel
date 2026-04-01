@@ -937,7 +937,7 @@ textarea.input { resize: vertical; min-height: 80px; }
 .offline-bar.show { transform: translateY(0); }
 
 /* ======== SWIPE GESTURES ======== */
-#todo-render { touch-action: pan-y; }
+#todo-render { touch-action: pan-y; padding-bottom: 4px; }
 .todo-item.swiping-right { background: rgba(125,184,155,0.2); border-color: rgba(125,184,155,0.3); }
 .todo-item.swiping-left  { background: rgba(232,138,138,0.2); border-color: rgba(232,138,138,0.3); }
 
@@ -2485,6 +2485,10 @@ function renderCountdown(todayStart){
       else label=daysUntil+'d';
     }
     return{id:e.id,name:e.name,label,daysUntil,isRecurring};
+  }).filter(item=>{
+    // Remove non-recurring events that have already passed
+    if(!item.isRecurring && item.daysUntil<0) return false;
+    return true;
   }).sort((a,b)=>a.daysUntil-b.daysUntil).slice(0,4);
 
   const track=document.getElementById('countdown-track');
@@ -2833,7 +2837,7 @@ function renderCal(){
   }
   if(restEvents.length){
     const chevron=_calRestExpanded?'▾':'▸';
-    listHtml+=`<div class="ev-section-toggle" onclick="_calRestExpanded=!_calRestExpanded;renderCal()" style="font-size:14px;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;color:var(--text2);padding:14px 16px;margin:8px -16px 0;cursor:pointer;display:flex;align-items:center;gap:8px;border-radius:var(--radius-sm);background:var(--surface);min-height:44px"><span style="font-size:12px">${chevron}</span>Later This Year (${restEvents.length})</div>`;
+    listHtml+=`<div class="ev-section-toggle" onclick="_calRestExpanded=!_calRestExpanded;renderCal()" style="font-size:12px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text2);padding:14px 0;margin-top:12px;cursor:pointer;display:flex;align-items:center;gap:8px;min-height:44px;border-top:1px solid var(--border)"><span style="font-size:11px">${chevron}</span>Later This Year (${restEvents.length})</div>`;
     if(_calRestExpanded){
       listHtml+=restEvents.map(evItemHtml).join('');
     }
