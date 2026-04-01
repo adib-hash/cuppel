@@ -4,7 +4,12 @@
   "webDir": "www",
   "ios": {
     "limitsNavigationsToAppBoundDomains": false,
-    "scrollEnabled": true
+    "scrollEnabled": true,
+    "allowsLinkPreview": false
+  },
+  "server": {
+    "androidScheme": "https",
+    "iosScheme": "capacitor"
   },
   "plugins": {
     "FirebaseAuthentication": {
