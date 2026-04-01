@@ -2339,11 +2339,9 @@ function populateWhoSelects() {
 const evColors = {date:'#E88A8A',birthday:'#E8B86D',anniversary:'#C49AE8',appointment:'#7DB89B',social:'#6AB4D4'};
 
 // ====== NAV ======
-let _navTransitioning = false;
 function nav(id) {
-  const current = document.querySelector('.page.active');
   const target = document.getElementById('page-'+id);
-  if (!target || target === current || _navTransitioning) return;
+  if (!target) return;
   _haptic.light();
 
   // Update sidebar + bottom nav immediately
@@ -2354,28 +2352,11 @@ function nav(id) {
   const bn = document.getElementById('bn-'+id);
   if(bn) bn.classList.add('active');
 
-  // Crossfade: exit old page, enter new page
-  if (current) {
-    _navTransitioning = true;
-    current.classList.remove('active');
-    current.classList.add('page-exit');
-    current.addEventListener('animationend', function onEnd() {
-      current.removeEventListener('animationend', onEnd);
-      current.classList.remove('page-exit');
-      target.classList.add('active');
-      _navTransitioning = false;
-    }, { once: true });
-    // Fallback in case animationend doesn't fire
-    setTimeout(() => {
-      if (_navTransitioning) {
-        current.classList.remove('page-exit');
-        target.classList.add('active');
-        _navTransitioning = false;
-      }
-    }, 120);
-  } else {
-    target.classList.add('active');
-  }
+  // Instant page swap — no crossfade animation to avoid race conditions on rapid taps
+  document.querySelectorAll('.page.active, .page.page-exit').forEach(p => {
+    p.classList.remove('active', 'page-exit');
+  });
+  target.classList.add('active');
 
   const renders = {todo:renderTodos,calendar:renderCal,projects:renderProj,wiki:renderWiki,inspire:renderInspire,more:renderMore};
   if(renders[id]) renders[id]();
