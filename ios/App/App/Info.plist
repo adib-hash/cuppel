@@ -47,5 +47,16 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.1093172338795-bumtjj3th7nqmec5ra7sa3fbad3untck</string>
+			</array>
+		</dict>
+	</array>
+	<key>GIDClientID</key>
+	<string>1093172338795-bumtjj3th7nqmec5ra7sa3fbad3untck.apps.googleusercontent.com</string>
 </dict>
 </plist>

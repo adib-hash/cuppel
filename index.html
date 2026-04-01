@@ -1936,8 +1936,6 @@ const db = firebase.database();
 const auth = firebase.auth();
 const storage = firebase.storage();
 const googleProvider = new firebase.auth.GoogleAuthProvider();
-// Handle redirect result for Capacitor (signInWithRedirect flow)
-auth.getRedirectResult().catch(e => console.error('Redirect auth error:', e));
 let ROOT = null;
 let HOUSEHOLD_ID = null;
 
@@ -2103,9 +2101,13 @@ async function signInWithGoogle() {
   const btn = document.getElementById('btn-google-signin');
   if (btn) { btn.disabled = true; btn.textContent = 'Signing in…'; }
   try {
-    const isCapacitor = window.Capacitor && window.Capacitor.isNativePlatform();
-    if (isCapacitor) {
-      await auth.signInWithRedirect(googleProvider);
+    if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+      // Native Google Sign-In via @capacitor-firebase/authentication
+      const FirebaseAuthentication = window.Capacitor.Plugins.FirebaseAuthentication;
+      const result = await FirebaseAuthentication.signInWithGoogle();
+      // The plugin handles Firebase auth natively — use the credential to sign in on the web SDK too
+      const credential = firebase.auth.GoogleAuthProvider.credential(result.credential.idToken);
+      await auth.signInWithCredential(credential);
     } else {
       await auth.signInWithPopup(googleProvider);
     }
