@@ -1,5 +1,16 @@
 # Cuppel Changelog
 
+## v3.5.8 — 2026-06-03
+
+### Invite / Join Flow: Clearer Errors + Longer-Lived Codes
+
+- **Specific join error messages** instead of one generic "Could not join". The user now sees exactly which case hit: "code not found / typo or already used", "code expired", "permission denied", or "network issue". This makes it much easier to recover (e.g. ask the partner for a fresh code) instead of guessing what went wrong.
+- **Invite code lifetime extended from 48 hours to 14 days.** 48h was way too short for casual sharing — partners often dont see the message right away, and the code would silently expire. 14 days still keeps the code finite for security but covers normal usage.
+- **Tolerate hyphens/spaces in the join input.** Pasting `9F-12-34-56` or `9F 12 34 56` now works — non-hex characters are stripped before validation. Reduces typo errors from copy/paste artifacts.
+- **Clearer length-error copy.** Updated from "Enter the 8-character invite code." to explicitly noting allowed characters are A-F and 0-9, so users dont try invalid letters.
+- **Surface Google sign-in errors.** Previously, if Google sign-in failed (network, popup blocked, etc.), the error was only logged to console — the button just bounced back with no explanation. Now the user sees an alert with the underlying message, while user-cancelled flows stay silent.
+- Waiting-screen copy updated to match: "The code is good for 14 days."
+
 ## v3.5.7 — 2026-06-03
 
 ### Scroll No Longer Gets Stuck

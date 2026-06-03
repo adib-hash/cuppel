@@ -1451,7 +1451,7 @@ body.capacitor-ios * {
         <div class="card-title" style="margin-bottom:16px">App Info</div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
           <span style="font-size:14px;color:var(--text2)">Version</span>
-          <span style="font-size:14px;font-weight:600;color:var(--gold)">v3.5.7</span>
+          <span style="font-size:14px;font-weight:600;color:var(--gold)">v3.5.8</span>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
           <span style="font-size:14px;color:var(--text2)">Household</span>
@@ -2134,8 +2134,14 @@ async function signInWithGoogle() {
     }
   }
   catch(e) {
-    console.error(e);
+    console.error('Google sign-in failed:', e);
     if (btn) { btn.disabled = false; btn.innerHTML = googleSignInBtnContent(); }
+    // Don't show an alert for user-cancelled sign-ins
+    const cancelled = e && (e.code === 'auth/popup-closed-by-user' || e.code === '12501' || /cancel/i.test(e.message || ''));
+    if (!cancelled) {
+      const detail = (e && (e.message || e.code)) ? ` (${e.message || e.code})` : '';
+      alert(`Sign-in didn't complete${detail}. Please check your connection and try again.`);
+    }
   }
 }
 
@@ -2163,7 +2169,7 @@ async function createHousehold() {
   if (btn) { btn.disabled = true; btn.textContent = 'Creating…'; }
   const hid = db.ref().push().key;
   const code = generateInviteCode();
-  const expiresAt = Date.now() + 48 * 60 * 60 * 1000;
+  const expiresAt = Date.now() + 14 * 24 * 60 * 60 * 1000;
   // Write member record + invite code (member path uses the members.$uid override rule)
   await db.ref().update({
     [`users/${user.uid}/householdId`]: hid,
@@ -2183,17 +2189,31 @@ async function createHousehold() {
 // Called from the Join button on setup screen
 async function joinWithCode() {
   const user = auth.currentUser;
-  if (!user) return;
+  if (!user) { alert("You're not signed in yet. Please sign in with Google first."); return; }
   const inp = document.getElementById('join-code-input');
-  const code = (inp ? inp.value.trim() : '').toUpperCase();
-  if (!code || code.length !== 8) { alert('Enter the 8-character invite code.'); return; }
+  // Tolerate hyphens, spaces, and other separators; keep only hex chars
+  const raw = (inp ? inp.value : '').toUpperCase().replace(/[^0-9A-F]/g, '');
+  if (raw.length !== 8) {
+    alert('Invite codes are 8 characters (letters A-F and numbers 0-9). Double-check the code from your partner.');
+    return;
+  }
   const btn = document.querySelector('#screen-setup .join-btn');
   if (btn) { btn.disabled = true; btn.textContent = 'Joining…'; }
   try {
-    await performJoin(user, code);
+    await performJoin(user, raw);
   } catch(e) {
     console.error('Join failed:', e);
-    alert('Could not join. Please check the code and try again.');
+    let msg = 'Could not join. Please check the code and try again.';
+    if (e && e.message === 'Code not found') {
+      msg = "We couldn't find that invite code. It may have a typo, already been used, or been replaced by a new code. Ask your partner to share the latest code from their setup screen.";
+    } else if (e && e.message === 'Code expired') {
+      msg = 'That invite code has expired. Ask your partner to generate a new one from their setup screen, then try again.';
+    } else if (e && e.code === 'PERMISSION_DENIED') {
+      msg = "Permission denied while joining. If you're already part of a household, sign out first; otherwise check your internet connection and try again.";
+    } else if (e && (e.code === 'NETWORK_ERROR' || /network/i.test(e.message || ''))) {
+      msg = "Looks like a network issue. Please check your connection and try again.";
+    }
+    alert(msg);
     if (btn) { btn.disabled = false; btn.textContent = 'Join'; }
   }
 }
@@ -3994,7 +4014,7 @@ if ('serviceWorker' in navigator) {
       <div class="waiting-dot"></div>
       Waiting for your partner to join…
     </div>
-    <p style="font-size:11px;color:var(--text3);line-height:1.5;max-width:280px">The code expires in 48 hours. Once your partner joins, the app will open automatically.</p>
+    <p style="font-size:11px;color:var(--text3);line-height:1.5;max-width:280px">The code is good for 14 days. Once your partner joins, the app will open automatically.</p>
     <button class="btn btn-ghost btn-sm" style="margin-top:8px;opacity:0.5;font-size:12px" onclick="confirmSignOut()">Sign out</button>
   </div>
 </div>
