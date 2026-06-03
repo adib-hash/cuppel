@@ -1186,9 +1186,9 @@ textarea.input { resize: vertical; min-height: 80px; }
 }
 
 /* ======== COUNTDOWN CAROUSEL ======== */
-.countdown-card { overflow: hidden; position: relative; padding-bottom: 8px !important; }
-.countdown-track { display: flex; transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); touch-action: pan-y; }
-.countdown-slide { min-width: 100%; flex-shrink: 0; cursor: pointer; }
+.countdown-card { overflow: hidden; position: relative; padding-bottom: 8px !important; min-width: 0; }
+.countdown-track { display: flex; min-width: 0; transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); touch-action: pan-y; }
+.countdown-slide { flex: 0 0 100%; min-width: 0; cursor: pointer; }
 .countdown-dots { display: flex; justify-content: center; gap: 6px; padding-top: 8px; }
 .countdown-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border2); transition: background 0.2s; }
 .countdown-dot.active { background: var(--gold); }
@@ -1443,7 +1443,7 @@ body.capacitor-ios * {
         <div class="card-title" style="margin-bottom:16px">App Info</div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
           <span style="font-size:14px;color:var(--text2)">Version</span>
-          <span style="font-size:14px;font-weight:600;color:var(--gold)">v3.5.3</span>
+          <span style="font-size:14px;font-weight:600;color:var(--gold)">v3.5.4</span>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
           <span style="font-size:14px;color:var(--text2)">Household</span>

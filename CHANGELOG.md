@@ -1,5 +1,11 @@
 # Cuppel Changelog
 
+## v3.5.4 — 2026-06-03
+
+### Countdown Carousel Overflow Fix
+
+- Fixed home page Countdown card visually bleeding the next slide into the current slide (and overflowing past the screen edge). The flex slides used `min-width: 100%` which inflated the grid column's intrinsic min-content, making the card render wider than its 50% grid track. Switched slides to `flex: 0 0 100%` with `min-width: 0` on slides, track, and card, so the grid column stays at 50% and `overflow: hidden` clips properly.
+
 ## v3.5.3 — 2026-03-30
 
 ### Long-press Action Sheet for To-Do Items
