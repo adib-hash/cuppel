@@ -1,5 +1,11 @@
 # Cuppel Changelog
 
+## v3.5.6 — 2026-06-03
+
+### UsWiki Tile Bottom Border Clearance
+
+- The last tile in any UsWiki section (and any other page where content ran right up against the bottom nav) appeared to be missing its bottom border. The border was actually being drawn — but only ~24px of page padding sat between the last item and the translucent, blurred bottom nav, so the 1px border was obscured by the nav backdrop. Bumped `.main` bottom padding from `var(--bottom-h) + 24px` to `var(--bottom-h) + 48px` on both responsive mobile and `body.capacitor-ios`, so the last item gets clean visual separation from the bottom nav.
+
 ## v3.5.5 — 2026-06-03
 
 ### Modals Respect iOS Safe Areas
