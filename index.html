@@ -1218,6 +1218,14 @@ body.capacitor-ios .bottom-nav {
     padding-bottom: calc(var(--bottom-h) + env(safe-area-inset-bottom) + 24px);
   }
 }
+/* Modals must clear notch + home indicator on iOS */
+body.capacitor-ios .modal-bg {
+  padding-top: max(20px, calc(env(safe-area-inset-top) + 8px));
+  padding-bottom: max(20px, calc(env(safe-area-inset-bottom) + 8px));
+}
+body.capacitor-ios .modal {
+  max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 32px);
+}
 /* Snappier transitions on native */
 body.capacitor-ios * {
   --transition: background-color 0.2s cubic-bezier(0.4,0,0.2,1), border-color 0.2s cubic-bezier(0.4,0,0.2,1), color 0.2s cubic-bezier(0.4,0,0.2,1), opacity 0.2s cubic-bezier(0.4,0,0.2,1), transform 0.2s cubic-bezier(0.4,0,0.2,1), box-shadow 0.2s cubic-bezier(0.4,0,0.2,1);
@@ -1443,7 +1451,7 @@ body.capacitor-ios * {
         <div class="card-title" style="margin-bottom:16px">App Info</div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
           <span style="font-size:14px;color:var(--text2)">Version</span>
-          <span style="font-size:14px;font-weight:600;color:var(--gold)">v3.5.4</span>
+          <span style="font-size:14px;font-weight:600;color:var(--gold)">v3.5.5</span>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
           <span style="font-size:14px;color:var(--text2)">Household</span>

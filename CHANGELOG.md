@@ -1,5 +1,11 @@
 # Cuppel Changelog
 
+## v3.5.5 — 2026-06-03
+
+### Modals Respect iOS Safe Areas
+
+- Fixed modals (e.g. the To-Do detail / sub-items modal) overlapping the iPhone notch and Dynamic Island. On native iOS, `.modal-bg` now uses `padding-top: max(20px, env(safe-area-inset-top) + 8px)` and the matching bottom inset, and `.modal` max-height is reduced by the safe-area insets so centered modals always sit between the notch and the home indicator. Web layout unchanged.
+
 ## v3.5.4 — 2026-06-03
 
 ### Countdown Carousel Overflow Fix
