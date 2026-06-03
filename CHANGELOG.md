@@ -1,5 +1,13 @@
 # Cuppel Changelog
 
+## v3.5.9 — 2026-06-03
+
+### Symmetric Horizontal Padding on Mobile
+
+- The Projects page (and any other page) looked like it had more padding on the left than on the right. The math was actually symmetric (16px each side), but two effects made the right side feel tighter: the iOS native scroll indicator visually pulls the right edge in, and `viewport-fit=cover` plus no `env(safe-area-inset-left/right)` meant any device-level horizontal inset (curved edges, landscape orientation) only got absorbed into the right.
+- Bumped horizontal main padding from 16px → 20px on mobile so cards have a touch more breathing room on both sides.
+- On `body.capacitor-ios`, padding-left/right are now `calc(20px + env(safe-area-inset-left/right))` so any device-reported horizontal inset is honored.
+
 ## v3.5.8 — 2026-06-03
 
 ### Invite / Join Flow: Clearer Errors + Longer-Lived Codes
