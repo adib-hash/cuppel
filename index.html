@@ -19,6 +19,14 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet"></noscript>
 <style>
+/* ======== TOUCH FEEL ========
+ * Remove the iOS gray tap-highlight overlay that briefly paints any tappable
+ * element when a finger lands on it — including when the user is just trying
+ * to scroll. We use a global override; specific elements that NEED a press
+ * affordance set their own background via :active.
+ */
+*, *::before, *::after { -webkit-tap-highlight-color: transparent; }
+
 :root {
   --bg: #0D0F14;
   --bg2: #13161E;
@@ -102,7 +110,7 @@ body::after {
   display: flex; align-items: center; gap: 8px;
   transition: var(--transition);
 }
-.logo:hover { opacity: 0.85; }
+@media (hover: hover) and (pointer: fine) { .logo:hover { opacity: 0.85; } }
 .logo-icon {
   width: 32px; height: 32px;
   background: linear-gradient(135deg, var(--gold), var(--rose));
@@ -119,7 +127,7 @@ body::after {
   cursor: pointer;
   transition: var(--transition);
 }
-.couple-pill:hover { background: rgba(255,255,255,0.12); }
+@media (hover: hover) and (pointer: fine) { .couple-pill:hover { background: rgba(255,255,255,0.12); } }
 .couple-avatars { display: flex; }
 .c-avatar {
   width: 28px; height: 28px;
@@ -171,7 +179,7 @@ body::after {
   color: var(--text2); font-size: 14px; font-weight: 500;
   position: relative;
 }
-.sb-item:hover { background: var(--surface); color: var(--text); }
+@media (hover: hover) and (pointer: fine) { .sb-item:hover { background: var(--surface); color: var(--text); } }
 .sb-item.active { background: var(--gold-glow); color: var(--gold); }
 .sb-item.active::before {
   content: '';
@@ -246,8 +254,7 @@ body::after {
   padding: 22px;
   transition: var(--transition);
 }
-.card:hover { border-color: var(--border2); background: var(--surface2); }
-
+@media (hover: hover) and (pointer: fine) { .card:hover { border-color: var(--border2); background: var(--surface2); } }
 .card-title {
   font-size: 12px; font-weight: 600;
   letter-spacing: 0.08em; text-transform: uppercase;
@@ -275,18 +282,17 @@ body::after {
   color: #1a0f00;
   box-shadow: 0 4px 20px rgba(232,184,109,0.3);
 }
-.btn-gold:hover { transform: translateY(-1px); box-shadow: 0 6px 28px rgba(232,184,109,0.4); }
+@media (hover: hover) and (pointer: fine) { .btn-gold:hover { transform: translateY(-1px); box-shadow: 0 6px 28px rgba(232,184,109,0.4); } }
 .btn-ghost {
   background: var(--surface2); color: var(--text2);
   border: 1px solid var(--border2);
 }
-.btn-ghost:hover { color: var(--text); background: rgba(255,255,255,0.12); }
+@media (hover: hover) and (pointer: fine) { .btn-ghost:hover { color: var(--text); background: rgba(255,255,255,0.12); } }
 .btn-sm { padding: 7px 16px; font-size: 14px; }
 .btn-danger { background: rgba(232,138,138,0.15); color: var(--rose); border: 1px solid rgba(232,138,138,0.2); }
-.btn-danger:hover { background: rgba(232,138,138,0.25); }
+@media (hover: hover) and (pointer: fine) { .btn-danger:hover { background: rgba(232,138,138,0.25); } }
 .btn-sage { background: rgba(125,184,155,0.15); color: var(--sage-light); border: 1px solid rgba(125,184,155,0.25); }
-.btn-sage:hover { background: rgba(125,184,155,0.28); }
-
+@media (hover: hover) and (pointer: fine) { .btn-sage:hover { background: rgba(125,184,155,0.28); } }
 .icon-btn {
   width: 34px; height: 34px; border-radius: 10px;
   display: inline-flex; align-items: center; justify-content: center;
@@ -295,8 +301,7 @@ body::after {
   color: var(--text2);
 }
 .icon-btn svg { width: 15px; height: 15px; }
-.icon-btn:hover { background: rgba(232,138,138,0.15); border-color: rgba(232,138,138,0.25); color: var(--rose); }
-
+@media (hover: hover) and (pointer: fine) { .icon-btn:hover { background: rgba(232,138,138,0.15); border-color: rgba(232,138,138,0.25); color: var(--rose); } }
 /* ======== INPUTS ======== */
 .input {
   width: 100%; padding: 11px 15px;
@@ -345,7 +350,7 @@ textarea.input { resize: vertical; min-height: 80px; }
   min-width: 56px; text-align: center;
 }
 .tab-btn.active { background: var(--surface2); color: var(--gold); }
-.tab-btn:hover:not(.active) { color: var(--text2); }
+@media (hover: hover) and (pointer: fine) { .tab-btn:hover:not(.active) { color: var(--text2); } }
 #todo-member-tabs { display: contents; }
 
 /* ======== HOME ======== */
@@ -412,8 +417,7 @@ textarea.input { resize: vertical; min-height: 80px; }
 .nudge-title { font-size: 14px; font-weight: 600; color: var(--gold2); margin-bottom: 2px; }
 .nudge-desc { font-size: 14px; color: var(--text2); }
 .nudge-close { font-size: 18px; color: var(--text3); cursor: pointer; padding: 4px; transition: var(--transition); line-height: 1; }
-.nudge-close:hover { color: var(--text); }
-
+@media (hover: hover) and (pointer: fine) { .nudge-close:hover { color: var(--text); } }
 /* ======== HOME QUICK CARDS ======== */
 .home-quick { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .hq-card {
@@ -425,7 +429,7 @@ textarea.input { resize: vertical; min-height: 80px; }
   position: relative; overflow: hidden;
   min-height: 130px;
 }
-.hq-card:hover { background: var(--surface2); border-color: var(--border2); transform: translateY(-2px); }
+@media (hover: hover) and (pointer: fine) { .hq-card:hover { background: var(--surface2); border-color: var(--border2); transform: translateY(-2px); } }
 .hq-label { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); margin-bottom: 10px; }
 .hq-value {
   font-family: 'Playfair Display', serif;
@@ -451,7 +455,7 @@ textarea.input { resize: vertical; min-height: 80px; }
   margin-bottom: 8px;
   overflow: hidden;
 }
-.todo-item:hover { background: var(--surface2); border-color: var(--border2); }
+@media (hover: hover) and (pointer: fine) { .todo-item:hover { background: var(--surface2); border-color: var(--border2); } }
 .todo-item.done { opacity: 0.4; }
 .todo-item.done .todo-text { text-decoration: line-through; color: var(--text3); }
 .todo-main-row { display: flex; align-items: center; gap: 13px; padding: 14px 16px; }
@@ -484,15 +488,14 @@ textarea.input { resize: vertical; min-height: 80px; }
 .todo-who-b { background: rgba(125,184,155,0.12); color: var(--sage-light); border: 1px solid rgba(125,184,155,0.18); }
 .todo-edit { display: flex; align-items: center; cursor: pointer; color: var(--text3); opacity: 0; transition: var(--transition); margin-right: 2px; }
 .todo-edit svg { width: 14px; height: 14px; }
-.todo-item:hover .todo-edit { opacity: 1; }
-.todo-edit:hover { color: var(--gold); }
+@media (hover: hover) and (pointer: fine) { .todo-item:hover .todo-edit { opacity: 1; } }
+@media (hover: hover) and (pointer: fine) { .todo-edit:hover { color: var(--gold); } }
 .todo-del { display: flex; align-items: center; cursor: pointer; color: var(--text3); opacity: 0; transition: var(--transition); }
 .todo-del svg { width: 14px; height: 14px; }
-.todo-item:hover .todo-del { opacity: 1; }
-.todo-del:hover { color: var(--rose); }
-
+@media (hover: hover) and (pointer: fine) { .todo-item:hover .todo-del { opacity: 1; } }
+@media (hover: hover) and (pointer: fine) { .todo-del:hover { color: var(--rose); } }
 .todo-expand { font-size: 12px; cursor: pointer; color: var(--text3); transition: var(--transition); display: flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 6px; white-space: nowrap; flex-shrink: 0; }
-.todo-expand:hover { color: var(--gold); background: var(--gold-glow); }
+@media (hover: hover) and (pointer: fine) { .todo-expand:hover { color: var(--gold); background: var(--gold-glow); } }
 .todo-expand-count { font-size: 11px; font-weight: 700; color: var(--sage-light); }
 
 .todo-sublist { border-top: 1px solid var(--border); padding: 10px 16px 14px; }
@@ -510,14 +513,14 @@ textarea.input { resize: vertical; min-height: 80px; }
 .sub-text.done { text-decoration: line-through; color: var(--text3); }
 .sub-del { display: flex; align-items: center; cursor: pointer; color: var(--text3); opacity: 0; transition: var(--transition); }
 .sub-del svg { width: 12px; height: 12px; }
-.todo-subitem:hover .sub-del { opacity: 1; }
-.sub-del:hover { color: var(--rose); }
+@media (hover: hover) and (pointer: fine) { .todo-subitem:hover .sub-del { opacity: 1; } }
+@media (hover: hover) and (pointer: fine) { .sub-del:hover { color: var(--rose); } }
 .sub-add-row { display: flex; align-items: center; gap: 10px; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
 .sub-add-placeholder { width: 16px; height: 16px; flex-shrink: 0; }
 .sub-add-input { flex: 1; background: transparent; border: none; color: var(--text); font-family: 'Sora', sans-serif; font-size: 16px; outline: none; }
 .sub-add-input::placeholder { color: var(--text3); }
 .sub-add-btn { font-size: 11px; color: var(--text3); cursor: pointer; padding: 3px 8px; border-radius: 6px; transition: var(--transition); flex-shrink: 0; }
-.sub-add-btn:hover { color: var(--gold); background: var(--gold-glow); }
+@media (hover: hover) and (pointer: fine) { .sub-add-btn:hover { color: var(--gold); background: var(--gold-glow); } }
 .sub-edit-input {
   flex: 1; background: transparent; border: none; border-bottom: 1px solid transparent;
   color: var(--text); font-family: 'Sora', sans-serif; font-size: 16px;
@@ -550,7 +553,7 @@ textarea.input { resize: vertical; min-height: 80px; }
   transition: var(--transition); position: relative;
   color: var(--text2);
 }
-.cal-cell:hover { background: var(--surface2); color: var(--text); }
+@media (hover: hover) and (pointer: fine) { .cal-cell:hover { background: var(--surface2); color: var(--text); } }
 .cal-cell.today {
   background: linear-gradient(135deg, var(--gold), #D4904A);
   color: #1a0f00; font-weight: 700;
@@ -564,7 +567,7 @@ textarea.input { resize: vertical; min-height: 80px; }
   background: var(--surface); border: 1px solid var(--border);
   margin-bottom: 8px; transition: var(--transition); cursor: pointer;
 }
-.ev-item:hover { background: var(--surface2); border-color: var(--border2); }
+@media (hover: hover) and (pointer: fine) { .ev-item:hover { background: var(--surface2); border-color: var(--border2); } }
 .ev-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 .ev-info { flex: 1; }
 .ev-name { font-size: 14px; font-weight: 500; }
@@ -582,7 +585,7 @@ textarea.input { resize: vertical; min-height: 80px; }
   margin-bottom: 14px; cursor: pointer;
   transition: var(--transition); position: relative; overflow: hidden;
 }
-.proj-card:hover { background: var(--surface2); border-color: var(--border2); transform: translateY(-2px); }
+@media (hover: hover) and (pointer: fine) { .proj-card:hover { background: var(--surface2); border-color: var(--border2); transform: translateY(-2px); } }
 .proj-card::before {
   content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
   background: linear-gradient(90deg, var(--gold), var(--rose));
@@ -617,7 +620,7 @@ textarea.input { resize: vertical; min-height: 80px; }
   border-radius: var(--radius-sm); padding: 14px 16px;
   cursor: pointer; transition: var(--transition);
 }
-.wiki-tile:hover { background: var(--surface2); border-color: var(--border2); }
+@media (hover: hover) and (pointer: fine) { .wiki-tile:hover { background: var(--surface2); border-color: var(--border2); } }
 .wiki-tile-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); margin-bottom: 5px; }
 .wiki-tile-val { font-size: 14px; font-weight: 500; color: var(--text); user-select: text; -webkit-user-select: text; }
 .wiki-tile-val.blurred { filter: blur(6px); user-select: none; -webkit-user-select: none; }
@@ -649,15 +652,14 @@ textarea.input { resize: vertical; min-height: 80px; }
   font-size: 14px; font-weight: 500; color: var(--text2);
   cursor: pointer; transition: var(--transition);
 }
-.jar-chip:hover { background: rgba(232,138,138,0.15); border-color: rgba(232,138,138,0.3); color: var(--rose-light); }
-
+@media (hover: hover) and (pointer: fine) { .jar-chip:hover { background: rgba(232,138,138,0.15); border-color: rgba(232,138,138,0.3); color: var(--rose-light); } }
 .inspire-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
 .inspire-tile {
   background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--radius); overflow: hidden;
   cursor: pointer; transition: var(--transition);
 }
-.inspire-tile:hover { transform: translateY(-3px); border-color: var(--border2); box-shadow: 0 12px 40px rgba(0,0,0,0.3); }
+@media (hover: hover) and (pointer: fine) { .inspire-tile:hover { transform: translateY(-3px); border-color: var(--border2); box-shadow: 0 12px 40px rgba(0,0,0,0.3); } }
 .inspire-img {
   height: 100px;
   display: flex; align-items: center; justify-content: center;
@@ -841,7 +843,7 @@ textarea.input { resize: vertical; min-height: 80px; }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: all; touch-action: pan-y; }
 .toast.swiping { transition: none !important; }
 .toast-undo { color: var(--gold); font-weight: 700; cursor: pointer; font-size: 14px; padding: 3px 10px; border-radius: 6px; transition: var(--transition); }
-.toast-undo:hover { background: var(--gold-glow); }
+@media (hover: hover) and (pointer: fine) { .toast-undo:hover { background: var(--gold-glow); } }
 @media (min-width: 901px) { .toast { bottom: 32px; } }
 
 /* ======== DUE DATE TAG ======== */
@@ -858,7 +860,7 @@ textarea.input { resize: vertical; min-height: 80px; }
   background: var(--surface2); border: 1px solid var(--border);
   cursor: pointer; transition: var(--transition); color: var(--text2); flex-shrink: 0;
 }
-.cal-nav-btn:hover { background: var(--gold-glow); border-color: rgba(232,184,109,0.3); color: var(--gold); }
+@media (hover: hover) and (pointer: fine) { .cal-nav-btn:hover { background: var(--gold-glow); border-color: rgba(232,184,109,0.3); color: var(--gold); } }
 .cal-nav-btn svg { width: 14px; height: 14px; }
 
 /* ======== EVENT ACTIONS ======== */
@@ -869,8 +871,8 @@ textarea.input { resize: vertical; min-height: 80px; }
   background: transparent; border: 1px solid transparent;
   cursor: pointer; transition: var(--transition); color: var(--text3);
 }
-.ev-act-btn:hover.edit { background: var(--gold-glow); border-color: rgba(232,184,109,0.2); color: var(--gold); }
-.ev-act-btn:hover.del { background: rgba(232,138,138,0.12); border-color: rgba(232,138,138,0.2); color: var(--rose); }
+@media (hover: hover) and (pointer: fine) { .ev-act-btn:hover.edit { background: var(--gold-glow); border-color: rgba(232,184,109,0.2); color: var(--gold); } }
+@media (hover: hover) and (pointer: fine) { .ev-act-btn:hover.del { background: rgba(232,138,138,0.12); border-color: rgba(232,138,138,0.2); color: var(--rose); } }
 .ev-act-btn svg { width: 13px; height: 13px; }
 
 
@@ -890,21 +892,21 @@ textarea.input { resize: vertical; min-height: 80px; }
 .proj-ci-text { flex: 1; font-size: 14px; color: var(--text2); }
 .proj-ci-text.done { text-decoration: line-through; color: var(--text3); }
 .proj-ci-del { display: flex; align-items: center; cursor: pointer; color: var(--text3); opacity: 0; transition: var(--transition); }
-.proj-ci:hover .proj-ci-del { opacity: 1; }
-.proj-ci-del:hover { color: var(--rose); }
+@media (hover: hover) and (pointer: fine) { .proj-ci:hover .proj-ci-del { opacity: 1; } }
+@media (hover: hover) and (pointer: fine) { .proj-ci-del:hover { color: var(--rose); } }
 .proj-ci-del svg { width: 12px; height: 12px; }
 
 /* ======== JAR IDEA MANAGEMENT ======== */
 .jar-chip-wrap { display: inline-flex; align-items: center; gap: 5px; }
 .jar-chip.done { text-decoration: line-through; opacity: 0.45; }
-.jar-chip.done:hover { background: var(--surface2); border-color: var(--border2); color: var(--text2); }
+@media (hover: hover) and (pointer: fine) { .jar-chip.done:hover { background: var(--surface2); border-color: var(--border2); color: var(--text2); } }
 .jar-chip-del {
   width: 18px; height: 18px; border-radius: 50%;
   background: rgba(232,138,138,0.12); border: 1px solid rgba(232,138,138,0.2);
   color: var(--rose); display: none; align-items: center; justify-content: center;
   cursor: pointer; flex-shrink: 0; transition: var(--transition);
 }
-.jar-chip-wrap:hover .jar-chip-del { display: flex; }
+@media (hover: hover) and (pointer: fine) { .jar-chip-wrap:hover .jar-chip-del { display: flex; } }
 .jar-chip-del svg { width: 9px; height: 9px; }
 .jar-chip-try {
   width: 18px; height: 18px; border-radius: 50%;
@@ -912,8 +914,8 @@ textarea.input { resize: vertical; min-height: 80px; }
   color: var(--sage); display: none; align-items: center; justify-content: center;
   cursor: pointer; flex-shrink: 0; transition: var(--transition);
 }
-.jar-chip-wrap:hover .jar-chip-try { display: flex; }
-.jar-chip-try:hover { background: rgba(125,184,155,0.25); border-color: rgba(125,184,155,0.4); }
+@media (hover: hover) and (pointer: fine) { .jar-chip-wrap:hover .jar-chip-try { display: flex; } }
+@media (hover: hover) and (pointer: fine) { .jar-chip-try:hover { background: rgba(125,184,155,0.25); border-color: rgba(125,184,155,0.4); } }
 .jar-chip-try svg { width: 9px; height: 9px; }
 .jar-tried-date { font-size: 11px; color: var(--text3); white-space: nowrap; }
 .jar-tried-header {
@@ -921,7 +923,7 @@ textarea.input { resize: vertical; min-height: 80px; }
   color: var(--text3); margin: 14px 0 8px; cursor: pointer;
   display: flex; align-items: center; gap: 6px;
 }
-.jar-tried-header:hover { color: var(--text2); }
+@media (hover: hover) and (pointer: fine) { .jar-tried-header:hover { color: var(--text2); } }
 .jar-tried-chevron { transition: transform 0.2s ease; flex-shrink: 0; }
 .jar-tried-chevron.open { transform: rotate(90deg); }
 
@@ -1002,8 +1004,8 @@ textarea.input { resize: vertical; min-height: 80px; }
 .wiki-sec-hd { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
 .wiki-tile-acts { display:flex; gap:2px; flex-shrink:0; }
 .wiki-act-btn { width:20px; height:20px; display:flex; align-items:center; justify-content:center; border-radius:5px; cursor:pointer; color:var(--text3); transition:var(--transition); flex-shrink:0; }
-.wiki-act-btn:hover { color:var(--gold); background:var(--gold-glow); }
-.wiki-del-btn:hover { color:var(--rose) !important; background:rgba(232,138,138,0.1) !important; }
+@media (hover: hover) and (pointer: fine) { .wiki-act-btn:hover { color:var(--gold); background:var(--gold-glow); } }
+@media (hover: hover) and (pointer: fine) { .wiki-del-btn:hover { color:var(--rose) !important; background:rgba(232,138,138,0.1) !important; } }
 .wiki-act-btn svg { width:10px; height:10px; }
 
 /* ======== CALENDAR V2 ======== */
@@ -1023,7 +1025,7 @@ textarea.input { resize: vertical; min-height: 80px; }
   cursor: pointer; transition: var(--transition);
 }
 .ds-ev-row:last-child { border-bottom: none; }
-.ds-ev-row:hover { opacity: 0.8; }
+@media (hover: hover) and (pointer: fine) { .ds-ev-row:hover { opacity: 0.8; } }
 .ds-ev-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 .ds-ev-info { flex: 1; }
 .ds-ev-name { font-size: 14px; font-weight: 500; }
@@ -1043,7 +1045,7 @@ textarea.input { resize: vertical; min-height: 80px; }
   cursor: pointer; transition: var(--transition);
   display: flex; flex-direction: column; gap: 10px;
 }
-.more-tile:hover { background: var(--surface2); border-color: var(--border2); transform: translateY(-2px); }
+@media (hover: hover) and (pointer: fine) { .more-tile:hover { background: var(--surface2); border-color: var(--border2); transform: translateY(-2px); } }
 .more-tile-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .more-tile-icon svg { width: 20px; height: 20px; }
 .more-tile-name { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 600; color: var(--text); }
@@ -1070,10 +1072,10 @@ textarea.input { resize: vertical; min-height: 80px; }
   display: block; font-size: 14px; color: var(--text2); text-decoration: none;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.proj-file-name:hover { color: var(--gold); }
+@media (hover: hover) and (pointer: fine) { .proj-file-name:hover { color: var(--gold); } }
 .proj-file-size { font-size: 11px; color: var(--text3); margin-top: 1px; }
 .proj-file-row .proj-ci-del { opacity: 0; }
-.proj-file-row:hover .proj-ci-del { opacity: 1; }
+@media (hover: hover) and (pointer: fine) { .proj-file-row:hover .proj-ci-del { opacity: 1; } }
 @media (max-width: 900px) { .proj-file-row .proj-ci-del { opacity: 1; } }
 
 /* ======== PROJECT CANVAS ======== */
@@ -1153,7 +1155,7 @@ textarea.input { resize: vertical; min-height: 80px; }
   color: var(--text); cursor: pointer; transition: var(--transition);
   width: 100%; justify-content: center;
 }
-.btn-google:hover { background: rgba(255,255,255,0.1); border-color: var(--gold); }
+@media (hover: hover) and (pointer: fine) { .btn-google:hover { background: rgba(255,255,255,0.1); border-color: var(--gold); } }
 .auth-privacy { font-size: 11px; color: var(--text3); line-height: 1.6; max-width: 280px; }
 .invite-code-display {
   font-family: 'Playfair Display', serif; font-size: 36px; font-weight: 700;
@@ -1453,7 +1455,7 @@ body.capacitor-ios * {
         <div class="card-title" style="margin-bottom:16px">App Info</div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
           <span style="font-size:14px;color:var(--text2)">Version</span>
-          <span style="font-size:14px;font-weight:600;color:var(--gold)">v3.5.9</span>
+          <span style="font-size:14px;font-weight:600;color:var(--gold)">v3.6.0</span>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
           <span style="font-size:14px;color:var(--text2)">Household</span>

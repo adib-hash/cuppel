@@ -1,5 +1,17 @@
 # Cuppel Changelog
 
+## v3.6.0 — 2026-06-03
+
+### Scroll Feels Right — No More Hover/Tap Flash When Scrolling
+
+When your finger landed on a card or button before you started scrolling, the app would briefly paint that element's pressed/hover state — making it feel like the app was about to fire a tap. Two underlying causes:
+
+1. **iOS gray tap-highlight overlay.** iOS Safari / Capacitor WebViews draw a translucent gray rectangle over any tappable element the instant a finger touches it, regardless of whether the user is tapping or scrolling. This is the iOS-native overlay, not a CSS `:active` state. Now globally suppressed with `-webkit-tap-highlight-color: transparent` on all elements.
+
+2. **`:hover` styles firing on touch.** On touch devices, iOS treats the first touch as a "hover" event, leaving the hovered look stuck on the element until you tap somewhere else. Wrapped all 45 `:hover` rules across the app in `@media (hover: hover) and (pointer: fine)` — so hover styles only apply when there's a real mouse pointer (desktop). On touch devices, the hover state literally cannot fire.
+
+The two intentional `:active` rules (action-sheet buttons) are preserved since those provide useful pressed feedback on a real tap.
+
 ## v3.5.9 — 2026-06-03
 
 ### Symmetric Horizontal Padding on Mobile
