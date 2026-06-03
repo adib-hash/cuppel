@@ -1451,7 +1451,7 @@ body.capacitor-ios * {
         <div class="card-title" style="margin-bottom:16px">App Info</div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
           <span style="font-size:14px;color:var(--text2)">Version</span>
-          <span style="font-size:14px;font-weight:600;color:var(--gold)">v3.5.6</span>
+          <span style="font-size:14px;font-weight:600;color:var(--gold)">v3.5.7</span>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
           <span style="font-size:14px;color:var(--text2)">Household</span>
@@ -2339,53 +2339,85 @@ function nav(id) {
   window.scrollTo(0, 0);
 }
 
-// ====== MODAL ======
-let _modalDepth=0, _savedScrollY=0;
-function _lockScroll(){
-  _modalDepth++;
-  if(_modalDepth===1){
-    _savedScrollY=window.scrollY;
-    document.body.style.position='fixed';
-    document.body.style.top=`-${_savedScrollY}px`;
-    document.body.style.width='100%';
+// ====== MODAL / SCROLL LOCK ======
+// Scroll lock is keyed by element id (a Set), not a depth counter.
+// This makes lock/unlock idempotent — double-opens, lost animationend events,
+// page nav while a modal is open, and visibility interruptions can no longer
+// strand the body in position:fixed (= stuck scroll).
+const _scrollLockers = new Set();
+let _savedScrollY = 0;
+function _applyScrollLock(){
+  if (document.body.dataset.scrollLocked === '1') return;
+  _savedScrollY = window.scrollY;
+  document.body.dataset.scrollLocked = '1';
+  document.body.style.position = 'fixed';
+  document.body.style.top = `-${_savedScrollY}px`;
+  document.body.style.width = '100%';
+}
+function _releaseScrollLock(){
+  if (document.body.dataset.scrollLocked !== '1') return;
+  delete document.body.dataset.scrollLocked;
+  document.body.style.position = '';
+  document.body.style.top = '';
+  document.body.style.width = '';
+  window.scrollTo(0, _savedScrollY);
+}
+function _lockScroll(id){
+  if (!id) id = '_anon_' + Date.now();
+  _scrollLockers.add(id);
+  if (_scrollLockers.size > 0) _applyScrollLock();
+}
+function _unlockScroll(id){
+  if (id) _scrollLockers.delete(id);
+  if (_scrollLockers.size === 0) _releaseScrollLock();
+}
+// Reconciler: if nothing on screen is actually open, drop the lock.
+// Covers strandings from animationend never firing, backgrounding mid-close, etc.
+function _reconcileScrollLock(){
+  const anyOpen = document.querySelector('.modal-bg.open, .action-sheet-bg.open');
+  if (!anyOpen) {
+    _scrollLockers.clear();
+    _releaseScrollLock();
   }
 }
-function _unlockScroll(){
-  if(_modalDepth<=0)return;
-  _modalDepth--;
-  if(_modalDepth===0){
-    document.body.style.position='';
-    document.body.style.top='';
-    document.body.style.width='';
-    window.scrollTo(0,_savedScrollY);
-  }
-}
+// Run reconciler when the page returns to the foreground (Capacitor / Safari).
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') _reconcileScrollLock();
+});
+window.addEventListener('pageshow', _reconcileScrollLock);
+
 function openModal(id){
-  _haptic.medium();
   const el = document.getElementById(id);
+  if (!el) return;
+  // Idempotent: if already open, don't double-lock.
+  if (el.classList.contains('open') && !el.classList.contains('closing')) return;
+  _haptic.medium();
   el.classList.remove('closing');
   el.classList.add('open');
-  _lockScroll();
+  _lockScroll(id);
 }
 function closeModal(id, cb){
   if(id==='m-proj-detail'){ closeProjDetail(cb); return; }
   const el = document.getElementById(id);
-  if (!el.classList.contains('open')) { if(cb) cb(); return; }
-  el.classList.add('closing');
-  el.addEventListener('animationend', function onEnd() {
-    el.removeEventListener('animationend', onEnd);
-    el.classList.remove('open', 'closing');
-    _unlockScroll();
+  if (!el) { if(cb) cb(); _reconcileScrollLock(); return; }
+  // Always release this id's claim, even if state is weird.
+  if (!el.classList.contains('open')) {
+    _unlockScroll(id);
     if(cb) cb();
-  }, { once: true });
-  // Fallback
-  setTimeout(() => {
-    if (el.classList.contains('closing')) {
-      el.classList.remove('open', 'closing');
-      _unlockScroll();
-      if(cb) cb();
-    }
-  }, 250);
+    return;
+  }
+  el.classList.add('closing');
+  let done = false;
+  const finish = () => {
+    if (done) return;
+    done = true;
+    el.classList.remove('open', 'closing');
+    _unlockScroll(id);
+    if(cb) cb();
+  };
+  el.addEventListener('animationend', finish, { once: true });
+  // Fallback if animationend never fires (backgrounded, parent re-rendered, etc.)
+  setTimeout(finish, 280);
 }
 document.querySelectorAll('.modal-bg').forEach(m=>m.addEventListener('click',e=>{
   if(e.target===m) closeModal(m.id);
@@ -3214,21 +3246,23 @@ function closeProjDetail(cb){
     _presenceListenerRef=null;_presenceListener=null;
   }
   const el = document.getElementById('m-proj-detail');
-  if (!el.classList.contains('open')) { if(cb) cb(); return; }
-  el.classList.add('closing');
-  el.addEventListener('animationend', function onEnd() {
-    el.removeEventListener('animationend', onEnd);
-    el.classList.remove('open', 'closing');
-    _unlockScroll();
+  if (!el) { if(cb) cb(); _reconcileScrollLock(); return; }
+  if (!el.classList.contains('open')) {
+    _unlockScroll('m-proj-detail');
     if(cb) cb();
-  }, { once: true });
-  setTimeout(() => {
-    if (el.classList.contains('closing')) {
-      el.classList.remove('open', 'closing');
-      _unlockScroll();
-      if(cb) cb();
-    }
-  }, 250);
+    return;
+  }
+  el.classList.add('closing');
+  let done = false;
+  const finish = () => {
+    if (done) return;
+    done = true;
+    el.classList.remove('open', 'closing');
+    _unlockScroll('m-proj-detail');
+    if(cb) cb();
+  };
+  el.addEventListener('animationend', finish, { once: true });
+  setTimeout(finish, 280);
 }
 function renderProjDetail(){
   const p=S.projects.find(p=>p.id===_detailProjId);
@@ -3726,22 +3760,34 @@ let _actionSheetTodoId=null;
 function openTodoActionSheet(todoId){
   const t=S.todos.find(t=>t.id===todoId);
   if(!t)return;
+  const sheet=document.getElementById('todo-action-sheet');
+  // Idempotent: don't double-open / double-lock.
+  if (sheet.classList.contains('open') && !sheet.classList.contains('closing')) return;
   _haptic.medium();
   _actionSheetTodoId=todoId;
   document.getElementById('tas-title').textContent=t.text;
-  const sheet=document.getElementById('todo-action-sheet');
   sheet.classList.remove('closing');
   sheet.classList.add('open');
-  _lockScroll();
+  _lockScroll('todo-action-sheet');
 }
 function closeTodoActionSheet(){
   const sheet=document.getElementById('todo-action-sheet');
-  sheet.classList.add('closing');
-  setTimeout(()=>{
-    sheet.classList.remove('open','closing');
-    _unlockScroll();
-  },180);
+  if (!sheet) { _unlockScroll('todo-action-sheet'); return; }
   _actionSheetTodoId=null;
+  if (!sheet.classList.contains('open')) {
+    _unlockScroll('todo-action-sheet');
+    return;
+  }
+  sheet.classList.add('closing');
+  let done = false;
+  const finish = () => {
+    if (done) return;
+    done = true;
+    sheet.classList.remove('open','closing');
+    _unlockScroll('todo-action-sheet');
+  };
+  sheet.addEventListener('animationend', finish, { once: true });
+  setTimeout(finish, 220);
 }
 function tasEdit(){
   const id=_actionSheetTodoId;

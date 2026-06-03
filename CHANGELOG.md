@@ -1,5 +1,26 @@
 # Cuppel Changelog
 
+## v3.5.7 — 2026-06-03
+
+### Scroll No Longer Gets Stuck
+
+Reworked the modal / action-sheet scroll lock so the page can no longer get stranded in a non-scrollable state. The old depth-counter approach had several silent failure modes that all looked the same to the user — page won't scroll until you fully reload the app.
+
+**What was broken:**
+- `openModal` / `openTodoActionSheet` were not idempotent. A double-tap or two code paths racing to open the same modal would bump the lock depth from 0 → 2; the single matching close would only drop it to 1, leaving `body { position: fixed }` forever.
+- `closeModal` early-returned without decrementing the counter when the modal had already lost its `open` class through some other path (page nav, DOM mutation, debug action).
+- `closeTodoActionSheet` had no `animationend` fallback — only a fixed 180ms `setTimeout` — so if anything interrupted, no recovery.
+- `animationend` events get dropped on iOS / Capacitor when the app is backgrounded mid-close or when a parent element is re-rendered during the close animation.
+- There was no recovery path once the counter got stranded. The only fix was a full app reload.
+
+**What now:**
+- Scroll lock is keyed by element id in a `Set`, not a depth counter. Adding the same id twice is a no-op; removing what isn't there is a no-op. State can't drift.
+- `openModal` / `openTodoActionSheet` are idempotent — if the element is already `open` and not `closing`, the call short-circuits.
+- Every close path always releases its id's claim — even when bailing early because the element is already closed.
+- `closeTodoActionSheet` now uses the same `animationend` + 220ms fallback pattern as modals.
+- New `_reconcileScrollLock()` runs on `visibilitychange` (foreground) and `pageshow`. If nothing on screen is actually open, the lock is force-released — so even if a future bug strands the state, returning to the app self-heals it.
+- `document.body.dataset.scrollLocked` flag prevents double-`position:fixed` from double-applying.
+
 ## v3.5.6 — 2026-06-03
 
 ### UsWiki Tile Bottom Border Clearance
