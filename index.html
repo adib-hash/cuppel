@@ -598,6 +598,34 @@ textarea.input { resize: vertical; min-height: 80px; }
 }
 .proj-status-dot.active { background: var(--sage); box-shadow: 0 0 8px var(--sage); }
 .proj-status-dot.planning { background: var(--gold); box-shadow: 0 0 8px var(--gold); }
+.proj-status-dot.complete { background: var(--text3); box-shadow: 0 0 8px rgba(255,255,255,0.18); }
+
+/* Inline status pill group (used in project detail) */
+.status-pills { display: inline-flex; gap: 3px; background: var(--surface); border: 1px solid var(--border); border-radius: 999px; padding: 3px; }
+.status-pill { padding: 6px 14px; border-radius: 999px; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--text3); transition: background-color 0.2s, color 0.2s; background: transparent; border: none; font-family: inherit; }
+.status-pill[data-status="planning"].selected { background: rgba(232,184,109,0.18); color: var(--gold2); }
+.status-pill[data-status="active"].selected { background: rgba(125,184,155,0.18); color: var(--sage-light); }
+.status-pill[data-status="complete"].selected { background: rgba(255,255,255,0.08); color: var(--text); }
+@media (hover: hover) and (pointer: fine) { .status-pill:hover:not(.selected) { color: var(--text2); } }
+
+/* Completed-projects collapsible section on Projects page */
+.proj-completed-section { margin-top: 24px; }
+.proj-completed-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 16px; cursor: pointer;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm);
+  font-size: 12px; font-weight: 700; color: var(--text2); letter-spacing: 0.08em; text-transform: uppercase;
+  transition: background-color 0.2s, border-color 0.2s;
+  user-select: none; -webkit-user-select: none;
+}
+@media (hover: hover) and (pointer: fine) { .proj-completed-header:hover { background: var(--surface2); border-color: var(--border2); } }
+.proj-completed-caret { width: 14px; height: 14px; transition: transform 0.2s; flex-shrink: 0; }
+.proj-completed-section.open .proj-completed-caret { transform: rotate(90deg); }
+.proj-completed-count { margin-left: auto; color: var(--text3); font-weight: 600; letter-spacing: 0; text-transform: none; font-size: 13px; }
+.proj-completed-list { padding-top: 14px; display: none; }
+.proj-completed-section.open .proj-completed-list { display: block; animation: fadeIn 0.18s ease-out; }
+.proj-completed-list .proj-card { opacity: 0.72; }
+.proj-completed-list .proj-card::before { opacity: 0.5; }
 .proj-desc { font-size: 14px; color: var(--text2); margin-bottom: 16px; }
 .proj-progress { margin-bottom: 14px; }
 .proj-progress-bar { height: 4px; background: var(--bg3); border-radius: 2px; overflow: hidden; }
@@ -1455,7 +1483,7 @@ body.capacitor-ios * {
         <div class="card-title" style="margin-bottom:16px">App Info</div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
           <span style="font-size:14px;color:var(--text2)">Version</span>
-          <span style="font-size:14px;font-weight:600;color:var(--gold)">v3.6.0</span>
+          <span style="font-size:14px;font-weight:600;color:var(--gold)">v3.7.0</span>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
           <span style="font-size:14px;color:var(--text2)">Household</span>
@@ -1728,7 +1756,14 @@ body.capacitor-ios * {
         <button class="btn btn-danger btn-sm" onclick="delProj()">Delete</button>
       </div>
     </div>
-    <div id="pd-meta" style="margin-bottom:16px"></div>
+    <div id="pd-meta" style="margin-bottom:16px">
+      <div class="status-pills" role="tablist" aria-label="Project status">
+        <button type="button" class="status-pill" data-status="planning" onclick="setProjStatus('planning')">Planning</button>
+        <button type="button" class="status-pill" data-status="active" onclick="setProjStatus('active')">Active</button>
+        <button type="button" class="status-pill" data-status="complete" onclick="setProjStatus('complete')">Complete</button>
+      </div>
+      <div id="pd-desc" style="font-size:14px;color:var(--text3);margin-top:10px"></div>
+    </div>
     <!-- CANVAS SECTION -->
     <div style="margin-bottom:20px">
       <div id="pd-canvas-presence" style="display:none"></div>
@@ -1767,6 +1802,7 @@ body.capacitor-ios * {
       <select class="input" id="ep-status">
         <option value="planning">Planning</option>
         <option value="active">Active</option>
+        <option value="complete">Complete</option>
       </select></div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="cancelEditProj()">Cancel</button>
@@ -3184,7 +3220,7 @@ function sendEventToCalendar(){
 // ====== FINANCES ======
 // ====== PROJECTS ======
 function renderProj(){
-  document.getElementById('proj-list').innerHTML=S.projects.length?S.projects.map(p=>{
+  const projCardHTML = (p) => {
     const items=p.items||[];
     const doneCount=items.filter(i=>i.done).length;
     const pct=items.length?Math.round(doneCount/items.length*100):(p.progress||0);
@@ -3204,10 +3240,46 @@ function renderProj(){
       <div class="proj-meta">
         <span class="proj-meta-item">${IC.clipboard} ${taskCount} tasks</span>
         <span class="proj-meta-item">${IC.check} ${doneCount} done</span>
-        <span class="tag ${p.status==='active'?'tag-sage':'tag-gold'}" style="margin-left:auto">${p.status}</span>
+        <span class="tag ${p.status==='complete'?'tag-dim':p.status==='active'?'tag-sage':'tag-gold'}" style="margin-left:auto">${p.status}</span>
       </div>
-    </div>`;}).join(''):
-    `<div class="empty"><div class="empty-icon">${IC.emptyBox}</div><div class="empty-text">No projects yet. Start building something together.</div></div>`;
+    </div>`;
+  };
+  const activeProjects = S.projects.filter(p => p.status !== 'complete');
+  const completedProjects = S.projects.filter(p => p.status === 'complete');
+  let html = '';
+  if (activeProjects.length) {
+    html += activeProjects.map(projCardHTML).join('');
+  } else if (!completedProjects.length) {
+    html = `<div class="empty"><div class="empty-icon">${IC.emptyBox}</div><div class="empty-text">No projects yet. Start building something together.</div></div>`;
+  }
+  if (completedProjects.length) {
+    const isOpen = localStorage.getItem('cuppel_completed_open') === '1';
+    html += `<div class="proj-completed-section ${isOpen?'open':''}" id="proj-completed-section">
+      <div class="proj-completed-header" onclick="toggleCompletedProjSection()">
+        <svg class="proj-completed-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        Completed <span class="proj-completed-count">${completedProjects.length}</span>
+      </div>
+      <div class="proj-completed-list">${completedProjects.map(projCardHTML).join('')}</div>
+    </div>`;
+  }
+  document.getElementById('proj-list').innerHTML = html;
+}
+function toggleCompletedProjSection(){
+  const sec = document.getElementById('proj-completed-section');
+  if (!sec) return;
+  _haptic.light();
+  const willOpen = !sec.classList.contains('open');
+  sec.classList.toggle('open', willOpen);
+  localStorage.setItem('cuppel_completed_open', willOpen ? '1' : '0');
+}
+function setProjStatus(status){
+  if (!_detailProjId) return;
+  const p = S.projects.find(p => p.id === _detailProjId);
+  if (!p || p.status === status) return;
+  _haptic.light();
+  p.status = status;
+  ROOT.child('projects').child(_detailProjId).child('status').set(status);
+  renderProjDetail();
 }
 
 function addProject(){
@@ -3294,7 +3366,11 @@ function renderProjDetail(){
   const canvasEl=document.getElementById('pd-canvas');
   if(canvasEl&&document.activeElement!==canvasEl) canvasEl.value=p.canvas||'';
   document.getElementById('pd-title').textContent=p.name;
-  document.getElementById('pd-meta').innerHTML=`<span class="tag ${p.status==='active'?'tag-sage':'tag-gold'}">${p.status}</span><span style="font-size:14px;color:var(--text3);margin-left:10px">${p.desc}</span>`;
+  // Update inline status pill group
+  document.querySelectorAll('#m-proj-detail .status-pill').forEach(pill => {
+    pill.classList.toggle('selected', pill.dataset.status === p.status);
+  });
+  document.getElementById('pd-desc').textContent = p.desc || 'No description yet.';
   const items=p.items||[];
   const doneCount=items.filter(i=>i.done).length;
   const pct=items.length?Math.round(doneCount/items.length*100):(p.progress||0);

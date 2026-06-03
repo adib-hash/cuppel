@@ -1,5 +1,19 @@
 # Cuppel Changelog
 
+## v3.7.0 — 2026-06-03
+
+### Projects: Change Status In-Place + Complete Status + Collapsible Completed Section
+
+- **New "Complete" status.** Projects now have three states: Planning, Active, Complete. Complete uses a dimmed visual treatment to feel "archived".
+- **Status pill group in the project detail view.** Tap-open any project and theres now an inline Planning / Active / Complete pill group at the top. Single tap to change status — no more digging into the Edit modal to switch from Planning to Active. The currently selected status is highlighted in its color.
+- **Edit modal also includes the Complete option** in the status dropdown for consistency.
+- **Collapsible "Completed" section on the Projects home page.** Active and Planning projects render normally at the top. Below them, a "Completed (N)" header appears (only when there are completed projects). Tap to expand/collapse. Completed projects render with reduced opacity to feel archived. Open/closed state persists in localStorage across sessions.
+- **Empty-state copy** still appears when there are zero projects of any status; once there's any completed project, the Completed section shows even if no active ones remain.
+
+### File Uploads — Yes, Theyre Functional
+
+For reference: project file uploads are wired up to Firebase Storage (`cuppel-2beff.firebasestorage.app`). 10 MB per file × 10 files per project. Free tier (5 GB total) is plenty for personal use. Files are stored at `households/{hid}/projects/{pid}/{fileId}_{name}` with metadata mirrored in Realtime DB. Storage rules require an authenticated user (currently any authed user — could be tightened to household members only later).
+
 ## v3.6.0 — 2026-06-03
 
 ### Scroll Feels Right — No More Hover/Tap Flash When Scrolling
