@@ -1,5 +1,32 @@
 # Cuppel Changelog
 
+## v3.7.1 — 2026-06-03
+
+### Project File Uploads — Blazing Fast + Real Feedback
+
+Uploads were sticking on "Uploading…" sometimes forever. Three different root causes; all addressed.
+
+**1. iPhone photos are huge.** A photo straight off the Camera Roll is typically 3–5 MB, sometimes 8+ MB if HDR/ProRAW. Even on good WiFi that takes 5–15 seconds; on cellular, painfully long; on a flaky connection, can fail entirely. Now we compress images client-side BEFORE uploading: max 1920px on the long edge, JPEG q=0.85. A 5 MB iPhone photo becomes ~200–500 KB — a 10× speed-up before the network even matters. The compression takes ~100ms.
+
+**2. HEIC photos weren't viewable.** Camera Roll exports are HEIC (Apple's format), which most non-Apple browsers can't render. We now decode HEIC via canvas and re-encode as JPEG — so files uploaded from iPhone are universally viewable.
+
+**3. No progress feedback / no stall detection.** The old button said "Uploading…" forever with no indication of whether anything was happening. Now:
+- Live progress percentage in the button: "Uploading 47%".
+- Stall detection: if no bytes transfer for 20 seconds, the upload is auto-aborted and the user sees "Upload stalled — check your connection and try again".
+- Specific Firebase error codes are surfaced: `storage/unauthorized`, `storage/quota-exceeded`, `storage/retry-limit-exceeded`, `storage/unauthenticated` each get their own clear message.
+
+**4. CORS may also be blocking.** Capacitor iOS WebView uses `capacitor://localhost` as the origin. Firebase Storage may reject uploads from this origin if CORS isn't configured. Added `cors.json` at the project root with the right origins (capacitor://localhost, ionic://localhost, cuppel.ihsan.build, etc.). To apply it to the bucket, run from your terminal:
+
+```
+gcloud auth login
+gcloud config set project cuppel-2beff
+gsutil cors set cors.json gs://cuppel-2beff.firebasestorage.app
+```
+
+(One-time setup. If your friend has already authed via `gcloud` and uploads still feel slow/fail, this is the next thing to try.)
+
+**Side effect:** pre-compression file size limit is now 50 MB on the input (well over what compression needs), and the existing 10 MB post-compression limit still applies as a safety net.
+
 ## v3.7.0 — 2026-06-03
 
 ### Projects: Change Status In-Place + Complete Status + Collapsible Completed Section

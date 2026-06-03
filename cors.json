@@ -1,0 +1,15 @@
+[
+  {
+    "origin": [
+      "capacitor://localhost",
+      "ionic://localhost",
+      "http://localhost",
+      "https://cuppel.ihsan.build",
+      "https://cuppel-2beff.web.app",
+      "https://cuppel-2beff.firebaseapp.com"
+    ],
+    "method": ["GET", "POST", "PUT", "DELETE", "HEAD"],
+    "responseHeader": ["Content-Type", "Authorization", "X-Goog-Resumable", "Content-Range", "Content-Disposition"],
+    "maxAgeSeconds": 3600
+  }
+]

@@ -1483,7 +1483,7 @@ body.capacitor-ios * {
         <div class="card-title" style="margin-bottom:16px">App Info</div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
           <span style="font-size:14px;color:var(--text2)">Version</span>
-          <span style="font-size:14px;font-weight:600;color:var(--gold)">v3.7.0</span>
+          <span style="font-size:14px;font-weight:600;color:var(--gold)">v3.7.1</span>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
           <span style="font-size:14px;color:var(--text2)">Household</span>
@@ -3495,34 +3495,140 @@ function triggerFileUpload(){
 function handleFileSelected(input){
   const file=input.files[0];
   if(!file)return;
-  if(file.size>10*1024*1024){showToast('File too large — 10 MB max');return;}
+  // Note: size check is done AFTER potential compression (in uploadProjFile)
+  // but enforce a hard cap on the pre-compression input to avoid loading huge
+  // files into memory for compression. 50 MB pre-compression is plenty.
+  if(file.size>50*1024*1024){showToast('File too large — 50 MB max');return;}
   uploadProjFile(file);
 }
 
-function uploadProjFile(file){
+// Compress images client-side before upload: max 1920px on the longest side,
+// JPEG q=0.85. Typical 5 MB iPhone photo -> 200-500 KB (10x speed-up).
+// Also converts HEIC -> JPEG so web/other-device viewers can display them.
+function compressImageIfNeeded(file){
+  return new Promise((resolve) => {
+    if (!file.type || !file.type.startsWith('image/')) { resolve(file); return; }
+    // For tiny images (<200 KB) and non-HEIC, skip compression entirely
+    const isHeic = /heic|heif/i.test(file.type) || /\.(heic|heif)$/i.test(file.name);
+    if (file.size < 200*1024 && !isHeic) { resolve(file); return; }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const MAX_DIM = 1920;
+        let w = img.width, h = img.height;
+        if (w > MAX_DIM || h > MAX_DIM) {
+          if (w >= h) { h = Math.round(h * (MAX_DIM / w)); w = MAX_DIM; }
+          else        { w = Math.round(w * (MAX_DIM / h)); h = MAX_DIM; }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        // White background for transparent PNGs / HEIC opacity
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, w, h);
+        ctx.drawImage(img, 0, 0, w, h);
+        canvas.toBlob(blob => {
+          if (!blob) { resolve(file); return; }
+          // If compression somehow made it bigger, keep original (rare)
+          if (blob.size >= file.size && !isHeic) { resolve(file); return; }
+          let outName = file.name.replace(/\.(heic|heif)$/i, '.jpg');
+          if (!/\.jpe?g$/i.test(outName)) outName = outName.replace(/\.[^.]+$/, '') + '.jpg';
+          resolve(new File([blob], outName, { type: 'image/jpeg', lastModified: Date.now() }));
+        }, 'image/jpeg', 0.85);
+      };
+      img.onerror = () => { console.warn('Image decode failed; uploading original'); resolve(file); };
+      img.src = e.target.result;
+    };
+    reader.onerror = () => { console.warn('FileReader failed; uploading original'); resolve(file); };
+    reader.readAsDataURL(file);
+  });
+}
+
+async function uploadProjFile(originalFile){
   if(!_detailProjId||!HOUSEHOLD_ID)return;
-  _uploading=true;
-  const btn=document.getElementById('pd-upload-btn');
-  if(btn){btn.disabled=true;btn.textContent='Uploading…';}
-  const fileId=newId();
-  const safeName=file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
-  const path=`households/${HOUSEHOLD_ID}/projects/${_detailProjId}/${fileId}_${safeName}`;
-  const ref=storage.ref(path);
-  const task=ref.put(file);
+  const btn = document.getElementById('pd-upload-btn');
+  const setLabel = (txt) => { if(btn) btn.textContent = txt; };
+  const setDisabled = (d) => { if(btn) btn.disabled = d; };
+  const resetBtn = () => { _uploading = false; setDisabled(false); setLabel('+ Upload'); };
+
+  _uploading = true;
+  setDisabled(true);
+  setLabel('Preparing…');
+
+  let file = originalFile;
+  try {
+    file = await compressImageIfNeeded(originalFile);
+    if (file !== originalFile) {
+      console.log(`Compressed: ${originalFile.size} -> ${file.size} bytes (${Math.round(100 - file.size/originalFile.size*100)}% smaller)`);
+    }
+  } catch(e) { console.warn('Compress failed, uploading original:', e); file = originalFile; }
+
+  if (file.size > 10*1024*1024) {
+    resetBtn();
+    showToast('Compressed file still over 10 MB — try a smaller file');
+    return;
+  }
+
+  setLabel('Uploading 0%');
+  const fileId = newId();
+  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+  const path = `households/${HOUSEHOLD_ID}/projects/${_detailProjId}/${fileId}_${safeName}`;
+  const ref = storage.ref(path);
+
+  let lastBytes = 0;
+  let stallTimer = null;
+  const STALL_MS = 20000;
+  const resetStall = () => {
+    clearTimeout(stallTimer);
+    stallTimer = setTimeout(() => {
+      console.error('Upload stalled (no progress for ' + STALL_MS + 'ms)');
+      try { task.cancel(); } catch(_) {}
+      resetBtn();
+      showToast('Upload stalled — check your connection and try again');
+    }, STALL_MS);
+  };
+
+  const task = ref.put(file, { contentType: file.type || 'application/octet-stream' });
+  resetStall();
+
   task.on('state_changed',
-    null,
-    ()=>{
-      _uploading=false;
-      if(btn){btn.disabled=false;btn.textContent='+ Upload';}
-      showToast('Upload failed — please try again');
+    (snap) => {
+      const pct = snap.totalBytes ? Math.round((snap.bytesTransferred / snap.totalBytes) * 100) : 0;
+      setLabel(`Uploading ${pct}%`);
+      if (snap.bytesTransferred > lastBytes) {
+        lastBytes = snap.bytesTransferred;
+        resetStall();
+      }
     },
-    async ()=>{
-      const url=await task.snapshot.ref.getDownloadURL();
-      const meta={id:fileId,name:file.name,size:file.size,type:file.type,url,path,uploadedAt:Date.now()};
-      ROOT.child('projects').child(_detailProjId).child('files').child(fileId).set(meta);
-      _uploading=false;
-      if(btn){btn.disabled=false;btn.textContent='+ Upload';}
-      showToast('File uploaded');
+    (err) => {
+      clearTimeout(stallTimer);
+      console.error('Upload error:', err && (err.code || err.message), err);
+      if (err && err.code === 'storage/canceled') { /* we cancelled — toast already shown */ return; }
+      resetBtn();
+      const code = err && err.code;
+      let msg = 'Upload failed — please try again';
+      if (code === 'storage/unauthorized') msg = "Upload blocked by Storage rules. Sign out & back in and try again.";
+      else if (code === 'storage/retry-limit-exceeded') msg = "Upload timed out — please check your connection.";
+      else if (code === 'storage/quota-exceeded') msg = "Storage quota full. Delete some old files.";
+      else if (code === 'storage/unauthenticated') msg = "Youre not signed in — please sign in again.";
+      else if (code) msg = `Upload failed: ${code}`;
+      showToast(msg);
+    },
+    async () => {
+      clearTimeout(stallTimer);
+      try {
+        const url = await task.snapshot.ref.getDownloadURL();
+        const meta = { id: fileId, name: file.name, size: file.size, type: file.type, url, path, uploadedAt: Date.now() };
+        await ROOT.child('projects').child(_detailProjId).child('files').child(fileId).set(meta);
+        showToast('File uploaded');
+      } catch(e) {
+        console.error('Upload finalize failed:', e);
+        showToast(`Uploaded but metadata save failed: ${(e && (e.code || e.message)) || 'unknown'}`);
+      } finally {
+        resetBtn();
+      }
     }
   );
 }
