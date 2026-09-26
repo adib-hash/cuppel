@@ -23,9 +23,16 @@ Quick reference for distributing a Capacitor iOS app via TestFlight.
 
 1. In the Organizer, select your archive
 2. Click **Distribute App**
-3. Choose **TestFlight & App Store**
-4. Use automatic signing
-5. Click **Upload** and wait for it to finish
+3. Choose **App Store Connect** (Xcode 15+ wording; older Xcode called this
+   "TestFlight & App Store"). The other options are wrong for this:
+   - *TestFlight Internal Only* — permanently caps the build at internal
+     testers; it can never be promoted to external or the App Store
+   - *Release Testing* — the old Ad Hoc export; signs for registered device
+     UDIDs and uploads nothing
+4. Choose **Upload**, not Export
+5. Use automatic signing — Xcode re-signs the archive with the distribution
+   certificate here, even if it was archived with a development cert
+6. Wait for the upload to finish
 
 ## 3. Create the App in App Store Connect (first time only)
 
@@ -57,8 +64,10 @@ Quick reference for distributing a Capacitor iOS app via TestFlight.
 ## Updating the App
 
 1. Bump the **Build** number in Xcode (Version can stay the same)
-2. **Product > Archive** > **Distribute App** > Upload
+2. **Product > Archive** > **Distribute App** > **App Store Connect** > Upload
 3. New build appears in App Store Connect automatically
+4. **Answer the export compliance question** on the build in App Store Connect
+   — HTTPS-only apps are exempt. The build can't be distributed until you do
 4. Internal testers get it immediately
 5. External testers get it after a brief review (usually instant after the first one)
 
@@ -66,6 +75,15 @@ Quick reference for distributing a Capacitor iOS app via TestFlight.
 
 ## Notes
 
-- Builds expire after **90 days** — testers lose access and need a new build
+- Builds expire after **90 days** — testers lose access and need a new build.
+  There is no way to extend or un-expire a build; the only fix is uploading a
+  new one with a higher build number. Existing testers don't need re-inviting
+- Claude can produce the signed archive headlessly, no Xcode needed:
+  `npm run build && npx cap sync ios`, then `xcodebuild -project
+  ios/App/App.xcodeproj -scheme App -configuration Release -destination
+  "generic/platform=iOS" -archivePath ~/Library/Developer/Xcode/Archives/$(date
+  +%F)/"Cuppel <ver> (<build>).xcarchive" -allowProvisioningUpdates archive`
+- Internal testers skip beta review on every build — worth moving regular
+  testers to internal (Users and Access) rather than an external group
 - You don't need to fill out App Store metadata just for TestFlight
 - TestFlight is free with your Apple Developer account
