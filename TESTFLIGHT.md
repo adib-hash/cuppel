@@ -68,8 +68,8 @@ Quick reference for distributing a Capacitor iOS app via TestFlight.
 3. New build appears in App Store Connect automatically
 4. **Answer the export compliance question** on the build in App Store Connect
    — HTTPS-only apps are exempt. The build can't be distributed until you do
-4. Internal testers get it immediately
-5. External testers get it after a brief review (usually instant after the first one)
+5. Internal testers get it immediately
+6. External testers get it after a brief review (usually instant after the first one)
 
 ---
 
